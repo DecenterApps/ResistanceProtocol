@@ -1,7 +1,9 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import "hardhat/console.sol";
+import "./NOI.sol";
 
+error CDPManager__NotAuthorized();
 error CDPManager__HasDebt();
 
 contract CDPManager {
@@ -18,9 +20,17 @@ contract CDPManager {
     uint256 cdpi;
     mapping(uint256 => CDP) private cdpList; // CDPId => CDP
 
-    constructor() {
+    NOI private immutable NOI_COIN;
+
+    modifier HasAccess(address _user) {
+        if(msg.sender != _user) revert CDPManager__NotAuthorized();
+        _;
+    }
+
+    constructor(address _noiCoin) {
         totalSupply = 0;
         cdpi = 0;
+        NOI_COIN = NOI(_noiCoin);
     }
 
     // Open a new cdp for a given _user address.
@@ -71,5 +81,13 @@ contract CDPManager {
             cdpList[_cdpIndex].generatedDebt
         );
         searchedCDP = cdpList[_cdpIndex];
+    }
+
+    function mintFromCDP(address _user, uint256 _cdpIndex, uint256 _amount) public HasAccess(_user) {
+        NOI_COIN.mint(_user, _amount);
+    }
+
+    function repayToCDP(address _user, uint256 _cdpIndex, uint256 _amount) public HasAccess(_user){
+        NOI_COIN.burn(_user, _amount);
     }
 }

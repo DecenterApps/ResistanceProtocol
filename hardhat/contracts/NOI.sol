@@ -17,7 +17,7 @@ contract NOI {
     }
 
     function removeAuthorization(address account) external isAuthorized {
-        authorizedAccounts[account] = true;
+        authorizedAccounts[account] = false;
         emit RemoveAuthorization(account);
     }
 
@@ -116,7 +116,7 @@ contract NOI {
      * @param _usr The address that will have its coins burned
      * @param _amount The amount of coins to burn
      */
-    function burn(address _usr, uint256 _amount) external {
+    function burn(address _usr, uint256 _amount) external isAuthorized {
         if(balanceOf[_usr] < _amount) revert NOI__InsufficientBalance();
         if (_usr != msg.sender) {
             if(allowance[_usr][msg.sender] < _amount) 
