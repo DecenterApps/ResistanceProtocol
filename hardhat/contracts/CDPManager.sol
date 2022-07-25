@@ -1,7 +1,8 @@
 pragma solidity >=0.8.0 <0.9.0;
 
-contract CDPManager {
+error CDPManager__HasDebt();
 
+contract CDPManager {
     struct CDP {
         // Total amount of collateral locked in a CDP
         uint256 lockedCollateral; // [wad]
@@ -10,17 +11,34 @@ contract CDPManager {
     }
 
     mapping(address => CDP[]) cdpListPerUser; // Owner => CDP[]
+    uint256 totalSupply;
 
     constructor() {
+        totalSupply=0;
     }
 
     // Open a new cdp for a given _user address.
-    function openCDP(address _user) public {
-        cdpListPerUser[_user].push(CDP(0,0));
+    function openCDP(address _user) public payable{
+        cdpListPerUser[_user].push(CDP(msg.value, 0));
     }
 
     //Adds collateral to an existing CDP
-    function transferCollateralToCDP(address _user,uint _cdpIndex) public payable{
-        cdpListPerUser[_user][_cdpIndex].lockedCollateral=cdpListPerUser[_user][_cdpIndex].lockedCollateral+msg.value;
+    function transferCollateralToCDP(address _user, uint _cdpIndex)
+        public
+        payable
+    {
+        cdpListPerUser[_user][_cdpIndex].lockedCollateral =
+            cdpListPerUser[_user][_cdpIndex].lockedCollateral +
+            msg.value;
+    }
+
+
+    // Close CDP if you have 0 debt
+    function closeCDP(address _user, uint _cdpIndex) public {
+        if (cdpListPerUser[_user][_cdpIndex].generatedDebt != 0) {
+            revert CDPManager__HasDebt();
+        }
+        (bool sent, ) = payable(msg.sender).call{value: cdpListPerUser[_user][_cdpIndex].lockedCollateral}("");
+        if (sent == false) revert();
     }
 }

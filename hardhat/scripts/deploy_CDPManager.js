@@ -8,7 +8,7 @@ async function main() {
 
   await contract.deployed();
 
-  await contract.deployTransaction.wait(1);
+  await contract.deployTransaction.wait(5);
 
   console.log("Contract deployed to: ", contract.address);
 
