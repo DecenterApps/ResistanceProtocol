@@ -1,0 +1,2 @@
+# ResistanceProtocol
+Inflation Resistant Stablecoin
