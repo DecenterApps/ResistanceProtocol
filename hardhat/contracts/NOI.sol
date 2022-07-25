@@ -12,12 +12,12 @@ contract NOI {
     mapping(address => bool) public authorizedAccounts;
 
     function addAuthorization(address account) external isAuthorized {
-        authorizedAccounts[account] = 1;
+        authorizedAccounts[account] = true;
         emit AddAuthorization(account);
     }
 
     function removeAuthorization(address account) external isAuthorized {
-        authorizedAccounts[account] = 0;
+        authorizedAccounts[account] = true;
         emit RemoveAuthorization(account);
     }
 
@@ -58,7 +58,7 @@ contract NOI {
         string memory _name,
         string memory _symbol,
         uint256 _chainId
-    ) public {
+    ) {
         authorizedAccounts[msg.sender] = true;
         name = _name;
         symbol = _symbol;
@@ -68,74 +68,74 @@ contract NOI {
 
     /*
      * @notice Transfer coins to another address
-     * @param dst The address to transfer coins to
+     * @param _dst The address to transfer coins to
      * @param amount The amount of coins to transfer
      */
-    function transfer(address dst, uint256 amount) external returns (bool) {
-        return transferFrom(msg.sender, dst, amount);
+    function transfer(address _dst, uint256 _amount) external returns (bool) {
+        return transferFrom(msg.sender, _dst, _amount);
     }
 
     /*
      * @notice Transfer coins from a source address to a destination address (if allowed)
-     * @param src The address from which to transfer coins
-     * @param dst The address that will receive the coins
-     * @param amount The amount of coins to transfer
+     * @param _src The address from which to transfer coins
+     * @param _dst The address that will receive the coins
+     * @param _amount The _amount of coins to transfer
      */
     function transferFrom(
-        address src,
-        address dst,
-        uint256 amount
+        address _src,
+        address _dst,
+        uint256 _amount
     ) public returns (bool) {
-        if (dst == address(0) || dst == address(this))
+        if (_dst == address(0) || _dst == address(this))
             revert NOI__InvalidDestination();
-        if (balanceOf[src] < amount) revert NOI__InsufficientBalance();
-        if (src != msg.sender) {
-            if(allowance[src][msg.sender] < amount)
-                revert NOI__InsufficientAllowance()
-            allowance[src][msg.sender] = allowance[src][msg.sender] - amount;
+        if (balanceOf[_src] < _amount) revert NOI__InsufficientBalance();
+        if (_src != msg.sender) {
+            if(allowance[_src][msg.sender] < _amount)
+                revert NOI__InsufficientAllowance();
+            allowance[_src][msg.sender] = allowance[_src][msg.sender] - _amount;
         }
-        balanceOf[src] = balanceOf[src] - amount;
-        balanceOf[dst] = balanceOf[dst] + amount;
-        emit Transfer(src, dst, amount);
+        balanceOf[_src] = balanceOf[_src] - _amount;
+        balanceOf[_dst] = balanceOf[_dst] + _amount;
+        emit Transfer(_src, _dst, _amount);
         return true;
     }
 
     /*
      * @notice Mint new coins
-     * @param usr The address for which to mint coins
-     * @param amount The amount of coins to mint
+     * @param _usr The address for which to mint coins
+     * @param _amount The _amount of coins to mint
      */
-    function mint(address usr, uint256 amount) external isAuthorized {
-        balanceOf[usr] = balanceOf[usr] + amount;
-        totalSupply = totalSupply + amount;
-        emit Transfer(address(0), usr, amount);
+    function mint(address _usr, uint256 _amount) external isAuthorized {
+        balanceOf[_usr] = balanceOf[_usr] + _amount;
+        totalSupply = totalSupply + _amount;
+        emit Transfer(address(0), _usr, _amount);
     }
 
     /*
      * @notice Burn coins from an address
-     * @param usr The address that will have its coins burned
-     * @param amount The amount of coins to burn
+     * @param _usr The address that will have its coins burned
+     * @param _amount The amount of coins to burn
      */
-    function burn(address usr, uint256 amount) external {
-        if(balanceOf[usr] < amount) revert NOI__InsufficientBalance();
-        if (usr != msg.sender) {
-            if(allowance[usr][msg.sender] < amount) 
+    function burn(address _usr, uint256 _amount) external {
+        if(balanceOf[_usr] < _amount) revert NOI__InsufficientBalance();
+        if (_usr != msg.sender) {
+            if(allowance[_usr][msg.sender] < _amount) 
                 revert NOI__InsufficientAllowance();
-            allowance[usr][msg.sender] = allowance[usr][msg.sender] - amount
+            allowance[_usr][msg.sender] = allowance[_usr][msg.sender] - _amount;
         }
-        balanceOf[usr] = balanceOf[usr] - amount;
-        totalSupply = totalSupply - amount
-        emit Transfer(usr, address(0), amount);
+        balanceOf[_usr] = balanceOf[_usr] - _amount;
+        totalSupply = totalSupply - _amount;
+        emit Transfer(_usr, address(0), _amount);
     }
 
     /*
      * @notice Change the transfer/burn allowance that another address has on your behalf
-     * @param usr The address whose allowance is changed
-     * @param amount The new total allowance for the usr
+     * @param _usr The address whose allowance is changed
+     * @param _amount The new total allowance for the usr
      */
-    function approve(address usr, uint256 amount) external returns (bool) {
-        allowance[msg.sender][usr] = amount;
-        emit Approval(msg.sender, usr, amount);
+    function approve(address _usr, uint256 _amount) external returns (bool) {
+        allowance[msg.sender][_usr] = _amount;
+        emit Approval(msg.sender, _usr, _amount);
         return true;
     }
 }
