@@ -1,5 +1,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
+import "hardhat/console.sol";
+
 error CDPManager__HasDebt();
 
 contract CDPManager {
@@ -10,8 +12,8 @@ contract CDPManager {
         uint256 generatedDebt; // [wad]
     }
 
-    mapping(address => CDP[]) cdpListPerUser; // Owner => CDP[]
-    uint256 totalSupply;
+    mapping(address => CDP[]) private cdpListPerUser; // Owner => CDP[]
+    uint256 private totalSupply;
 
     constructor() {
         totalSupply=0;
@@ -35,7 +37,7 @@ contract CDPManager {
 
 
     // Close CDP if you have 0 debt
-    function closeCDP(address _user, uint _cdpIndex) public {
+    function closeCDP(address _user, uint256 _cdpIndex) public {
         if (cdpListPerUser[_user][_cdpIndex].generatedDebt != 0) {
             revert CDPManager__HasDebt();
         }
@@ -43,5 +45,17 @@ contract CDPManager {
         if (sent == false) revert();
         totalSupply=totalSupply-cdpListPerUser[_user][_cdpIndex].lockedCollateral;
         cdpListPerUser[_user][_cdpIndex].lockedCollateral=0;
+    }
+
+    // View total supply of ether in contract
+    function getTotalSupply() view public returns(uint256){
+        console.log(totalSupply);
+        return totalSupply;
+    }
+
+    // View the state of one CDP
+    function getOneCDP(address _user,uint256 _cdpIndex) view public returns(CDP memory searchedCDP){
+        console.log("CDP LockedCollateral: %d GeneratedDebt: %d",cdpListPerUser[_user][_cdpIndex].lockedCollateral,cdpListPerUser[_user][_cdpIndex].generatedDebt);
+        searchedCDP=cdpListPerUser[_user][_cdpIndex];
     }
 }
