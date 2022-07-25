@@ -1,10 +1,6 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 contract CDPManager {
-    struct List {
-        uint prev;
-        uint next;
-    }
 
     struct CDP {
         // Total amount of collateral locked in a CDP
@@ -13,32 +9,18 @@ contract CDPManager {
         uint256 generatedDebt; // [wad]
     }
 
-    uint public cdpi;
-
-    mapping(uint => List) public cdpList; // CDPId => Prev & Next CDPIds (double linked list)
-    mapping(uint => address) public ownsCDP; // CDPId => Owner
-    mapping(address => uint) public firstCDPID; // Owner => First CDPId
-    mapping(address => uint) public lastCDPID; // Owner => Last CDPId
-    mapping(address => uint) public cdpCount; // Owner => Amount of CDPs
+    mapping(address => CDP[]) cdpListPerUser; // Owner => CDP[]
 
     constructor() {
-        cdpi = 0;
     }
 
     // Open a new cdp for a given _user address.
     function openCDP(address _user) public {
-        cdpi = cdpi + 1;
-        ownsCDP[cdpi] = _user;
+        cdpListPerUser[_user].push(CDP(0,0));
+    }
 
-        if (firstCDPID[_user] == 0) {
-            firstCDPID[_user] = cdpi;
-        }
-        if (lastCDPID[_user] != 0) {
-            cdpList[cdpi].prev = lastCDPID[_user];
-            cdpList[lastCDPID[_user]].next = cdpi;
-        }
-        lastCDPID[_user] = cdpi;
-
-        cdpCount[_user] = cdpCount[_user]+1;
+    //Adds collateral to an existing CDP
+    function transferCollateralToCDP(address _user,uint _cdpIndex) public payable{
+        cdpListPerUser[_user][_cdpIndex].lockedCollateral=cdpListPerUser[_user][_cdpIndex].lockedCollateral+msg.value;
     }
 }
