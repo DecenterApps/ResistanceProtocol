@@ -25,16 +25,16 @@ describe("CDP functionality", function () {
     await mainContractObj.connect(senderAcc[0]).getTotalSupply();
     await mainContractObj
       .connect(senderAcc[0])
-      .getOneCDP(senderAcc[0].address, 0);
+      .getOneCDP(1);
     await mainContractObj
       .connect(senderAcc[0])
-      .getOneCDP(senderAcc[0].address, 1);
+      .getOneCDP(2);
     await mainContractObj
       .connect(senderAcc[0])
-      .closeCDP(senderAcc[0].address, 0);
+      .closeCDP(1);
     await mainContractObj.connect(senderAcc[0]).getTotalSupply();
     await mainContractObj
       .connect(senderAcc[0])
-      .getOneCDP(senderAcc[0].address, 0);
+      .getOneCDP(1);
   });
 });
