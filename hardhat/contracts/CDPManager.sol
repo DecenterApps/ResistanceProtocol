@@ -20,6 +20,7 @@ contract CDPManager {
     // Open a new cdp for a given _user address.
     function openCDP(address _user) public payable{
         cdpListPerUser[_user].push(CDP(msg.value, 0));
+        totalSupply=totalSupply+msg.value;
     }
 
     //Adds collateral to an existing CDP
@@ -40,5 +41,7 @@ contract CDPManager {
         }
         (bool sent, ) = payable(msg.sender).call{value: cdpListPerUser[_user][_cdpIndex].lockedCollateral}("");
         if (sent == false) revert();
+        totalSupply=totalSupply-cdpListPerUser[_user][_cdpIndex].lockedCollateral;
+        cdpListPerUser[_user][_cdpIndex].lockedCollateral=0;
     }
 }
