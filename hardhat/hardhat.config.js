@@ -18,6 +18,9 @@ module.exports = {
       chainId: 42,
       blockConfirmations: 5,
     },
+    local: {
+      url: "http://127.0.0.1:8545",
+    }
   },
   etherscan: {
     apiKey: ETHERSCAN_API_KEY,
