@@ -22,10 +22,12 @@ genesis_states = {
     'pool_noi': 10000000,
 }
 
+
 def get_chance(probability):
     p = np.random.random()
     print(p)
     return p < probability
+
 
 traders = dict()
 for i in range(NUM_TRADERS):
@@ -40,6 +42,7 @@ genesis_states['agents'] = {'traders': traders}
 eth_dollar = []
 eth_amount_graph = [eth_noi_pool['eth']]
 noi_amount_graph = [eth_noi_pool['noi']]
+market_values = []
 
 with open('dataset/eth_dollar.csv', 'r') as csvfile:
     eth_dollar = list(csv.reader(csvfile))[0]
@@ -50,6 +53,7 @@ def get_current_timestep(cur_substep, previous_state):
     if cur_substep == 1:
         return previous_state['timestep']+1
     return previous_state['timestep']
+
 
 def update_traders(params, substep, state_history,  previous_state, policy_input):
     # print('params: ', params)
@@ -69,20 +73,30 @@ def update_traders(params, substep, state_history,  previous_state, policy_input
         if previous_state['agents']['traders'][name]['type'] == 'safe':
             eth_add *= 3
             noi_add *= 3
+        if eth_noi_pool['noi'] + noi_add <= 0 or eth_noi_pool['eth'] + eth_add <= 0:
+            eth_add = 0
+            noi_add = 0
         eth_noi_pool['eth'] += eth_add
         eth_noi_pool['noi'] += noi_add
         ret[name] = {'eth': previous_state['agents']['traders'][name]['eth'] + eth_add, 'noi': previous_state['agents']['traders']
-                   [name]['noi'] + noi_add, 'type': previous_state['agents']['traders'][name]['type']}
+                     [name]['noi'] + noi_add, 'type': previous_state['agents']['traders'][name]['type']}
     eth_amount_graph.append(eth_noi_pool['eth'])
     noi_amount_graph.append(eth_noi_pool['noi'])
     return ret
 
+def calculate_price(params, substep, state_history, previous_state):
+    value = eth_noi_pool['noi']/eth_noi_pool['eth'] * eth_dollar[get_current_timestep(substep, previous_state)]
+    market_values.append(value)
+
 def update_agents(params, substep, state_history,  previous_state, policy_input):
-    return ('agents', {'traders':update_traders(params, substep, state_history,  previous_state, policy_input)})
+    calculate_price(params, substep, state_history, previous_state)
+    return ('agents', {'traders': update_traders(params, substep, state_history,  previous_state, policy_input)})
+
+
 
 partial_state_update_blocks = [
     {
-        'policies': {
+        'policies': { 
         },
         'variables': {
             'agents': update_agents,
@@ -121,10 +135,10 @@ simulation_result = pd.DataFrame(raw_system_events)
 simulation_result.set_index(['subset', 'run', 'timestep', 'substep'])
 
 # print(noi_amount)
-print(eth_amount_graph)
 plt.figure()
-plt.plot(noi_amount_graph)
-plt.plot(eth_amount_graph)
+# plt.plot(noi_amount_graph)
+# plt.plot(eth_amount_graph)
+plt.plot(market_values)
 plt.legend(['noi', 'eth'])
 plt.savefig('images/novi_lol.png')
 
