@@ -1,8 +1,12 @@
+// SPDX-License-Identifier: MIT
+
 pragma solidity >=0.8.0 <0.9.0;
 
 import "hardhat/console.sol";
 import "./NOI.sol";
 
+error CDPManager__OnlyOwnerAuthorization();
+error CDPManager__UnauthorizedLiquidator();
 error CDPManager__NotAuthorized();
 error CDPManager__HasDebt();
 error CDPManager__LiquidationRatioReached();
@@ -17,6 +21,8 @@ contract CDPManager {
         address owner;
     }
 
+    address owner;
+
     uint256 private totalSupply;
     uint256 public cdpi;
     mapping(uint256 => CDP) private cdpList; // CDPId => CDP
@@ -24,6 +30,18 @@ contract CDPManager {
     NOI private immutable NOI_COIN;
     uint256 ethRp;
     uint256 liquidationRatio;
+
+    address liquidatorContractAddress;
+
+    modifier onlyOwner(){
+        if(msg.sender != owner) revert CDPManager__OnlyOwnerAuthorization();
+        _;
+    }
+
+    modifier onlyLiquidatorContract(){
+        if(msg.sender != liquidatorContractAddress) revert CDPManager__UnauthorizedLiquidator();
+        _;
+    }
 
     modifier HasAccess(address _user) {
         if(msg.sender != _user) revert CDPManager__NotAuthorized();
@@ -43,6 +61,11 @@ contract CDPManager {
         NOI_COIN = NOI(_noiCoin);
         ethRp = 1000/1;
         liquidationRatio = 120;
+        owner = msg.sender;
+    }
+
+    function setLiquidatorContractAddress(address _liquidatorContractAddress) public onlyOwner{
+        liquidatorContractAddress = _liquidatorContractAddress;
     }
 
     // Open a new cdp for a given _user address.
@@ -136,5 +159,17 @@ contract CDPManager {
 
     function updateValue(uint _ethrp) public {
         ethRp = _ethrp;
+    }
+
+
+    function liquidatePosition(uint _cdpIndex) public onlyLiquidatorContract {
+        
+        (bool sent, ) = payable(msg.sender).call{
+            value: cdpList[_cdpIndex].lockedCollateral
+        }("");
+        if (sent == false) revert();
+        totalSupply = totalSupply - cdpList[_cdpIndex].lockedCollateral;
+        emit CDPClose(cdpList[_cdpIndex].owner,_cdpIndex);
+        delete cdpList[_cdpIndex];
     }
 }
