@@ -25,6 +25,9 @@ describe('CDPManager', function () {
 
         owner = (await hre.ethers.getSigners())[0];
 
+        const txAddAuthToCDPManager = await noiContractObj.connect(owner).addAuthorization(CDPManagerContractObj.address);
+        await txAddAuthToCDPManager.wait();
+
         senderAccounts.push((await hre.ethers.getSigners())[1]);
         senderAccounts.push((await hre.ethers.getSigners())[2]);
         senderAccounts.push((await hre.ethers.getSigners())[3]);
@@ -32,9 +35,6 @@ describe('CDPManager', function () {
     });
 
     it('... mint tokens without changing the rate', async () => {        
-        const txAddAuthToCDPManager = await noiContractObj.connect(owner).addAuthorization(CDPManagerContractObj.address);
-        await txAddAuthToCDPManager.wait();
-
         const txOpenCDP = await CDPManagerContractObj.connect(senderAccounts[1]).openCDP(senderAccounts[1].address, {value: ethers.utils.parseEther("12")});
         await txOpenCDP.wait();
 
@@ -50,9 +50,6 @@ describe('CDPManager', function () {
     });
 
     it('... mint tokens with changing the rate', async () => {        
-        const txAddAuthToCDPManager = await noiContractObj.connect(owner).addAuthorization(CDPManagerContractObj.address);
-        await txAddAuthToCDPManager.wait();
-
         const txAddAuthToRateSetter = await CDPManagerContractObj.connect(owner).addAuthorization(RateSetterContractObj.address);
         await txAddAuthToRateSetter.wait();
 
@@ -69,9 +66,6 @@ describe('CDPManager', function () {
     });
 
     it('... remove auth from RateSetter', async () => {        
-        const txAddAuthToCDPManager = await noiContractObj.connect(owner).addAuthorization(CDPManagerContractObj.address);
-        await txAddAuthToCDPManager.wait();
-
         const txAddAuthToRateSetter = await CDPManagerContractObj.connect(owner).addAuthorization(RateSetterContractObj.address);
         await txAddAuthToRateSetter.wait();
 

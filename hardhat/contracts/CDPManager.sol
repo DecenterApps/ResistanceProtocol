@@ -28,7 +28,6 @@ contract CDPManager {
     NOI private immutable NOI_COIN;
     uint256 ethRp;
     uint256 liquidationRatio;
-    
 
     modifier HasAccess(address _user) {
         if(msg.sender != _user) revert CDPManager__NotAuthorized();
