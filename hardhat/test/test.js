@@ -1,136 +1,104 @@
 const hre = require("hardhat");
 const { assert, expect } = require("chai");
+const { BigNumber } = require("@ethersproject/bignumber");
 
-describe("CDPManager", function () {
+describe("MultiSigWallet", function () {
     this.timeout(80000);
 
     const senderAccounts = [];
     let owner;
-    let noiContractObj;
-    let CDPManagerContractObj;
+    let multiSigWallet;
 
     before(async () => {
-        const NoiContract = await hre.ethers.getContractFactory("NOI");
-        noiContractObj = await NoiContract.deploy("NOI", "NOI", 42);
-        await noiContractObj.deployed();
-        console.log("Contract deployed to: ", noiContractObj.address);
-
-        const CDPManagerContract = await hre.ethers.getContractFactory("CDPManager");
-        CDPManagerContractObj = await CDPManagerContract.deploy(noiContractObj.address);
-        await CDPManagerContractObj.deployed();
-
         owner = (await hre.ethers.getSigners())[0];
-
-        // add auth to cdpManager to mint and burn tokens from erc20
-        const txAddAuthToCDPManager = await noiContractObj.connect(owner).addAuthorization(CDPManagerContractObj.address);
-        await txAddAuthToCDPManager.wait();
 
         senderAccounts.push((await hre.ethers.getSigners())[1]);
         senderAccounts.push((await hre.ethers.getSigners())[2]);
         senderAccounts.push((await hre.ethers.getSigners())[3]);
         senderAccounts.push((await hre.ethers.getSigners())[4]);
+
+        const multiSigWalletContract = await hre.ethers.getContractFactory("MultiSigWallet");
+        multiSigWallet = await multiSigWalletContract.deploy([senderAccounts[0].address, senderAccounts[1].address, senderAccounts[2].address]);
+        await multiSigWallet.deployed();
+        console.log("Contract deployed to: ", multiSigWallet.address);
     });
 
-    describe("Mint", function () {
-        it("... mint tokens from valid user address", async () => {
-            const txOpenCDP = await CDPManagerContractObj.connect(senderAccounts[1]).openCDP(senderAccounts[1].address, {
-                value: ethers.utils.parseEther("12"),
-            });
-            await txOpenCDP.wait();
-
-            const getCDPIndex = await CDPManagerContractObj.connect(senderAccounts[1]).cdpi();
-
-            const txmintFromCDPManager = await CDPManagerContractObj.connect(senderAccounts[1]).mintFromCDP(getCDPIndex.toString(), "9999");
-            await txmintFromCDPManager.wait();
-            const balance = await noiContractObj.connect(senderAccounts[1]).balanceOf(senderAccounts[1].address);
-
-            assert.equal("9999", balance.toString());
-
-            const txApprove = await noiContractObj.connect(senderAccounts[1]).approve(CDPManagerContractObj.address, "9999");
-            await txApprove.wait();
-
-            const txBurn = await CDPManagerContractObj.connect(senderAccounts[1]).repayToCDP(getCDPIndex.toString(), "9999");
-            await txBurn.wait();
-        });
-
-        it("... mint more than we can handle", async () => {
-            const txOpenCDP = await CDPManagerContractObj.connect(senderAccounts[1]).openCDP(senderAccounts[1].address, {
-                value: ethers.utils.parseEther("12"),
-            });
-            await txOpenCDP.wait();
-
-            const getCDPIndex = await CDPManagerContractObj.connect(senderAccounts[1]).cdpi();
-
-            await expect(CDPManagerContractObj.connect(senderAccounts[1]).mintFromCDP(getCDPIndex.toString(), "10000")).to.be.reverted;
-        });
-
-        it("... mint tokens from invalid user address", async () => {
-            const txOpenCDP = await CDPManagerContractObj.connect(senderAccounts[1]).openCDP(senderAccounts[1].address, {
-                value: ethers.utils.parseEther("10"),
-            });
-            await txOpenCDP.wait();
-
-            const getCDPIndex = await CDPManagerContractObj.connect(senderAccounts[1]).cdpi();
-
-            await expect(CDPManagerContractObj.connect(senderAccounts[2]).mintFromCDP(getCDPIndex.toString(), "10")).to.be.reverted;
-        });
+    it("... submit new tx from valid owner", async () => {
+        const numberOfExistingPendingTxs = (await multiSigWallet.connect(senderAccounts[0]).getTransactionCount()).toString();
+        const tx = await multiSigWallet.connect(senderAccounts[0]).submitTransaction(multiSigWallet.address, "0", ethers.utils.formatBytes32String(""));
+        await tx.wait();
+        const newNumberOfExistingPendingTxs = (await multiSigWallet.connect(senderAccounts[0]).getTransactionCount()).toString();
+        assert.equal(Number(numberOfExistingPendingTxs) + 1, Number(newNumberOfExistingPendingTxs));
     });
 
-    describe("Burn", function () {
-        it("... burn tokens from valid user address", async () => {
-            const txOpenCDP = await CDPManagerContractObj.connect(senderAccounts[1]).openCDP(senderAccounts[1].address, {
-                value: ethers.utils.parseEther("12"),
-            });
-            await txOpenCDP.wait();
+    it("... submit new tx from invalid owner", async () => {
+        await expect(multiSigWallet.connect(senderAccounts[3]).submitTransaction(multiSigWallet.address, "0", ethers.utils.formatBytes32String(""))).to.be
+            .reverted;
+    });
 
-            const getCDPIndex = await CDPManagerContractObj.connect(senderAccounts[1]).cdpi();
+    it("... confirm pending tx", async () => {
+        const tx = await multiSigWallet.connect(senderAccounts[0]).submitTransaction(multiSigWallet.address, "0", ethers.utils.formatBytes32String(""));
+        await tx.wait();
+        const pendingTxId = Number((await multiSigWallet.connect(senderAccounts[0]).getTransactionCount()).toString()) - 1;
 
-            const txmintFromCDPManager = await CDPManagerContractObj.connect(senderAccounts[1]).mintFromCDP(getCDPIndex.toString(), "5000");
-            await txmintFromCDPManager.wait();
+        const txConfirmTx = await multiSigWallet.connect(senderAccounts[0]).confirmTransaction(pendingTxId);
+        await txConfirmTx.wait();
 
-            const txApprove = await noiContractObj.connect(senderAccounts[1]).approve(CDPManagerContractObj.address, "2000");
-            await txApprove.wait();
+        const pendingTxResult = await multiSigWallet.connect(senderAccounts[0]).transactions(pendingTxId);
 
-            const txBurn = await CDPManagerContractObj.connect(senderAccounts[1]).repayToCDP(getCDPIndex.toString(), "2000");
-            await txBurn.wait();
+        assert.equal(pendingTxResult[4].toString(), "1");
+    });
 
-            const txBalance = await noiContractObj.connect(senderAccounts[1]).balanceOf(senderAccounts[1].address);
+    it("... revoke pending tx", async () => {
+        const tx = await multiSigWallet.connect(senderAccounts[0]).submitTransaction(multiSigWallet.address, "0", ethers.utils.formatBytes32String(""));
+        await tx.wait();
+        const pendingTxId = Number((await multiSigWallet.connect(senderAccounts[0]).getTransactionCount()).toString()) - 1;
 
-            assert.equal(txBalance.toString(), "3000");
-        });
+        const txConfirmTx = await multiSigWallet.connect(senderAccounts[0]).confirmTransaction(pendingTxId);
+        await txConfirmTx.wait();
 
-        it("... burn more than we can handle", async () => {
-            const txOpenCDP = await CDPManagerContractObj.connect(senderAccounts[1]).openCDP(senderAccounts[1].address, {
-                value: ethers.utils.parseEther("12"),
-            });
-            await txOpenCDP.wait();
+        const txRevokeTx = await multiSigWallet.connect(senderAccounts[0]).revokeConfirmation(pendingTxId);
+        await txRevokeTx.wait();
 
-            const getCDPIndex = await CDPManagerContractObj.connect(senderAccounts[1]).cdpi();
+        const pendingTxResult = await multiSigWallet.connect(senderAccounts[0]).transactions(pendingTxId);
 
-            const txMint = await CDPManagerContractObj.connect(senderAccounts[1]).mintFromCDP(getCDPIndex.toString(), "5000");
-            await txMint.wait();
+        assert.equal(pendingTxResult[4].toString(), "0");
+    });
 
-            const txApprove = await noiContractObj.connect(senderAccounts[1]).approve(CDPManagerContractObj.address, "4000");
-            await txApprove.wait();
+    it("... execute pending send tx that is confirmed by majority", async () => {
+        const oneEth = ethers.utils.parseEther("1");
+        const oldAccBalance = (await senderAccounts[3].getBalance()).toString();
 
-            await expect(CDPManagerContractObj.connect(senderAccounts[1]).repayToCDP(getCDPIndex.toString(), "5000")).to.be.reverted;
-        });
+        const tx = await multiSigWallet.connect(senderAccounts[0]).submitTransaction(senderAccounts[3].address, oneEth, ethers.utils.formatBytes32String(""));
+        await tx.wait();
+        const txSendEth = await senderAccounts[0].sendTransaction({ to: multiSigWallet.address, value: ethers.utils.parseEther("10") });
+        await txSendEth.wait();
 
-        it("... burn tokens from invalid user address", async () => {
-            const txOpenCDP = await CDPManagerContractObj.connect(senderAccounts[1]).openCDP(senderAccounts[1].address, {
-                value: ethers.utils.parseEther("12"),
-            });
-            await txOpenCDP.wait();
+        const pendingTxId = Number((await multiSigWallet.connect(senderAccounts[0]).getTransactionCount()).toString()) - 1;
 
-            const getCDPIndex = await CDPManagerContractObj.connect(senderAccounts[1]).cdpi();
+        const txConfirm1Tx = await multiSigWallet.connect(senderAccounts[0]).confirmTransaction(pendingTxId);
+        await txConfirm1Tx.wait();
+        const txConfirm2Tx = await multiSigWallet.connect(senderAccounts[1]).confirmTransaction(pendingTxId);
+        await txConfirm2Tx.wait();
 
-            const txMint = await CDPManagerContractObj.connect(senderAccounts[1]).mintFromCDP(getCDPIndex.toString(), "5000");
-            await txMint.wait();
+        const txExecute = await multiSigWallet.connect(senderAccounts[0]).executeTransaction(pendingTxId);
+        await txExecute.wait();
 
-            const txApprove = await noiContractObj.connect(senderAccounts[1]).approve(CDPManagerContractObj.address, "5000");
-            await txApprove.wait();
+        const newAccBalance = (await senderAccounts[3].getBalance()).toString();
 
-            await expect(CDPManagerContractObj.connect(senderAccounts[2]).repayToCDP(getCDPIndex.toString(), "2000")).to.be.reverted;
-        });
+        assert.equal(Number(oldAccBalance) + Number(oneEth.toString()), Number(newAccBalance));
+    });
+
+    it("... execute pending send tx that is not confirmed by majority", async () => {
+        const oneEth = ethers.utils.parseEther("1");
+        const tx = await multiSigWallet.connect(senderAccounts[0]).submitTransaction(senderAccounts[3].address, oneEth, ethers.utils.formatBytes32String(""));
+        await tx.wait();
+
+        const pendingTxId = Number((await multiSigWallet.connect(senderAccounts[0]).getTransactionCount()).toString()) - 1;
+
+        const txConfirm1Tx = await multiSigWallet.connect(senderAccounts[0]).confirmTransaction(pendingTxId);
+        await txConfirm1Tx.wait();
+
+        await expect(multiSigWallet.connect(senderAccounts[0]).executeTransaction(pendingTxId)).to.be.reverted;
     });
 });
