@@ -3,6 +3,7 @@
 pragma solidity ^0.8.0;
 
 error NOI__NotAuthorized();
+error NOI__NotOwner();
 error NOI__InvalidDestination();
 error NOI__InsufficientBalance();
 error NOI__InsufficientAllowance();
@@ -10,13 +11,14 @@ error NOI__InsufficientAllowance();
 contract NOI {
     // --- Auth ---
     mapping(address => bool) public authorizedAccounts;
+    address private owner;
 
-    function addAuthorization(address account) external isAuthorized {
+    function addAuthorization(address account) external isOwner {
         authorizedAccounts[account] = true;
         emit AddAuthorization(account);
     }
 
-    function removeAuthorization(address account) external isAuthorized {
+    function removeAuthorization(address account) external isOwner {
         authorizedAccounts[account] = false;
         emit RemoveAuthorization(account);
     }
@@ -24,6 +26,12 @@ contract NOI {
     modifier isAuthorized() {
         if (authorizedAccounts[msg.sender] == false)
             revert NOI__NotAuthorized();
+        _;
+    }
+
+    modifier isOwner() {
+        if (msg.sender!=owner)
+            revert NOI__NotOwner();
         _;
     }
 
@@ -59,6 +67,7 @@ contract NOI {
         string memory _symbol,
         uint256 _chainId
     ) {
+        owner=msg.sender;
         authorizedAccounts[msg.sender] = true;
         name = _name;
         symbol = _symbol;
