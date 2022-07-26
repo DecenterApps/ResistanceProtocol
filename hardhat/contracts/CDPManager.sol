@@ -36,6 +36,8 @@ contract CDPManager {
     event TransferCollateral(address indexed _user,uint256 indexed _cdpId, uint _value);
     event CDPClose(address indexed _user,uint256 indexed _cdpId);
     event OwnershipTransfer(address indexed _from,address indexed _to,uint256 indexed _cdpId);
+    event MintCDP(address indexed _from,uint256 indexed _cdpId, uint _amount);
+    event RepayCDP(address indexed _from,uint256 indexed _cdpId, uint _amount);
 
     constructor(address _noiCoin) {
         totalSupply = 0;
@@ -45,7 +47,10 @@ contract CDPManager {
         liquidationRatio = 120;
     }
 
-    // Open a new cdp for a given _user address.
+    /*
+     * @notice open a new cdp for a given _user address
+     * @param _user address of cdp owner
+     */
     function openCDP(address _user) public payable HasAccess(_user) returns (uint256){
         cdpi = cdpi + 1;
         cdpList[cdpi] = CDP(msg.value, 0, _user);
@@ -54,7 +59,10 @@ contract CDPManager {
         return cdpi;
     }
 
-    //Adds collateral to an existing CDP
+    /*
+     * @notice adds collateral to an existing CDP
+     * @param _cdpIndex index of cdp
+     */
     function transferCollateralToCDP(uint _cdpIndex) public payable {
         cdpList[_cdpIndex].lockedCollateral =
             cdpList[_cdpIndex].lockedCollateral +
@@ -63,7 +71,10 @@ contract CDPManager {
         emit TransferCollateral(cdpList[_cdpIndex].owner,_cdpIndex,msg.value);
     }
 
-    // Close CDP if you have 0 debt
+    /*
+     * @notice close CDP if you have 0 debt
+     * @param _cdpIndex index of cdp
+     */
     function closeCDP(uint256 _cdpIndex) public HasAccess(cdpList[_cdpIndex].owner){
         if (cdpList[_cdpIndex].generatedDebt != 0) {
             revert CDPManager__HasDebt();
@@ -77,13 +88,18 @@ contract CDPManager {
         delete cdpList[_cdpIndex];
     }
 
-    // View total supply of ether in contract
+    /*
+     * @notice view total supply of ether in contract
+     */
     function getTotalSupply() public view returns (uint256) {
         console.log(totalSupply);
         return totalSupply;
     }
 
-    // View the state of one CDP
+    /*
+     * @notice view the state of one CDP
+     * @param _cdpIndex index of cdp
+     */
     function getOneCDP(uint256 _cdpIndex)
         public
         view
@@ -98,7 +114,12 @@ contract CDPManager {
         searchedCDP = cdpList[_cdpIndex];
     }
 
-    // Transfer ownership of CDP
+    /*
+     * @notice transfer ownership of CDP
+     * @param _from address of owner
+     * @param _to address of new owner
+     * @param _cdpIndex index of cdp
+     */
     function transferOwnership(address _from,address _to,uint256 _cdpIndex) public HasAccess(_from){
         cdpList[_cdpIndex].owner=_to;
         emit OwnershipTransfer(_from,_to,_cdpIndex);
@@ -122,6 +143,7 @@ contract CDPManager {
         cdpList[_cdpIndex].generatedDebt += _amount;
 
         NOI_COIN.mint(user_cdp.owner, _amount);
+        emit MintCDP(cdpList[_cdpIndex].owner,_cdpIndex,_amount);
     }
 
     /*
@@ -132,6 +154,7 @@ contract CDPManager {
     function repayToCDP(uint256 _cdpIndex, uint256 _amount) public HasAccess(cdpList[_cdpIndex].owner){
         NOI_COIN.burn(cdpList[_cdpIndex].owner, _amount);
         cdpList[_cdpIndex].generatedDebt -= _amount;
+        emit RepayCDP(cdpList[_cdpIndex].owner,_cdpIndex,_amount);
     }
 
     function updateValue(uint _ethrp) public {
