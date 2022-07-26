@@ -67,4 +67,23 @@ describe('CDPManager', function () {
 
         await expect(CDPManagerContractObj.connect(senderAccounts[1]).mintFromCDP(cdpIndex, "9999")).to.be.reverted;
     });
+
+    it('... remove auth from RateSetter', async () => {        
+        const txAddAuthToCDPManager = await noiContractObj.connect(owner).addAuthorization(CDPManagerContractObj.address);
+        await txAddAuthToCDPManager.wait();
+
+        const txAddAuthToRateSetter = await CDPManagerContractObj.connect(owner).addAuthorization(RateSetterContractObj.address);
+        await txAddAuthToRateSetter.wait();
+
+        const txOpenCDP = await CDPManagerContractObj.connect(senderAccounts[1]).openCDP(senderAccounts[1].address, {value: ethers.utils.parseEther("12")});
+        await txOpenCDP.wait();
+
+        const txChangeRate = await RateSetterContractObj.connect(senderAccounts[0]).updateRates();
+        await txChangeRate.wait();
+
+        const txRemoveAuthFromRateSetter = await CDPManagerContractObj.connect(owner).removeAuthorization(RateSetterContractObj.address);
+        await txRemoveAuthFromRateSetter.wait();
+
+        await expect(RateSetterContractObj.connect(senderAccounts[0]).updateRates()).to.be.reverted;
+    });
 });
