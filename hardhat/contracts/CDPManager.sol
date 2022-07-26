@@ -5,6 +5,7 @@ import "./NOI.sol";
 
 error CDPManager__NotAuthorized();
 error CDPManager__HasDebt();
+error CDPManager__LiquidationRatioReached();
 
 contract CDPManager {
     struct CDP {
@@ -17,10 +18,12 @@ contract CDPManager {
     }
 
     uint256 private totalSupply;
-    uint256 cdpi;
+    uint256 public cdpi;
     mapping(uint256 => CDP) private cdpList; // CDPId => CDP
 
     NOI private immutable NOI_COIN;
+    uint256 ethRp;
+    uint256 liquidationRatio;
 
     modifier HasAccess(address _user) {
         if(msg.sender != _user) revert CDPManager__NotAuthorized();
@@ -38,6 +41,8 @@ contract CDPManager {
         totalSupply = 0;
         cdpi = 0;
         NOI_COIN = NOI(_noiCoin);
+        ethRp = 1000/1;
+        liquidationRatio = 120;
     }
 
     // Open a new cdp for a given _user address.
@@ -99,11 +104,37 @@ contract CDPManager {
         emit OwnershipTransfer(_from,_to,_cdpIndex);
     }
 
-    function mintFromCDP(address _user, uint256 _cdpIndex, uint256 _amount) public HasAccess(_user) {
-        NOI_COIN.mint(_user, _amount);
+    /*
+     * @notice mint coins for cdp 
+     * @param _cdpIndex index of cdp
+     * @param _amount amount of tokens to mint
+     */
+    function mintFromCDP(uint256 _cdpIndex, uint256 _amount) public HasAccess(cdpList[_cdpIndex].owner) {
+        CDP memory user_cdp = cdpList[_cdpIndex];
+
+        // check if the new minted coins will be under liquidation ratio
+        uint256 newDebt = (user_cdp.generatedDebt + _amount) * liquidationRatio*1e16;
+        console.log(newDebt);
+        console.log(ethRp * user_cdp.lockedCollateral);
+        if(newDebt >= ethRp * user_cdp.lockedCollateral) 
+            revert CDPManager__LiquidationRatioReached();
+
+        cdpList[_cdpIndex].generatedDebt += _amount;
+
+        NOI_COIN.mint(user_cdp.owner, _amount);
     }
 
-    function repayToCDP(address _user, uint256 _cdpIndex, uint256 _amount) public HasAccess(_user){
-        NOI_COIN.burn(_user, _amount);
+    /*
+     * @notice repay debt in coins
+     * @param _cdpIndex index of cdp
+     * @param _amount amount of tokens to repay
+     */
+    function repayToCDP(uint256 _cdpIndex, uint256 _amount) public HasAccess(cdpList[_cdpIndex].owner){
+        NOI_COIN.burn(cdpList[_cdpIndex].owner, _amount);
+        cdpList[_cdpIndex].generatedDebt -= _amount;
+    }
+
+    function updateValue(uint _ethrp) public {
+        ethRp = _ethrp;
     }
 }
