@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 error Treasury_NotAuthorized();
 error Treasury_NotOwner();
 error Treasury_NotEnoughFunds();
+error Treasury_TransactionFailed();
 
 contract Treasury{
 
@@ -37,9 +38,15 @@ contract Treasury{
         userAuthorized[_from] = false;
     }
 
+    /*
+     * @notice sends requested funds to an authorized user
+     * @param _amount amount of ETH requested
+     */
     function getFunds(uint256 _amount) public onlyAuthorized {
         if ( getBalanceOfTreasury() < _amount ) revert Treasury_NotEnoughFunds();
-        payable(msg.sender).transfer(_amount);
+
+        (bool sent, ) = payable(msg.sender).call{value: _amount}("");
+        if (sent == false) revert Treasury_TransactionFailed();
     }
 
     function getBalanceOfTreasury() public view returns (uint256) {
