@@ -27,6 +27,13 @@ contract CDPManager {
         _;
     }
 
+    // EVENTS
+
+    event CDPOpen(address indexed _user,uint256 indexed _cdpId, uint _value);
+    event TransferCollateral(address indexed _user,uint256 indexed _cdpId, uint _value);
+    event CDPClose(address indexed _user,uint256 indexed _cdpId);
+    event OwnershipTransfer(address indexed _from,address indexed _to,uint256 indexed _cdpId);
+
     constructor(address _noiCoin) {
         totalSupply = 0;
         cdpi = 0;
@@ -38,6 +45,7 @@ contract CDPManager {
         cdpi = cdpi + 1;
         cdpList[cdpi] = CDP(msg.value, 0, _user);
         totalSupply = totalSupply + msg.value;
+        emit CDPOpen(_user,cdpi,msg.value);
         return cdpi;
     }
 
@@ -47,6 +55,7 @@ contract CDPManager {
             cdpList[_cdpIndex].lockedCollateral +
             msg.value;
         totalSupply = totalSupply + msg.value;
+        emit TransferCollateral(cdpList[_cdpIndex].owner,_cdpIndex,msg.value);
     }
 
     // Close CDP if you have 0 debt
@@ -59,6 +68,7 @@ contract CDPManager {
         }("");
         if (sent == false) revert();
         totalSupply = totalSupply - cdpList[_cdpIndex].lockedCollateral;
+        emit CDPClose(cdpList[_cdpIndex].owner,_cdpIndex);
         delete cdpList[_cdpIndex];
     }
 
@@ -81,6 +91,12 @@ contract CDPManager {
             cdpList[_cdpIndex].generatedDebt
         );
         searchedCDP = cdpList[_cdpIndex];
+    }
+
+    // Transfer ownership of CDP
+    function transferOwnership(address _from,address _to,uint256 _cdpIndex) public HasAccess(_from){
+        cdpList[_cdpIndex].owner=_to;
+        emit OwnershipTransfer(_from,_to,_cdpIndex);
     }
 
     function mintFromCDP(address _user, uint256 _cdpIndex, uint256 _amount) public HasAccess(_user) {
