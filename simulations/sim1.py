@@ -6,56 +6,66 @@ from cadCAD import configs
 import pandas as pd
 import matplotlib.pyplot as plt
 import dataframe_image as dfi
+import csv
 
 exp = Experiment()
 
 genesis_states = {
-    'usr1': 10,
-    'usr2': 10,
-    'usr3': 10,
-    'usr4': 10,
-    'usr5': 10
+    'trader': {'eth':100,'noi':100},
+    'pool_eth': 100000,
+    'pool_noi': 10000000,
 }
 
 
-def update_A(params, step, sH, s, _input):
-    y = 'box_A'
-    add_to_A = 0
-    if (s['box_A'] > s['box_B']):
-        add_to_A = -1
-    elif (s['box_A'] < s['box_B']):
-        add_to_A = 1
-    x = s['box_A'] + add_to_A
-    return (y, x)
+eth_dollar = []
 
+with open('dataset/eth_dollar.csv', 'r') as csvfile:
+    eth_dollar = list(csv.reader(csvfile))[0]
+    eth_dollar = [float(i) for i in eth_dollar]
 
-def update_B(params, step, sH, s, _input):
-    y = 'box_B'
-    add_to_B = 0
-    if (s['box_B'] > s['box_A']):
-        add_to_B = -1
-    elif (s['box_B'] < s['box_A']):
-        add_to_B = 1
-    x = s['box_B'] + add_to_B
-    return (y, x)
+# print(eth_dollar)
+params = {
+    'eth_dollar': eth_dollar,
+}
 
+# print(params)
+
+def get_current_timestep(cur_substep, previous_state):
+    return 1
+    # if cur_substep == 1:
+    #     return previous_state['timestep']+1
+    # return previous_state['timestep']
+
+def update_trader(params, substep, state_history,  previous_state, policy_input):
+    y = 'trader'
+    eth_value = params['eth_dollar'][get_current_timestep(substep, previous_state)]
+    eth_value = 0
+    noi_value = 0
+    if eth_value > 1000:
+        eth_value = eth_value - 1
+        noi_value = noi_value + 1
+    else:
+        eth_value = eth_value + 1
+        noi_value = noi_value - 1
+    return (y, [previous_state['trader']['pool_eth'] + eth_value, previous_state['trader']['pool_noi'] + noi_value])
 
 partial_state_update_blocks = [
     {
-        'policies': {  # We'll ignore policies for now
+        'policies': {  
         },
         'variables': {  # The following state variables will be updated simultaneously
-            'box_A': update_A,
-            'box_B': update_B
+            'trader': update_trader
         }
     }
 ]
 
 sim_config_dict = {
-    'T': range(10),
+    'T': range(50),
     'N': 1,
-    # 'M': {}
+    'M': {'lol': 1}, 
 }
+
+
 
 c = config_sim(sim_config_dict)
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -81,17 +91,17 @@ simulation_result = pd.DataFrame(raw_system_events)
 simulation_result.set_index(['subset', 'run', 'timestep', 'substep'])
 
 print(simulation_result)
-# plt.plot(simulation_result)
-# plt.show()
-# plt.savefig('lol.png')
+plt.plot(simulation_result)
+plt.show()
+plt.savefig('lol.png')
 
 plt.figure()
-plt.plot(simulation_result)
-# plt.show()
+# plt.plot(simulation_result)
+# # plt.show()
 plt.savefig('test.png')
 
-simulation_result.plot('timestep', ['box_A', 'box_B'], grid=True,
-                       colormap='RdYlGn',
-                       xticks=list(
-                           simulation_result['timestep'].drop_duplicates()),
-                       yticks=list(range(1+(simulation_result['box_A']+simulation_result['box_B']).max())))
+# simulation_result.plot('timestep', ['box_A', 'box_B'], grid=True,
+#                        colormap='RdYlGn',
+#                        xticks=list(
+#                            simulation_result['timestep'].drop_duplicates()),
+#                        yticks=list(range(1+(simulation_result['box_A']+simulation_result['box_B']).max())))
