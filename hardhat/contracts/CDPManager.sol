@@ -22,11 +22,11 @@ contract CDPManager {
     }
 
     uint256 private totalSupply;
-    uint256 public cdpi;
+    uint256 public cdpi; // auto increment index for CDPs
     mapping(uint256 => CDP) private cdpList; // CDPId => CDP
 
     NOI private immutable NOI_COIN;
-    uint256 ethRp;
+    uint256 ethRp; // ETH/RP rate
     uint256 liquidationRatio;
     
 
