@@ -7,6 +7,7 @@ import "./NOI.sol";
 
 error CDPManager__NotAuthorized();
 error CDPManager__ContractNotAuthorized();
+error CDPManager__NotOwner();
 error CDPManager__HasDebt();
 error CDPManager__LiquidationRatioReached();
 
@@ -47,15 +48,22 @@ contract CDPManager {
 
     // --- Auth ---
     mapping(address => bool) public authorizedAccounts;
+    address private owner;
 
-    function addAuthorization(address account) external isAuthorized {
+    function addAuthorization(address account) external isOwner {
         authorizedAccounts[account] = true;
         emit AddAuthorization(account);
     }
 
-    function removeAuthorization(address account) external isAuthorized {
+    function removeAuthorization(address account) external isOwner {
         authorizedAccounts[account] = false;
         emit RemoveAuthorization(account);
+    }
+
+    modifier isOwner() {
+        if (owner != msg.sender)
+            revert CDPManager__NotOwner();
+        _;
     }
 
     modifier isAuthorized() {
@@ -65,6 +73,7 @@ contract CDPManager {
     }
 
     constructor(address _noiCoin) {
+        owner = msg.sender;
         authorizedAccounts[msg.sender] = true;
         totalSupply = 0;
         cdpi = 0;
@@ -183,7 +192,11 @@ contract CDPManager {
         emit RepayCDP(cdpList[_cdpIndex].owner,_cdpIndex,_amount);
     }
 
-    function updateValue(uint _ethrp) public isAuthorized{
+    /*
+     * @notice update ETH/RP value
+     * @param _ethrp new value
+     */
+    function updateValue(uint _ethrp) external isAuthorized{
         ethRp = _ethrp;
     }
 }
