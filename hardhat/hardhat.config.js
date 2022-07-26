@@ -16,8 +16,11 @@ module.exports = {
       url: KOVAN_RPC_URL,
       accounts: [KOVAN_ACCOUNT],
       chainId: 42,
-      blockConfirmations: 2,
+      blockConfirmations: 5,
     },
+    local: {
+      url: "http://127.0.0.1:8545",
+    }
   },
   etherscan: {
     apiKey: ETHERSCAN_API_KEY,
