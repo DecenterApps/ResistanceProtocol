@@ -41,7 +41,7 @@ contract CDPManager {
     }
 
     // Open a new cdp for a given _user address.
-    function openCDP(address _user) public payable returns (uint256) {
+    function openCDP(address _user) public payable HasAccess(_user) returns (uint256){
         cdpi = cdpi + 1;
         cdpList[cdpi] = CDP(msg.value, 0, _user);
         totalSupply = totalSupply + msg.value;
@@ -59,7 +59,7 @@ contract CDPManager {
     }
 
     // Close CDP if you have 0 debt
-    function closeCDP(uint256 _cdpIndex) public {
+    function closeCDP(uint256 _cdpIndex) public HasAccess(cdpList[_cdpIndex].owner){
         if (cdpList[_cdpIndex].generatedDebt != 0) {
             revert CDPManager__HasDebt();
         }
