@@ -12,42 +12,42 @@ exp = Experiment()
 
 genesis_states = {
     'trader': {'eth':100,'noi':100},
+    # 'trader': 100,
     'pool_eth': 100000,
     'pool_noi': 10000000,
 }
 
 
 eth_dollar = []
+eth_amount = []
+noi_amount = []
 
 with open('dataset/eth_dollar.csv', 'r') as csvfile:
     eth_dollar = list(csv.reader(csvfile))[0]
     eth_dollar = [float(i) for i in eth_dollar]
 
-# print(eth_dollar)
-params = {
-    'eth_dollar': eth_dollar,
-}
 
 # print(params)
 
 def get_current_timestep(cur_substep, previous_state):
-    return 1
-    # if cur_substep == 1:
-    #     return previous_state['timestep']+1
-    # return previous_state['timestep']
+    if cur_substep == 1:
+        return previous_state['timestep']+1
+    return previous_state['timestep']
 
 def update_trader(params, substep, state_history,  previous_state, policy_input):
     y = 'trader'
-    eth_value = params['eth_dollar'][get_current_timestep(substep, previous_state)]
-    eth_value = 0
-    noi_value = 0
-    if eth_value > 1000:
-        eth_value = eth_value - 1
-        noi_value = noi_value + 1
-    else:
-        eth_value = eth_value + 1
-        noi_value = noi_value - 1
-    return (y, [previous_state['trader']['pool_eth'] + eth_value, previous_state['trader']['pool_noi'] + noi_value])
+    # return (y, {'eth': 100, 'noi': 100})
+    eth_value = eth_dollar[get_current_timestep(substep, previous_state)]
+    print()
+    eth_add = -1
+    noi_add = +1
+    if eth_value < 1000:
+        eth_add = + 1
+        noi_add = - 1
+    # print(type(previous_state['trader']['eth']))
+    eth_amount.append(previous_state['trader']['eth'] + eth_add)
+    noi_amount.append(previous_state['trader']['noi'] + noi_add)
+    return (y, {'eth':previous_state['trader']['eth'] + eth_add, 'noi':previous_state['trader']['noi'] + noi_add})
 
 partial_state_update_blocks = [
     {
@@ -60,9 +60,9 @@ partial_state_update_blocks = [
 ]
 
 sim_config_dict = {
-    'T': range(50),
+    'T': range(999),
     'N': 1,
-    'M': {'lol': 1}, 
+    # 'M': ,
 }
 
 
@@ -90,15 +90,16 @@ raw_system_events, tensor_field, sessions = simulation.execute()
 simulation_result = pd.DataFrame(raw_system_events)
 simulation_result.set_index(['subset', 'run', 'timestep', 'substep'])
 
-print(simulation_result)
-plt.plot(simulation_result)
-plt.show()
-plt.savefig('lol.png')
-
 plt.figure()
-# plt.plot(simulation_result)
-# # plt.show()
-plt.savefig('test.png')
+plt.plot(noi_amount)
+plt.plot(eth_amount)
+plt.legend(['noi', 'eth'])
+plt.savefig('novi_lol.png')
+
+# plt.figure()
+# # plt.plot(simulation_result)
+# # # plt.show()
+# plt.savefig('test.png')
 
 # simulation_result.plot('timestep', ['box_A', 'box_B'], grid=True,
 #                        colormap='RdYlGn',
