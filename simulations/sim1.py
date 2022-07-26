@@ -5,56 +5,87 @@ from cadCAD.configuration import Experiment
 from cadCAD import configs
 import pandas as pd
 import matplotlib.pyplot as plt
-import dataframe_image as dfi
 import csv
+import numpy as np
 
 exp = Experiment()
 
+NUM_TRADERS = 20
+PERC_RISKY_TRADERS = 0.4
+MONTE_CARLO_SIMULATIONS = 10
+
+eth_noi_pool = {'eth': 100, 'noi': 1000}
+
+
 genesis_states = {
-    'trader': {'eth':100,'noi':100},
-    # 'trader': 100,
     'pool_eth': 100000,
     'pool_noi': 10000000,
 }
 
+def get_chance(probability):
+    p = np.random.random()
+    print(p)
+    return p < probability
+
+traders = dict()
+for i in range(NUM_TRADERS):
+    name = 'trader' + str(i)
+    trader_type = 'safe'
+    if get_chance(PERC_RISKY_TRADERS):
+        trader_type = 'risky'
+    traders[name] = {'eth': 100, 'noi': 100, 'type': trader_type}
+genesis_states['agents'] = {'traders': traders}
+
 
 eth_dollar = []
-eth_amount = []
-noi_amount = []
+eth_amount_graph = [eth_noi_pool['eth']]
+noi_amount_graph = [eth_noi_pool['noi']]
 
 with open('dataset/eth_dollar.csv', 'r') as csvfile:
     eth_dollar = list(csv.reader(csvfile))[0]
     eth_dollar = [float(i) for i in eth_dollar]
 
 
-# print(params)
-
 def get_current_timestep(cur_substep, previous_state):
     if cur_substep == 1:
         return previous_state['timestep']+1
     return previous_state['timestep']
 
-def update_trader(params, substep, state_history,  previous_state, policy_input):
-    y = 'trader'
-    # return (y, {'eth': 100, 'noi': 100})
+def update_traders(params, substep, state_history,  previous_state, policy_input):
+    # print('params: ', params)
+    # print('substep: ', substep)
+    # print('state_history: ', state_history)
+    # print('previous_state: ', previous_state)
+    # print('policy_input: ', policy_input)
     eth_value = eth_dollar[get_current_timestep(substep, previous_state)]
-    print()
-    eth_add = -1
-    noi_add = +1
-    if eth_value < 1000:
-        eth_add = + 1
-        noi_add = - 1
-    # print(type(previous_state['trader']['eth']))
-    eth_amount.append(previous_state['trader']['eth'] + eth_add)
-    noi_amount.append(previous_state['trader']['noi'] + noi_add)
-    return (y, {'eth':previous_state['trader']['eth'] + eth_add, 'noi':previous_state['trader']['noi'] + noi_add})
+    ret = dict()
+    for i in range(NUM_TRADERS):
+        name = 'trader' + str(i)
+        eth_add = -1
+        noi_add = +1
+        if eth_value < 1000:
+            eth_add = + 1
+            noi_add = - 1
+        if previous_state['agents']['traders'][name]['type'] == 'safe':
+            eth_add *= 3
+            noi_add *= 3
+        eth_noi_pool['eth'] += eth_add
+        eth_noi_pool['noi'] += noi_add
+        ret[name] = {'eth': previous_state['agents']['traders'][name]['eth'] + eth_add, 'noi': previous_state['agents']['traders']
+                   [name]['noi'] + noi_add, 'type': previous_state['agents']['traders'][name]['type']}
+    eth_amount_graph.append(eth_noi_pool['eth'])
+    noi_amount_graph.append(eth_noi_pool['noi'])
+    return ret
+
+def update_agents(params, substep, state_history,  previous_state, policy_input):
+    return ('agents', {'traders':update_traders(params, substep, state_history,  previous_state, policy_input)})
 
 partial_state_update_blocks = [
     {
-        'policies': {  
+        'policies': {
         },
-        'variables': {  # The following state variables will be updated simultaneously
-            'trader': update_trader
+        'variables': {
+            'agents': update_agents,
         }
     }
 ]
@@ -64,7 +95,6 @@ sim_config_dict = {
     'N': 1,
     # 'M': ,
 }
-
 
 
 c = config_sim(sim_config_dict)
@@ -78,7 +108,7 @@ exp.append_configs(initial_state=genesis_states,  # dict containing variable nam
                    )
 
 exec_mode = ExecutionMode()
-local_mode_ctx = ExecutionContext(exec_mode.local_mode)
+local_mode_ctx = ExecutionContext(exec_mode.multi_proc)
 
 
 # Pass the configuration object inside an array
@@ -90,11 +120,13 @@ raw_system_events, tensor_field, sessions = simulation.execute()
 simulation_result = pd.DataFrame(raw_system_events)
 simulation_result.set_index(['subset', 'run', 'timestep', 'substep'])
 
+# print(noi_amount)
+print(eth_amount_graph)
 plt.figure()
-plt.plot(noi_amount)
-plt.plot(eth_amount)
+plt.plot(noi_amount_graph)
+plt.plot(eth_amount_graph)
 plt.legend(['noi', 'eth'])
-plt.savefig('novi_lol.png')
+plt.savefig('images/novi_lol.png')
 
 # plt.figure()
 # # plt.plot(simulation_result)
