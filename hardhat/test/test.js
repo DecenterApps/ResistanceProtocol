@@ -1,7 +1,7 @@
 const hre = require('hardhat');
-const { assert } = require("chai");
+const { assert, expect } = require("chai");
 
-describe('Test', function () {
+describe('CDPManager', function () {
     this.timeout(80000);
 
     const senderAccounts = [];
@@ -27,14 +27,49 @@ describe('Test', function () {
         senderAccounts.push((await hre.ethers.getSigners())[4]);
     });
 
-    it('... testing', async () => {
-
-        //await noiContractObj.connect(senderAccounts[0]).mint({value: ethers.utils.parseEther("10")});
-        
+    it('... mint tokens from valid user address', async () => {        
         const txAddAuthToCDPManager = await noiContractObj.connect(owner).addAuthorization(CDPManagerContractObj.address);
         await txAddAuthToCDPManager.wait();
-        const txmintFromCDPManager = await CDPManagerContractObj.connect(senderAccounts[1]).mintFromCDP(senderAccounts[1].address, "10");
+
+        const txOpenCDP = await CDPManagerContractObj.connect(senderAccounts[1]).openCDP(senderAccounts[1].address, {value: ethers.utils.parseEther("12")});
+        await txOpenCDP.wait();
+
+        const getCDPIndex = await CDPManagerContractObj.connect(senderAccounts[1]).cdpi();
+
+        const cdpIndex = getCDPIndex.toString();
+
+        const txmintFromCDPManager = await CDPManagerContractObj.connect(senderAccounts[1]).mintFromCDP(cdpIndex, "9999");
         await txmintFromCDPManager.wait();
-        console.log(await noiContractObj.connect(senderAccounts[1]).balanceOf(senderAccounts[1].address))
+        const receipt = await noiContractObj.connect(senderAccounts[1]).balanceOf(senderAccounts[1].address);
+
+        assert.equal("9999", receipt.toString());
+    });
+
+    it('... mint more than we can handle', async () => {        
+        const txAddAuthToCDPManager = await noiContractObj.connect(owner).addAuthorization(CDPManagerContractObj.address);
+        await txAddAuthToCDPManager.wait();
+
+        const txOpenCDP = await CDPManagerContractObj.connect(senderAccounts[1]).openCDP(senderAccounts[1].address, {value: ethers.utils.parseEther("12")});
+        await txOpenCDP.wait();
+
+        const getCDPIndex = await CDPManagerContractObj.connect(senderAccounts[1]).cdpi();
+
+        const cdpIndex = getCDPIndex.toString();
+
+        await expect(CDPManagerContractObj.connect(senderAccounts[1]).mintFromCDP(cdpIndex, "10000")).to.be.reverted;
+    });
+
+    it('... mint tokens from invalid user address', async () => {        
+        const txAddAuthToCDPManager = await noiContractObj.connect(owner).addAuthorization(CDPManagerContractObj.address);
+        await txAddAuthToCDPManager.wait();
+
+        const txOpenCDP = await CDPManagerContractObj.connect(senderAccounts[1]).openCDP(senderAccounts[1].address, {value: ethers.utils.parseEther("10")});
+        await txOpenCDP.wait();
+
+        const getCDPIndex = await CDPManagerContractObj.connect(senderAccounts[1]).cdpi();
+
+        const cdpIndex = getCDPIndex.toString();
+
+        await expect(CDPManagerContractObj.connect(senderAccounts[2]).mintFromCDP(cdpIndex, "10")).to.be.reverted;
     });
 });
