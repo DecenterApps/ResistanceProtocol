@@ -1,9 +1,12 @@
+// SPDX-License-Identifier: MIT
+
 pragma solidity >=0.8.0 <0.9.0;
 
 import "hardhat/console.sol";
 import "./NOI.sol";
 
 error CDPManager__NotAuthorized();
+error CDPManager__ContractNotAuthorized();
 error CDPManager__HasDebt();
 error CDPManager__LiquidationRatioReached();
 
@@ -24,6 +27,7 @@ contract CDPManager {
     NOI private immutable NOI_COIN;
     uint256 ethRp;
     uint256 liquidationRatio;
+    
 
     modifier HasAccess(address _user) {
         if(msg.sender != _user) revert CDPManager__NotAuthorized();
@@ -38,8 +42,30 @@ contract CDPManager {
     event OwnershipTransfer(address indexed _from,address indexed _to,uint256 indexed _cdpId);
     event MintCDP(address indexed _from,uint256 indexed _cdpId, uint _amount);
     event RepayCDP(address indexed _from,uint256 indexed _cdpId, uint _amount);
+    event AddAuthorization(address _account);
+    event RemoveAuthorization(address _account);
+
+    // --- Auth ---
+    mapping(address => bool) public authorizedAccounts;
+
+    function addAuthorization(address account) external isAuthorized {
+        authorizedAccounts[account] = true;
+        emit AddAuthorization(account);
+    }
+
+    function removeAuthorization(address account) external isAuthorized {
+        authorizedAccounts[account] = false;
+        emit RemoveAuthorization(account);
+    }
+
+    modifier isAuthorized() {
+        if (authorizedAccounts[msg.sender] == false)
+            revert CDPManager__ContractNotAuthorized();
+        _;
+    }
 
     constructor(address _noiCoin) {
+        authorizedAccounts[msg.sender] = true;
         totalSupply = 0;
         cdpi = 0;
         NOI_COIN = NOI(_noiCoin);
@@ -157,7 +183,7 @@ contract CDPManager {
         emit RepayCDP(cdpList[_cdpIndex].owner,_cdpIndex,_amount);
     }
 
-    function updateValue(uint _ethrp) public {
+    function updateValue(uint _ethrp) public isAuthorized{
         ethRp = _ethrp;
     }
 }
