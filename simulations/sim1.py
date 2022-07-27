@@ -7,6 +7,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import csv
 import numpy as np
+import pi_controller
 
 exp = Experiment()
 
@@ -71,6 +72,9 @@ eth_amount_graph = [eth_noi_pool['eth']]
 noi_amount_graph = [eth_noi_pool['noi']]
 market_prices = []
 redemption_prices = []
+market_price = 0
+redemption_price = 2.71828182846
+accumulated_leak = 0
 
 with open('dataset/eth_dollar.csv', 'r') as csvfile:
     eth_dollar = list(csv.reader(csvfile))[0]
@@ -100,8 +104,8 @@ def update_traders(substep,  previous_state, policy_input):
         name = 'trader' + str(i)
         trader = previous_state['agents']['traders'][name]
         noi_mp = calculate_market_price(substep, previous_state, False)
-        noi_rp = calculate_redemption_price()
-        relative_gap = abs(noi_mp - noi_rp) / noi_mp
+        noi_rp = redemption_price
+        relative_gap = pi_controller.absolute(noi_mp - noi_rp) / noi_mp
         if relative_gap < trader.relative_gap:
             ret[name] = create_trader(trader, 0, 0)
             continue
@@ -120,8 +124,7 @@ def update_traders(substep,  previous_state, policy_input):
         or trader.noi - noi_add <= 0):
             eth_add = 0
             noi_add = 0
-        eth_noi_pool['eth'] += eth_add
-        eth_noi_pool['noi'] += noi_add
+        change_market_pool(substep, previous_state, eth_add, noi_add)
         ret[name] = create_trader(trader, eth_add, noi_add)
     eth_amount_graph.append(eth_noi_pool['eth'])
     noi_amount_graph.append(eth_noi_pool['noi'])
@@ -129,15 +132,26 @@ def update_traders(substep,  previous_state, policy_input):
 
 
 def calculate_market_price(substep, previous_state, write: bool) -> float:
-    value = eth_noi_pool['eth']/eth_noi_pool['noi'] * \
+    global market_price
+    market_price = eth_noi_pool['eth']/eth_noi_pool['noi'] * \
         eth_dollar[get_current_timestep(substep, previous_state)]
     if write:
-        market_prices.append(value)
-        redemption_prices.append(100)
-    return value
+        market_prices.append(market_price)
+        redemption_prices.append(redemption_price)
+    return market_price
+
+
+def change_market_pool(substep, previous_state, noi_value, eth_value):
+    global redemption_price, market_price
+    eth_noi_pool['eth'] += eth_value
+    eth_noi_pool['noi'] += noi_value
+    market_price = calculate_market_price(substep, previous_state, False)
+    redemption_price = calculate_redemption_price()
 
 def calculate_redemption_price():
-    return 100
+    global redemption_price
+    redemption_price = pi_controller.computeRate(market_price, redemption_price, accumulated_leak)
+    return redemption_price
 
 
 def update_agents(params, substep, state_history,  previous_state, policy_input):

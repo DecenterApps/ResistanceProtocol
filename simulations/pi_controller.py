@@ -76,7 +76,7 @@ def riemannSum(x: float, y: float) -> float:
     return (x + y) / 2
 
 def absolute(x: float) -> float:
-    return math.abs(x)
+    return np.abs(x)
 
 def getGainAdjustedPIOutput(proportionalTerm: float, integralTerm: float) -> float:
     (adjustedProportional, adjustedIntegral) = getGainAdjustedTerms(proportionalTerm, integralTerm)
