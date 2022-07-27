@@ -146,12 +146,13 @@ def change_market_pool(substep, previous_state, noi_value, eth_value):
     eth_noi_pool['eth'] += eth_value
     eth_noi_pool['noi'] += noi_value
     market_price = calculate_market_price(substep, previous_state, False)
-    redemption_price = calculate_redemption_price()
+    rr = calculate_redemption_rate()
+    redemption_price = (1+(rr-1)/3)*redemption_price
+    print(1+(rr-1)/3)
 
-def calculate_redemption_price():
-    global redemption_price
-    redemption_price = pi_controller.computeRate(market_price, redemption_price, accumulated_leak)
-    return redemption_price
+def calculate_redemption_rate():
+    rr = pi_controller.computeRate(market_price, redemption_price, accumulated_leak)
+    return rr
 
 
 def update_agents(params, substep, state_history,  previous_state, policy_input):
@@ -194,7 +195,7 @@ local_mode_ctx = ExecutionContext(exec_mode.multi_proc)
 simulation = Executor(exec_context=local_mode_ctx, configs=exp.configs)
 # The `execute()` method returns a tuple; its first elements contains the raw results
 raw_system_events, tensor_field, sessions = simulation.execute()
-
+0
 
 simulation_result = pd.DataFrame(raw_system_events)
 simulation_result.set_index(['subset', 'run', 'timestep', 'substep'])
@@ -204,7 +205,9 @@ plt.figure()
 # plt.plot(noi_amount_graph)
 # plt.plot(eth_amount_graph)
 plt.plot(market_prices)
-plt.legend(['noi', 'eth'])
+plt.plot(redemption_prices)
+# print(redemption_prices)
+plt.legend(['market price', 'redemption price'])
 plt.savefig('images/novi_lol.png')
 
 # plt.figure()

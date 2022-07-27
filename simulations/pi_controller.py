@@ -95,11 +95,8 @@ def computeRate(marketPrice: float, redemptionPrice: float, accumulatedLeak: flo
     updateDeviationHistory(proportionalTerm, accumulatedLeak)
     lastUpdateTime = lastUpdateTime + TIME_STEP
     piOutput = getGainAdjustedPIOutput(proportionalTerm, priceDeviationCumulative)
-    if breaksNoiseBarrier(absolute(piOutput), redemptionPrice) and piOutput != 0:
-        newRedemptionRate, _ = getBoundedRedemptionRate(piOutput)
-        return newRedemptionRate
-    else:
-        return 1
+    newRedemptionRate, _ = getBoundedRedemptionRate(piOutput)
+    return newRedemptionRate
 
 def updateDeviationHistory(proportionalTerm: float, accumulatedLeak: float) -> None:
     global historicalCumulativeDeviations
@@ -128,8 +125,8 @@ deviationObservations = []
 defaultRedemptionRate = 1
 defaultGlobalTimeline = 1
 historicalCumulativeDeviations = []
-feedbackOutputUpperBound = 50
-feedbackOutputLowerBound = -50
+feedbackOutputUpperBound = 1.5
+feedbackOutputLowerBound = 0.5
 integralPeriodSize = TIME_STEP
 controllerGains = ControllerGains(0.9, 1.5)
 priceDeviationCumulative = 0
