@@ -162,8 +162,10 @@ contract CDPManager {
     }
 
 
-    function liquidatePosition(uint _cdpIndex) public onlyLiquidatorContract {
+    function liquidatePosition(uint _cdpIndex) public payable onlyLiquidatorContract {
         
+        console.log("Balance ", address(this).balance);
+        console.log("tx value ", cdpList[_cdpIndex].lockedCollateral);
         (bool sent, ) = payable(msg.sender).call{
             value: cdpList[_cdpIndex].lockedCollateral
         }("");

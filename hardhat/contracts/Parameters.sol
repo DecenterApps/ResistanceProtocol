@@ -6,7 +6,8 @@ error Parameters_NotAuthorized();
 
 contract Parameters{
 
-    uint8 public LR; // LR percentage
+    uint8 public LR=120; // Liquidation Ratio percentage
+    uint8 public SF; // Stability Fee percentage
     address owner;
 
     modifier onlyOwner(){
@@ -15,13 +16,26 @@ contract Parameters{
         _;
     }
 
-    constructor()
-    {
+    constructor(){
         owner = msg.sender;
     }
 
-    function getLR() public view onlyOwner returns(uint8){
+
+    function setLR(uint8 _LR) public onlyOwner{
+        LR = _LR;
+    }
+
+    function getLR() public view returns(uint8){
         return LR;
     }
+
+   function setSF(uint8 _SF) public onlyOwner{
+        SF = _SF;
+    }
+
+    function getSF() public view returns(uint8){
+        return SF;
+    }
+
 
 }
