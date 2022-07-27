@@ -8,77 +8,33 @@ import matplotlib.pyplot as plt
 import csv
 import numpy as np
 import pi_controller
+from utils.classes import *
+from utils.constants import *
+from trader import *
 
 exp = Experiment()
 
-NUM_TRADERS = 20
-PERC_RISKY_TRADERS = 0.2
-PERC_MODERATE_TRADERS = 0.3
-PERC_SAFE_TRADERS = 1 - PERC_MODERATE_TRADERS - PERC_RISKY_TRADERS
-
-PERCENT_BOUND_HIGH = 0.2
-PERCENT_BOUND_MID = 0.3
-PERCENT_BOUND_LOW = 1 - PERCENT_BOUND_HIGH - PERCENT_BOUND_MID
-MONTE_CARLO_SIMULATIONS = 1
-
-eth_noi_pool = {'eth': 100, 'noi': 10000}
-
-
-genesis_states = {
-}
-
-
-class Trader:
-    def __init__(self, name, eth, noi, perc_amount, relative_gap):
-        self.name = name
-        self.eth = eth
-        self.noi = noi
-        self.perc_amount = perc_amount
-        self.relative_gap = relative_gap
-
-# percentage of traders resource when trading
-def get_trader_perc_amount() -> float:
-    p = np.random.random()
-    if p < PERC_RISKY_TRADERS:
-        return 0.9
-    p -= PERC_RISKY_TRADERS
-    if p < PERC_MODERATE_TRADERS:
-        return 0.7
-    return 0.3
-
-# relative difference between redemption price and market price when trader is activated
-def get_trader_relative_gap():
-    p = np.random.random()
-    if p < PERCENT_BOUND_HIGH:
-        return 0.02
-    p -= PERCENT_BOUND_HIGH
-    if p < PERCENT_BOUND_MID:
-        return 0.06
-    return 0.1
-
+genesis_states = {}
 
 traders = dict()
 for i in range(NUM_TRADERS):
     name = 'trader' + str(i)
-    perc_amount = get_trader_perc_amount()
-    relative_gap = get_trader_relative_gap()
-    traders[name] = Trader(name, 100, 100, perc_amount, relative_gap)
+    traders[name] = create_new_trader(name, ETH_AMOUNT_TRADER, NOI_AMOUNT_TRADER)
 
 genesis_states['agents'] = {'traders': traders}
 
+price_station = PriceStation(100, 100, 0)
+data_station = DataStation()
+pool = Pool(ETH_AMOUNT_POOL, NOI_AMOUNT_POOL)
+graph = Graph()
 
-eth_dollar = []
-eth_amount_graph = [eth_noi_pool['eth']]
-noi_amount_graph = [eth_noi_pool['noi']]
-market_prices = []
-redemption_prices = []
-market_price = 0
-redemption_price = 2.71828182846
-accumulated_leak = 0
+
+graph.eth = [pool.eth]
+graph.noi = [pool.noi]
 
 with open('dataset/eth_dollar.csv', 'r') as csvfile:
     eth_dollar = list(csv.reader(csvfile))[0]
-    eth_dollar = [float(i) for i in eth_dollar]
+    data_station.eth_dollar = [float(i) for i in eth_dollar]
 
 
 def get_current_timestep(cur_substep, previous_state):
@@ -86,72 +42,72 @@ def get_current_timestep(cur_substep, previous_state):
         return previous_state['timestep']+1
     return previous_state['timestep']
 
+def get_eth_value(substep, previous_state):
+    return data_station.eth_dollar[get_current_timestep(substep, previous_state)]
 
-def create_trader(trader: Trader, eth_add, noi_add):
-    return Trader(trader.name, trader.eth - eth_add, trader.noi - noi_add, trader.perc_amount, trader.relative_gap)
 
 def exchange_noi_to_eth(noi_value):
-    return noi_value * eth_noi_pool['noi'] / eth_noi_pool['eth']
+    return noi_value * (pool.eth / pool.noi)
+
 
 def exchange_eth_to_noi(eth_value):
-    return eth_value * eth_noi_pool['eth'] / eth_noi_pool['noi']
+    return eth_value * (pool.noi / pool.eth)
 
 
 def update_traders(substep,  previous_state, policy_input):
-    eth_value = eth_dollar[get_current_timestep(substep, previous_state)]
     ret = dict()
     for i in range(NUM_TRADERS):
         name = 'trader' + str(i)
-        trader = previous_state['agents']['traders'][name]
-        noi_mp = calculate_market_price(substep, previous_state, False)
-        noi_rp = redemption_price
-        relative_gap = pi_controller.absolute(noi_mp - noi_rp) / noi_mp
-        if relative_gap < trader.relative_gap:
-            ret[name] = create_trader(trader, 0, 0)
+        trader:Trader = previous_state['agents']['traders'][name]
+        relative_gap = pi_controller.absolute(price_station.mp - price_station.rp) / price_station.rp
+        if relative_gap < trader.relative_gap or pool.eth < 0.1:
+            ret[name] = create_modified_trader(trader, 0, 0)
             continue
-
-        # buy eth
-        noi_add = +1*trader.noi * trader.perc_amount # value of noi to be added to pool
-        eth_add = -1*exchange_noi_to_eth(noi_add) # value of eth to be added to pool
-        if noi_mp < noi_rp:
-            # buy noi
+        # buy eth, sell noi
+        noi_add = +1*trader.noi * trader.perc_amount  # value of noi to be added to pool
+        # value of eth to be added to pool
+        eth_add = -1*exchange_noi_to_eth(noi_add)
+        if price_station.mp < price_station.rp:
+            # buy noi, sell eth
             eth_add = +1*trader.eth * trader.perc_amount
             noi_add = -1*exchange_eth_to_noi(eth_add)
-            
-        if (eth_noi_pool['noi'] + noi_add <= 0
-        or eth_noi_pool['eth'] + eth_add <= 0
+
+        if (pool.noi + noi_add <= 0
+        or pool.eth + eth_add <= 0
         or trader.eth - eth_add <= 0
         or trader.noi - noi_add <= 0):
+            #TODO ako nema dovoljno para u poolu da uzme deo ili nesto tako(zbog velikih tradera)
             eth_add = 0
             noi_add = 0
         change_market_pool(substep, previous_state, eth_add, noi_add)
-        ret[name] = create_trader(trader, eth_add, noi_add)
-    eth_amount_graph.append(eth_noi_pool['eth'])
-    noi_amount_graph.append(eth_noi_pool['noi'])
+        ret[name] = create_modified_trader(trader, eth_add, noi_add)
+    graph.eth.append(pool.eth)
+    graph.noi.append(pool.noi)
     return ret
 
 
 def calculate_market_price(substep, previous_state, write: bool) -> float:
-    global market_price
-    market_price = eth_noi_pool['eth']/eth_noi_pool['noi'] * \
-        eth_dollar[get_current_timestep(substep, previous_state)]
+    global price_station
+    price_station.mp = pool.eth/pool.noi * get_eth_value(substep, previous_state)
     if write:
-        market_prices.append(market_price)
-        redemption_prices.append(redemption_price)
-    return market_price
+        graph.m_prices.append(price_station.mp)
+        graph.r_prices.append(price_station.rp)
+    return price_station.mp
 
 
-def change_market_pool(substep, previous_state, noi_value, eth_value):
-    global redemption_price, market_price
-    eth_noi_pool['eth'] += eth_value
-    eth_noi_pool['noi'] += noi_value
-    market_price = calculate_market_price(substep, previous_state, False)
+def change_market_pool(substep, previous_state, eth_add, noi_add):
+    global price_station
+    pool.eth += eth_add
+    pool.noi += noi_add
+    price_station.mp = calculate_market_price(substep, previous_state, False)
     rr = calculate_redemption_rate()
-    redemption_price = (1+(rr-1)/3)*redemption_price
-    print(1+(rr-1)/3)
+    price_station.rp = (1+(rr-1)/3)*price_station.rp
+    # print(1+(rr-1)/3)
+
 
 def calculate_redemption_rate():
-    rr = pi_controller.computeRate(market_price, redemption_price, accumulated_leak)
+    rr = 1
+    # rr = pi_controller.computeRate(market_price, redemption_price, accumulated_leak)
     return rr
 
 
@@ -202,12 +158,19 @@ simulation_result.set_index(['subset', 'run', 'timestep', 'substep'])
 
 # print(noi_amount)
 plt.figure()
-# plt.plot(noi_amount_graph)
-# plt.plot(eth_amount_graph)
-plt.plot(market_prices)
-plt.plot(redemption_prices)
-# print(redemption_prices)
+
+plt.plot(graph.eth)
+plt.plot(graph.noi)
+plt.legend(['noi amount', 'eth amount'])
+
+plt.savefig('images/amounts.png')
+
+plt.figure()
+
+plt.plot(graph.m_prices)
+plt.plot(graph.r_prices)
 plt.legend(['market price', 'redemption price'])
+
 plt.savefig('images/novi_lol.png')
 
 # plt.figure()
