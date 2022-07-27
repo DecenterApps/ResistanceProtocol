@@ -1,9 +1,8 @@
-import math
 import matplotlib.pyplot as plt
 import numpy as np
 
 TIME_STEP = 0.01
-NEGATIVE_RATE_LIMIT = 50
+NEGATIVE_RATE_LIMIT = 0.99
 
 class ControllerGains(object):
     def __init__(self, Kp: float, Ki: float):
@@ -15,7 +14,7 @@ class DeviationObservation(object):
         self.timestamp = timestamp
         self.proportional = proportional
         self.integral = integral
-
+        
 def getLastProportionalTerm() -> float:
     if oll() == 0:
         return 0
@@ -40,13 +39,13 @@ def getBoundedRedemptionRate(piOutput: float) -> tuple:
     if piOutput < feedbackOutputLowerBound:
         boundedPIOutput = feedbackOutputLowerBound
     elif piOutput > feedbackOutputUpperBound:
-        boundedPIOutput = int(feedbackOutputUpperBound)
+        boundedPIOutput = feedbackOutputUpperBound
 
     negativeOutputExceedsHundred = boundedPIOutput < 0 and -boundedPIOutput >= defaultRedemptionRate
     if (negativeOutputExceedsHundred): 
         newRedemptionRate = NEGATIVE_RATE_LIMIT
     else:
-        if boundedPIOutput < 0 and boundedPIOutput <= -int(NEGATIVE_RATE_LIMIT): 
+        if boundedPIOutput < 0 and boundedPIOutput <= -NEGATIVE_RATE_LIMIT:
             newRedemptionRate = defaultRedemptionRate - NEGATIVE_RATE_LIMIT
         else:
             newRedemptionRate = defaultRedemptionRate + boundedPIOutput
@@ -120,6 +119,15 @@ def getNextRedemptionRate(marketPrice: float, redemptionPrice: float, accumulate
         return (newRedemptionRate, proportionalTerm, cumulativeDeviation, rateTimeline)
     else:
         return (1, proportionalTerm, cumulativeDeviation, defaultGlobalTimeline)
+
+def updateRedemptionPrice(redemptionRate: float) -> float:
+    # Update redemption price
+    _redemptionPrice = (redemptionRate ** TIME_STEP) * _redemptionPrice
+    if _redemptionPrice == 0:
+        _redemptionPrice = 1
+
+    # Return updated redemption price
+    return _redemptionPrice
 
 deviationObservations = []
 defaultRedemptionRate = 1
