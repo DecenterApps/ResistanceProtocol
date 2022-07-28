@@ -34,6 +34,7 @@ contract RateSetter {
         AbsPiController_CONTRACT = AbsPiController(_AbsPiController);
         redemptionPrice = 314 * RAY / 100;
         redemptionRate = RAY;
+        ethPrice = 1000 * RAY;
 
         ethPriceFeed = AggregatorV3Interface(_ethPriceFeedAddress);
         cpiDataFeed = AggregatorV3Interface(_cpiDataFeedAddress);
@@ -73,7 +74,9 @@ contract RateSetter {
         console.log("============ RP After ============ ");
         console.log(redemptionPrice);
         // gather rate from CPI controller
-        CDPManager_CONTARCT.updateValue(900);
+        console.log("============ ETH/RP ============ ");
+        console.log(ethPrice/redemptionPrice);
+        CDPManager_CONTARCT.updateValue(ethPrice/redemptionPrice);
     }
 
     function updateRatesInternal() public {}

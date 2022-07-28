@@ -88,49 +88,64 @@ contract AbsPiController {
     }
 
     // --- PI Specific Math ---
-    function riemannSum(int x, int y) internal pure returns (int z) {
-        return (x + y) / 2;
+    function riemannSum(int _x, int _y) internal pure returns (int) {
+        return (_x + _y) / 2;
     }
 
-    function absolute(int x) internal pure returns (uint z) {
-        z = (x < 0) ? uint(-x) : uint(x);
+    function absolute(int _x) internal pure returns (uint _z) {
+        _z = (_x < 0) ? uint(-_x) : uint(_x);
     }
 
     // --- PI Utils ---
-    function getGainAdjustedPIOutput(int proportionalTerm, int integralTerm)
+
+    /*
+     * @notice calculates PI output based on provided proportional and integral terms
+     * @param _proportionalTerm proportional term in controller
+     * @param _integralTerm integral term in controller
+     */
+    function getGainAdjustedPIOutput(int _proportionalTerm, int _integralTerm)
         public
         view
         returns (int256)
     {
         (int adjustedProportional, int adjustedIntegral) = getGainAdjustedTerms(
-            proportionalTerm,
-            integralTerm
+            _proportionalTerm,
+            _integralTerm
         );
         return adjustedProportional + adjustedIntegral;
     }
 
-    function getGainAdjustedTerms(int proportionalTerm, int integralTerm)
+    /*
+     * @notice calculates proportional and integral term multiplied by coefs
+     * @param _proportionalTerm proportional term in controller
+     * @param _integralTerm integral term in controller
+     */
+    function getGainAdjustedTerms(int _proportionalTerm, int _integralTerm)
         public
         view
         returns (int256, int256)
     {
         return (
-            (proportionalTerm * int(Kp)) / int(EIGHTEEN_DECIMAL_NUMBER),
-            (integralTerm * int(Ki)) / int(EIGHTEEN_DECIMAL_NUMBER)
+            (_proportionalTerm * int(Kp)) / int(EIGHTEEN_DECIMAL_NUMBER),
+            (_integralTerm * int(Ki)) / int(EIGHTEEN_DECIMAL_NUMBER)
         );
     }
 
-    function getBoundedRedemptionRate(int piOutput)
+    /*
+     * @notice provides new redemption rate by bounding the output of PI controller
+     * @param _piOutput output of PI controller
+     */
+    function getBoundedRedemptionRate(int _piOutput)
         public
         view
         returns (uint256)
     {
-        int boundedPIOutput = piOutput;
+        int boundedPIOutput = _piOutput;
         uint newRedemptionRate;
 
-        if (piOutput < feedbackOutputLowerBound) {
+        if (_piOutput < feedbackOutputLowerBound) {
             boundedPIOutput = feedbackOutputLowerBound;
-        } else if (piOutput > int(feedbackOutputUpperBound)) {
+        } else if (_piOutput > int(feedbackOutputUpperBound)) {
             boundedPIOutput = int(feedbackOutputUpperBound);
         }
 
@@ -156,28 +171,39 @@ contract AbsPiController {
         return newRedemptionRate;
     }
 
+    /*
+     * @notice returns last proportional term
+     */
     function getLastProportionalTerm() public view returns (int256) {
         if (oll() == 0) return 0;
         return deviationObservations[oll() - 1].proportional;
     }
 
+    /*
+     * @notice returns number of deviation observations
+     */
     function oll() public view returns (uint256) {
         return deviationObservations.length;
     }
 
+    /*
+     * @notice calculates the integral term
+     * @param _proportionalTerm calculated proportional term
+     * @param _accumulatedLeak alpha parameter in equation
+     */
     function getNextPriceDeviationCumulative(
-        int proportionalTerm,
-        uint accumulatedLeak
+        int _proportionalTerm,
+        uint _accumulatedLeak
     ) public view returns (int256) {
         int256 lastProportionalTerm = getLastProportionalTerm();
         uint256 timeElapsed = (lastUpdateTime == 0)
             ? 0
             : block.timestamp - lastUpdateTime;
         int256 newTimeAdjustedDeviation = riemannSum(
-            proportionalTerm,
+            _proportionalTerm,
             lastProportionalTerm
         ) * int(timeElapsed);
-        int256 leakedPriceCumulative = (int(accumulatedLeak) *
+        int256 leakedPriceCumulative = (int(_accumulatedLeak) *
             priceDeviationCumulative) / int(TWENTY_SEVEN_DECIMAL_NUMBER);
 
         return leakedPriceCumulative + newTimeAdjustedDeviation;
@@ -185,18 +211,24 @@ contract AbsPiController {
 
     // --- COMPUTATION ---
 
+    /*
+     * @notice calculates new redemption rate based on market and redemption price using PI controller logic
+     * @param _marketPrice last recorded market price of NOI
+     * @param _redemptionPrice last recorded redemption price of NOI
+     * @param _accumulatedLeak alpha parameter in equation
+     */
     function computeRate(
-        uint marketPrice,
-        uint redemptionPrice,
-        uint accumulatedLeak
+        uint _marketPrice,
+        uint _redemptionPrice,
+        uint _accumulatedLeak
     ) external returns (uint256) {
         if (block.timestamp - lastUpdateTime < integralPeriodSize) {
             revert AbsPiController__TooSoon();
         }
-        int256 proportionalTerm = int(redemptionPrice) -
-            int(marketPrice) *
+        int256 proportionalTerm = int(_redemptionPrice) -
+            int(_marketPrice) *
             int(10**9);
-        updateDeviationHistory(proportionalTerm, accumulatedLeak);
+        updateDeviationHistory(proportionalTerm, _accumulatedLeak);
         lastUpdateTime = block.timestamp;
         int256 piOutput = getGainAdjustedPIOutput(
             proportionalTerm,
@@ -210,6 +242,12 @@ contract AbsPiController {
         }
     }
 
+    /*
+     * @notice calculates new integral term and records current deviation
+     * @param _marketPrice last recorded market price of NOI
+     * @param _proportionalTerm proportional term in controller
+     * @param _integralTerm integral term in controller
+     */
     function updateDeviationHistory(int proportionalTerm, uint accumulatedLeak)
         internal
     {
@@ -227,6 +265,9 @@ contract AbsPiController {
         );
     }
 
+    /*
+     * @notice returns elapsed time sice last update
+     */
     function tlv() external view returns (uint256) {
         uint elapsed = (lastUpdateTime == 0)
             ? 0
@@ -234,6 +275,9 @@ contract AbsPiController {
         return elapsed;
     }
 
+    /*
+     * @notice returns per second cumulative
+     */
     function pscl() external view returns (uint256) {
         return perSecondCumulativeLeak;
     }
