@@ -8,9 +8,12 @@ import matplotlib.pyplot as plt
 import csv
 import numpy as np
 import pi_controller
+from utils.eth_data import *
 from utils.classes import *
 from utils.constants import *
 from trader import *
+from utils.exchange import *
+from utils.pool import Pool
 
 exp = Experiment()
 
@@ -24,39 +27,23 @@ for i in range(NUM_TRADERS):
 genesis_states['agents'] = {'traders': traders}
 
 price_station = PriceStation(3, 3, 0)
-data_station = DataStation()
+eth_data = ETHData()
+
 pool = Pool(ETH_AMOUNT_POOL, NOI_AMOUNT_POOL)
 graph = Graph()
-
 
 graph.eth = [pool.eth]
 graph.noi = [pool.noi]
 
 with open('dataset/eth_dollar.csv', 'r') as csvfile:
     eth_dollar = list(csv.reader(csvfile))[0]
-    data_station.eth_dollar = [float(i) for i in eth_dollar]
-
-
-def get_current_timestep(cur_substep, previous_state):
-    if cur_substep == 1:
-        return previous_state['timestep']+1
-    return previous_state['timestep']
-
-def get_eth_value(substep, previous_state):
-    return data_station.eth_dollar[get_current_timestep(substep, previous_state)]
-
-
-def exchange_noi_to_eth(noi_value):
-    return noi_value * (pool.eth / pool.noi)
-
-
-def exchange_eth_to_noi(eth_value):
-    return eth_value * (pool.noi / pool.eth)
+    eth_data.eth_dollar = [float(i) for i in eth_dollar]
 
 
 def update_traders(substep,  previous_state, policy_input):
-    ret = dict() 
-    calculate_redemption_price()
+    ret = dict()
+    price_station.calculate_redemption_price()
+    add_to_graph()
     print(previous_state['timestep'])
     for i in range(NUM_TRADERS):
         name = 'trader' + str(i)
@@ -68,11 +55,11 @@ def update_traders(substep,  previous_state, policy_input):
         # buy eth, sell noi
         noi_add = +1*trader.noi * trader.perc_amount  # value of noi to be added to pool
         # value of eth to be added to pool
-        eth_add = -1*exchange_noi_to_eth(noi_add)
+        eth_add = -1*exchange_noi_to_eth(noi_add, pool)
         if price_station.mp < price_station.rp:
             # buy noi, sell eth
             eth_add = +1*trader.eth * trader.perc_amount
-            noi_add = -1*exchange_eth_to_noi(eth_add)
+            noi_add = -1*exchange_eth_to_noi(eth_add, pool)
 
         if (pool.noi + noi_add <= 0
         or pool.eth + eth_add <= 0
@@ -81,45 +68,20 @@ def update_traders(substep,  previous_state, policy_input):
             #TODO ako nema dovoljno para u poolu da uzme deo ili nesto tako(zbog velikih tradera)
             eth_add = 0
             noi_add = 0
-        change_market_pool(substep, previous_state, eth_add, noi_add)
+        pool.change_pool(substep, previous_state, eth_add, noi_add, price_station, eth_data)
         ret[name] = create_modified_trader(trader, eth_add, noi_add)
     graph.eth.append(pool.eth)
     graph.noi.append(pool.noi)
     return ret
 
-
-def calculate_market_price(substep, previous_state, write: bool) -> float:
-    global price_station
-    price_station.mp = pool.eth/pool.noi * get_eth_value(substep, previous_state)
-    if write:
-        graph.m_prices.append(price_station.mp)
-        graph.r_prices.append(price_station.rp)
-    return price_station.mp
-
-
-def change_market_pool(substep, previous_state, eth_add, noi_add):
-    global price_station
-    pool.eth += eth_add
-    pool.noi += noi_add
-    price_station.mp = calculate_market_price(substep, previous_state, False)
-    # rr = calculate_redemption_rate()
-    # price_station.rp = pi_controller.updateRedemptionPrice(price_station.rp, rr)
-    # print(1+(rr-1)/3)
-
-def calculate_redemption_price():
-    rr = calculate_redemption_rate()
-    price_station.rp = pi_controller.updateRedemptionPrice(price_station.rp, rr)
-
-def calculate_redemption_rate():
-    # rr = 1
-    global price_station
-    print(price_station.mp, price_station.rp)
-    rr = pi_controller.computeRate(price_station.mp, price_station.rp, price_station.accumulated_leak)
-    return rr
+def add_to_graph():
+    global price_station, graph
+    graph.m_prices.append(price_station.mp)
+    graph.r_prices.append(price_station.rp)
 
 
 def update_agents(params, substep, state_history,  previous_state, policy_input):
-    calculate_market_price(substep, previous_state, True)
+    price_station.get_fresh_mp(substep, previous_state, pool, eth_data)
     return ('agents', {'traders': update_traders(substep,  previous_state, policy_input)})
 
 
