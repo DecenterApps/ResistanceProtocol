@@ -8,7 +8,7 @@ contract Parameters{
 
     uint8 public LR=120; // Liquidation Ratio percentage
     uint8 public SF; // Stability Fee percentage
-    address owner;
+    address private owner;
 
     modifier onlyOwner(){
         if (msg.sender != owner)

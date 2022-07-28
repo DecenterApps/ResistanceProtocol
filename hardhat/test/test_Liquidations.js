@@ -1,12 +1,15 @@
 const hre = require("hardhat");
-var chai = require('chai')
+const chai = require('chai')
 const expect = chai.expect;
+const BigNumber = require('big-number');
+
 describe("Liquidations", function () {
   this.timeout(80000);
   let senderAcc;
   let CDPManagerContractObj, noiContractObj, LiquidatorContractObj, ParametersContractObj, TreasuryContractObj;
   let owner;
   let LiquidatorContract;
+  const wei = BigNumber(10).pow(18);
   before(async () => {
 
     const NoiContract = await hre.ethers.getContractFactory("NOI");
@@ -36,7 +39,9 @@ describe("Liquidations", function () {
     await LiquidatorContractObj.connect(owner).setCdpManagerContractAddress(CDPManagerContractObj.address);
     await LiquidatorContractObj.connect(owner).setParametersContractAddress(ParametersContractObj.address);
     await LiquidatorContractObj.connect(owner).setTreasuryContractAddress(owner.address);
+    await LiquidatorContractObj.connect(owner).setNoiContractAddress(noiContractObj.address);
     await CDPManagerContractObj.connect(owner).setLiquidatorContractAddress(LiquidatorContractObj.address);
+    await CDPManagerContractObj.connect(owner).setParametersContractAddress(ParametersContractObj.address);
 
   });
   it("... should liquidate CDP", async () => {
@@ -45,15 +50,29 @@ describe("Liquidations", function () {
     const txAddAuthToCDPManager = await noiContractObj.connect(owner).addAuthorization(CDPManagerContractObj.address);
     await txAddAuthToCDPManager.wait();
 
-    const txOpenCDP = await CDPManagerContractObj.connect(senderAcc[1]).openCDP(senderAcc[1].address, {value: ethers.utils.parseEther("110")});
+    const txAddAuthToLiquidator = await noiContractObj.connect(owner).addAuthorization(LiquidatorContractObj.address);
+    await txAddAuthToLiquidator.wait();
+
+
+    const txOpenCDP = await CDPManagerContractObj.connect(senderAcc[1]).openCDP(senderAcc[1].address, {value: ethers.utils.parseEther("130")});
     await txOpenCDP.wait();
     const getCDPIndex = await CDPManagerContractObj.connect(senderAcc[1]).cdpi();
     const cdpIndex = getCDPIndex.toString();
 
-    const txmintFromCDPManager = await CDPManagerContractObj.connect(senderAcc[1]).mintFromCDP(cdpIndex, "100");
+    const txmintFromCDPManager = await CDPManagerContractObj.connect(senderAcc[1]).mintFromCDP(cdpIndex, wei.mult(100).toString());
     await txmintFromCDPManager.wait();
 
-    const liquidateCDP = await LiquidatorContractObj.connect(owner).liquidateCDP(cdpIndex);
+    const txSetLR = await ParametersContractObj.connect(owner).setLR(150);
+    await txSetLR.wait();
+
+
+    const mintNOI = await noiContractObj.connect(owner).mint(senderAcc[2].address, wei.mult(100).toString());
+    await mintNOI.wait();
+
+    const approveLiquidator = await noiContractObj.connect(senderAcc[2]).approve(LiquidatorContractObj.address, wei.mult(100).toString());
+    await approveLiquidator.wait();
+
+    const liquidateCDP = await LiquidatorContractObj.connect(senderAcc[2]).liquidateCDP(cdpIndex);
     await liquidateCDP.wait();
 
 

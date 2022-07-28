@@ -2,14 +2,16 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import "hardhat/console.sol";
 import "./NOI.sol";
+import "./Parameters.sol";
 
 error CDPManager__OnlyOwnerAuthorization();
 error CDPManager__UnauthorizedLiquidator();
 error CDPManager__NotAuthorized();
 error CDPManager__HasDebt();
 error CDPManager__LiquidationRatioReached();
+error CDPManager__ZeroTokenMint();
+
 
 contract CDPManager {
     struct CDP {
@@ -28,10 +30,10 @@ contract CDPManager {
     mapping(uint256 => CDP) private cdpList; // CDPId => CDP
 
     NOI private immutable NOI_COIN;
-    uint256 ethRp;
     uint256 liquidationRatio;
 
     address liquidatorContractAddress;
+    address parametersContractAddress;
 
     modifier onlyOwner(){
         if(msg.sender != owner) revert CDPManager__OnlyOwnerAuthorization();
@@ -59,7 +61,6 @@ contract CDPManager {
         totalSupply = 0;
         cdpi = 0;
         NOI_COIN = NOI(_noiCoin);
-        ethRp = 1000/1;
         liquidationRatio = 120;
         owner = msg.sender;
     }
@@ -67,6 +68,11 @@ contract CDPManager {
     function setLiquidatorContractAddress(address _liquidatorContractAddress) public onlyOwner{
         liquidatorContractAddress = _liquidatorContractAddress;
     }
+
+
+    function setParametersContractAddress(address _parametersContractAdress) public onlyOwner{
+        parametersContractAddress = _parametersContractAdress;
+    } 
 
     // Open a new cdp for a given _user address.
     function openCDP(address _user) public payable HasAccess(_user) returns (uint256){
@@ -102,7 +108,6 @@ contract CDPManager {
 
     // View total supply of ether in contract
     function getTotalSupply() public view returns (uint256) {
-        console.log(totalSupply);
         return totalSupply;
     }
 
@@ -112,12 +117,6 @@ contract CDPManager {
         view
         returns (CDP memory searchedCDP)
     {
-        console.log(
-            "CDP Owner: %s LockedCollateral: %d GeneratedDebt: %d",
-            cdpList[_cdpIndex].owner,
-            cdpList[_cdpIndex].lockedCollateral,
-            cdpList[_cdpIndex].generatedDebt
-        );
         searchedCDP = cdpList[_cdpIndex];
     }
 
@@ -133,13 +132,20 @@ contract CDPManager {
      * @param _amount amount of tokens to mint
      */
     function mintFromCDP(uint256 _cdpIndex, uint256 _amount) public HasAccess(cdpList[_cdpIndex].owner) {
+        if(_amount == 0)
+            revert CDPManager__ZeroTokenMint();
         CDP memory user_cdp = cdpList[_cdpIndex];
 
-        // check if the new minted coins will be under liquidation ratio
-        uint256 newDebt = (user_cdp.generatedDebt + _amount) * liquidationRatio*1e16;
-        console.log(newDebt);
-        console.log(ethRp * user_cdp.lockedCollateral);
-        if(newDebt >= ethRp * user_cdp.lockedCollateral) 
+        uint256 redemptionPrice=1000; // should get it from RateSetter contract
+        uint256 ethPrice = 1000;     // should get it from RateSetter contract
+
+        uint256 newDebt = user_cdp.generatedDebt + _amount;
+
+        uint256 CR = user_cdp.lockedCollateral*ethPrice*100/(newDebt*redemptionPrice);
+
+        uint8 LR = Parameters(parametersContractAddress).getLR();
+
+        if(CR < LR) 
             revert CDPManager__LiquidationRatioReached();
 
         cdpList[_cdpIndex].generatedDebt += _amount;
@@ -157,15 +163,9 @@ contract CDPManager {
         cdpList[_cdpIndex].generatedDebt -= _amount;
     }
 
-    function updateValue(uint _ethrp) public {
-        ethRp = _ethrp;
-    }
-
 
     function liquidatePosition(uint _cdpIndex) public payable onlyLiquidatorContract {
         
-        console.log("Balance ", address(this).balance);
-        console.log("tx value ", cdpList[_cdpIndex].lockedCollateral);
         (bool sent, ) = payable(msg.sender).call{
             value: cdpList[_cdpIndex].lockedCollateral
         }("");
@@ -174,4 +174,7 @@ contract CDPManager {
         emit CDPClose(cdpList[_cdpIndex].owner,_cdpIndex);
         delete cdpList[_cdpIndex];
     }
+
+
+
 }

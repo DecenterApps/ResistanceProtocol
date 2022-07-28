@@ -4,8 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import "./Parameters.sol";
 import "./CDPManager.sol";
-
-import "hardhat/console.sol";
+import "./NOI.sol";
 
 
 error Liquidator__CDPNotEligibleForLiquidation();
@@ -16,9 +15,10 @@ contract Liquidator{
     address cdpManagerContractAddress;
     address rateSetterContractAddress;
     address treasuryContractAddress;
-    uint8 treasuryPercent = 5;
+    address noiContractAddress;
+    uint8 treasuryPercent = 25; // percent of profit from liquidation
 
-    address owner;
+    address private owner;
 
     constructor(){
         owner = msg.sender;
@@ -36,10 +36,8 @@ contract Liquidator{
 
         uint256 redemptionPrice=1000; // should get it from RateSetter contract
         uint256 ethPrice = 1000;     // should get it from RateSetter contract
-        uint256 CR = _cdp.lockedCollateral*ethPrice*100/(_cdp.generatedDebt*redemptionPrice*10**18);
-        console.log(_cdp.lockedCollateral);
-        console.log(_cdp.generatedDebt);
-        console.log("CR: ", CR, "  LR:", LR);
+        uint256 CR = _cdp.lockedCollateral*ethPrice*100/(_cdp.generatedDebt*redemptionPrice);
+        
         return CR<LR;
     }
 
@@ -56,15 +54,18 @@ contract Liquidator{
         if(!isEligibleForLiquidation(cdp)) 
             revert Liquidator__CDPNotEligibleForLiquidation();
 
+
+        // burn dept from liquidator balance
+        NOI noiContract = NOI(noiContractAddress);
+        noiContract.burn(msg.sender,cdp.generatedDebt);
+
         cdpManager.liquidatePosition(_cdpIndex);
 
-        uint256 redemptionPrice=1000; // should get it from RateSetter contract
         // calculate distribution of collateral
         uint256 total = cdp.lockedCollateral;
-        uint256 treasuryPart = (total-redemptionPrice*cdp.generatedDebt)*treasuryPercent/100;
+        uint256 treasuryPart = (total-cdp.generatedDebt)*treasuryPercent/100;
         uint256 liquidatorPart = total-treasuryPart;
 
-        console.log(treasuryPart, liquidatorPart);
         // send part to the Treasury
         (bool sentTreasury, ) = payable(treasuryContractAddress).call{
             value: treasuryPart
@@ -92,6 +93,10 @@ contract Liquidator{
     function setTreasuryContractAddress(address _treasuryContractAddress) public onlyOwner{
         treasuryContractAddress = _treasuryContractAddress;
     } 
+    function setNoiContractAddress(address _noiContractAddress) public onlyOwner{
+        noiContractAddress = _noiContractAddress;
+    } 
+
 
     receive() external payable{
 
