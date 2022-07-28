@@ -2,14 +2,18 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import "hardhat/console.sol";
 import "./NOI.sol";
+import "./Parameters.sol";
 
+error CDPManager__OnlyOwnerAuthorization();
+error CDPManager__UnauthorizedLiquidator();
 error CDPManager__NotAuthorized();
 error CDPManager__ContractNotAuthorized();
 error CDPManager__NotOwner();
 error CDPManager__HasDebt();
 error CDPManager__LiquidationRatioReached();
+error CDPManager__ZeroTokenMint();
+
 
 contract CDPManager {
     struct CDP {
@@ -21,6 +25,8 @@ contract CDPManager {
         address owner;
     }
 
+    address owner;
+
     uint256 private totalSupply;
     uint256 public cdpi; // auto increment index for CDPs
     mapping(uint256 => CDP) private cdpList; // CDPId => CDP
@@ -28,6 +34,19 @@ contract CDPManager {
     NOI private immutable NOI_COIN;
     uint256 ethRp; // ETH/RP rate
     uint256 liquidationRatio;
+
+    address liquidatorContractAddress;
+    address parametersContractAddress;
+
+    modifier onlyOwner(){
+        if(msg.sender != owner) revert CDPManager__OnlyOwnerAuthorization();
+        _;
+    }
+
+    modifier onlyLiquidatorContract(){
+        if(msg.sender != liquidatorContractAddress) revert CDPManager__UnauthorizedLiquidator();
+        _;
+    }
 
     modifier HasAccess(address _user) {
         if(msg.sender != _user) revert CDPManager__NotAuthorized();
@@ -77,9 +96,17 @@ contract CDPManager {
         totalSupply = 0;
         cdpi = 0;
         NOI_COIN = NOI(_noiCoin);
-        ethRp = 1000/1;
         liquidationRatio = 120;
+        owner = msg.sender;
     }
+
+    function setLiquidatorContractAddress(address _liquidatorContractAddress) public onlyOwner{
+        liquidatorContractAddress = _liquidatorContractAddress;
+    }
+
+    function setParametersContractAddress(address _parametersContractAdress) public onlyOwner{
+        parametersContractAddress = _parametersContractAdress;
+    } 
 
     /*
      * @notice open a new cdp for a given _user address
@@ -126,7 +153,6 @@ contract CDPManager {
      * @notice view total supply of ether in contract
      */
     function getTotalSupply() public view returns (uint256) {
-        console.log(totalSupply);
         return totalSupply;
     }
 
@@ -139,12 +165,6 @@ contract CDPManager {
         view
         returns (CDP memory searchedCDP)
     {
-        console.log(
-            "CDP Owner: %s LockedCollateral: %d GeneratedDebt: %d",
-            cdpList[_cdpIndex].owner,
-            cdpList[_cdpIndex].lockedCollateral,
-            cdpList[_cdpIndex].generatedDebt
-        );
         searchedCDP = cdpList[_cdpIndex];
     }
 
@@ -165,11 +185,13 @@ contract CDPManager {
      * @param _amount amount of tokens to mint
      */
     function mintFromCDP(uint256 _cdpIndex, uint256 _amount) public HasAccess(cdpList[_cdpIndex].owner) {
+        if(_amount == 0)
+            revert CDPManager__ZeroTokenMint();
         CDP memory user_cdp = cdpList[_cdpIndex];
 
         // check if the new minted coins will be under liquidation ratio
-        uint256 newDebt = (user_cdp.generatedDebt + _amount) * liquidationRatio*1e16;
-        if(newDebt >= ethRp * user_cdp.lockedCollateral) 
+        uint256 newTotalDebt = (user_cdp.generatedDebt + _amount) * liquidationRatio/100;
+        if(newTotalDebt >= ethRp * user_cdp.lockedCollateral) 
             revert CDPManager__LiquidationRatioReached();
 
         cdpList[_cdpIndex].generatedDebt += _amount;
@@ -189,6 +211,16 @@ contract CDPManager {
         emit RepayCDP(cdpList[_cdpIndex].owner,_cdpIndex,_amount);
     }
 
+    function liquidatePosition(uint _cdpIndex) public payable onlyLiquidatorContract {
+        
+        (bool sent, ) = payable(msg.sender).call{
+            value: cdpList[_cdpIndex].lockedCollateral
+        }("");
+        if (sent == false) revert();
+        totalSupply = totalSupply - cdpList[_cdpIndex].lockedCollateral;
+        emit CDPClose(cdpList[_cdpIndex].owner,_cdpIndex);
+        delete cdpList[_cdpIndex];
+
     /*
      * @notice update ETH/RP value
      * @param _ethrp new value
@@ -196,4 +228,7 @@ contract CDPManager {
     function updateValue(uint _ethrp) external isAuthorized{
         ethRp = _ethrp;
     }
+
+
+
 }

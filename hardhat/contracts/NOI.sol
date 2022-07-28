@@ -8,6 +8,8 @@ error NOI__InvalidDestination();
 error NOI__InsufficientBalance();
 error NOI__InsufficientAllowance();
 
+
+
 contract NOI {
     // --- Auth ---
     mapping(address => bool) public authorizedAccounts;
@@ -126,6 +128,7 @@ contract NOI {
      * @param _amount The amount of coins to burn
      */
     function burn(address _usr, uint256 _amount) external isAuthorized {
+        
         if(balanceOf[_usr] < _amount) revert NOI__InsufficientBalance();
         if (_usr != msg.sender) {
             if(allowance[_usr][msg.sender] < _amount) 
