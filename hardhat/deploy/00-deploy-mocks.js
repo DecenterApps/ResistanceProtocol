@@ -1,7 +1,7 @@
 const { network } = require("hardhat")
 
 const DECIMALS = "8"
-const INITIAL_PRICE = "200000000000" // 2000
+const INITIAL_PRICE = "1000"
 
 module.exports = async ({ getNamedAccounts, deployments }) => {
     const { deploy, log } = deployments

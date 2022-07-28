@@ -7,16 +7,16 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     const { deployer } = await getNamedAccounts();
     const chainId = network.config.chainId;
 
-    let ethUsdPriceFeedAddress;
-    let cpiDataFeedAddress;
+    let ethUsdPriceFeedAddress = networkConfig[42].ethUsdPriceFeed;
+    let cpiDataFeedAddress = ethers.constants.AddressZero;
 
-    if (chainId == 31337) {
-        const ethUsdAggregator = await deployments.get("MockV3Aggregator");
-        ethUsdPriceFeedAddress = ethUsdAggregator.address;
-        cpiDataFeedAddress = ethers.constants.AddressZero;
-    } else {
-        ethUsdPriceFeedAddress = networkConfig[chainId]["ethUsdPriceFeed"];
-    }
+    // if (chainId == 31337) {
+    //     const ethUsdAggregator = await deployments.get("MockV3Aggregator");
+    //     ethUsdPriceFeedAddress = ethUsdAggregator.address;
+    //     cpiDataFeedAddress = ethers.constants.AddressZero;
+    // } else {
+    //     ethUsdPriceFeedAddress = networkConfig[chainId]["ethUsdPriceFeed"];
+    // }
     log("----------------------------------------------------");
     log("Deploying RateSetter and waiting for confirmations...");
 

@@ -21,11 +21,6 @@ describe('RateSetter', function () {
         RateSetterContractObj = await ethers.getContract("RateSetter", deployer);
         AbsPiControllerContractObj = await ethers.getContract("AbsPiController", deployer);
 
-        // const AbsPiControllerContract = await hre.ethers.getContractFactory("AbsPiController");
-        // AbsPiControllerContractObj = await AbsPiControllerContract.deploy("75000000000","24000","0","0","0","999999711200000000000000000");
-        // await AbsPiControllerContractObj.deployed();
-
-
         owner = (await hre.ethers.getSigners())[0];
 
         senderAccounts.push((await hre.ethers.getSigners())[1]);
