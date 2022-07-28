@@ -55,7 +55,7 @@ def exchange_eth_to_noi(eth_value):
 
 
 def update_traders(substep,  previous_state, policy_input):
-    ret = dict()
+    ret = dict() 
     for i in range(NUM_TRADERS):
         name = 'trader' + str(i)
         trader:Trader = previous_state['agents']['traders'][name]
