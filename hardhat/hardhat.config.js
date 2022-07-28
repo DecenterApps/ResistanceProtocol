@@ -1,7 +1,8 @@
-require("@nomicfoundation/hardhat-toolbox");
 require("dotenv").config();
 require("@nomiclabs/hardhat-etherscan");
 require("hardhat-deploy");
+require("@nomiclabs/hardhat-ethers");
+require("@nomiclabs/hardhat-waffle")
 
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
 const KOVAN_RPC_URL = process.env.KOVAN_RPC_URL;
@@ -13,7 +14,6 @@ module.exports = {
     networks: {
         hardhat: {
             chainId: 31337,
-            blockGasLimit: 100000042972000,
         },
         kovan: {
             url: KOVAN_RPC_URL,
@@ -22,7 +22,7 @@ module.exports = {
             blockConfirmations: 5,
         },
         local: {
-            url: "http://127.0.0.1:8545",
+            url: "https://127.0.0.1:8545",
         },
     },
     etherscan: {

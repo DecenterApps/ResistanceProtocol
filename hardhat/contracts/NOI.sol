@@ -11,7 +11,7 @@ error NOI__InsufficientAllowance();
 contract NOI {
     // --- Auth ---
     mapping(address => bool) public authorizedAccounts;
-    address private owner;
+    address public owner;
 
     function addAuthorization(address account) external isOwner {
         authorizedAccounts[account] = true;

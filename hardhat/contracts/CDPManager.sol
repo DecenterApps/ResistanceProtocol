@@ -169,8 +169,6 @@ contract CDPManager {
 
         // check if the new minted coins will be under liquidation ratio
         uint256 newDebt = (user_cdp.generatedDebt + _amount) * liquidationRatio*1e16;
-        console.log(newDebt);
-        console.log(ethRp * user_cdp.lockedCollateral);
         if(newDebt >= ethRp * user_cdp.lockedCollateral) 
             revert CDPManager__LiquidationRatioReached();
 

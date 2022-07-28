@@ -1,4 +1,4 @@
-const { getNamedAccounts, deployments, network, ethers } = require("hardhat");
+const { getNamedAccounts, deployments, network } = require("hardhat");
 const { networkConfig, developmentChains } = require("../helper-hardhat-config");
 const { verify } = require("../utils/verify");
 
@@ -6,24 +6,26 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     const { deploy, log } = deployments;
     const { deployer } = await getNamedAccounts();
 
-    // getContract gets the most recent deployment for the specified contract
-    let coinAddress = (await ethers.getContract("NOI", deployer)).address;
+    const owners = [];
+
+    owners.push((await ethers.getSigners())[0].address);
+    owners.push((await ethers.getSigners())[1].address);
+    owners.push((await ethers.getSigners())[2].address);
 
     log("----------------------------------------------------");
-    log("Deploying CDPManager and waiting for confirmations...");
-    const CDPManager = await deploy("CDPManager", {
+    log("Deploying MultiSigWallet and waiting for confirmations...");
+    const msw = await deploy("MultiSigWallet", {
         from: deployer,
-        args: [coinAddress],
+        args: [owners],
         log: true,
-        // wait if on a live network so we can verify properly
         waitConfirmations: network.config.blockConfirmations || 1,
     });
-    log(`CDPManager deployed at ${CDPManager.address}`);
+    log(`MultiSigWallet deployed at ${msw.address}`);
 
     // verify contract on etherscan
     if (!developmentChains.includes(network.name) && process.env.ETHERSCAN_API_KEY) {
-        await verify(CDPManager.address, [coinAddress]);
+        await verify(msw.address, [owners]);
     }
 };
 
-module.exports.tags = ["all", "cdpmanager"];
+module.exports.tags = ["all", "multisigwallet"];
