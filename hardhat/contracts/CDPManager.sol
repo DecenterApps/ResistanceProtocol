@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import "./NOI.sol";
 import "./Parameters.sol";
+import "hardhat/console.sol";
 
 error CDPManager__OnlyOwnerAuthorization();
 error CDPManager__UnauthorizedLiquidator();
@@ -25,8 +26,6 @@ contract CDPManager {
         address owner;
     }
 
-    address owner;
-
     uint256 private totalSupply;
     uint256 public cdpi; // auto increment index for CDPs
     mapping(uint256 => CDP) private cdpList; // CDPId => CDP
@@ -47,6 +46,8 @@ contract CDPManager {
         if(msg.sender != liquidatorContractAddress) revert CDPManager__UnauthorizedLiquidator();
         _;
     }
+    uint256 internal constant TWENTY_SEVEN_DECIMAL_NUMBER = 10**27;
+    uint256 internal constant EIGHTEEN_DECIMAL_NUMBER = 10**18;
 
     modifier HasAccess(address _user) {
         if(msg.sender != _user) revert CDPManager__NotAuthorized();
@@ -96,8 +97,8 @@ contract CDPManager {
         totalSupply = 0;
         cdpi = 0;
         NOI_COIN = NOI(_noiCoin);
-        liquidationRatio = 120;
-        owner = msg.sender;
+        ethRp = 1000 * EIGHTEEN_DECIMAL_NUMBER;
+        liquidationRatio = 120 * EIGHTEEN_DECIMAL_NUMBER / 100;
     }
 
     function setLiquidatorContractAddress(address _liquidatorContractAddress) public onlyOwner{
@@ -190,8 +191,8 @@ contract CDPManager {
         CDP memory user_cdp = cdpList[_cdpIndex];
 
         // check if the new minted coins will be under liquidation ratio
-        uint256 newTotalDebt = (user_cdp.generatedDebt + _amount) * liquidationRatio/100;
-        if(newTotalDebt >= ethRp * user_cdp.lockedCollateral) 
+        uint256 newTotalDebt = (user_cdp.generatedDebt + _amount) * liquidationRatio;
+        if(newTotalDebt >= ethRp * user_cdp.lockedCollateral / EIGHTEEN_DECIMAL_NUMBER) 
             revert CDPManager__LiquidationRatioReached();
 
         cdpList[_cdpIndex].generatedDebt += _amount;
@@ -220,6 +221,7 @@ contract CDPManager {
         totalSupply = totalSupply - cdpList[_cdpIndex].lockedCollateral;
         emit CDPClose(cdpList[_cdpIndex].owner,_cdpIndex);
         delete cdpList[_cdpIndex];
+    }
 
     /*
      * @notice update ETH/RP value

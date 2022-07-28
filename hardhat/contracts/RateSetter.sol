@@ -18,6 +18,7 @@ contract RateSetter {
     uint256 ethPrice;
     uint256 public constant RAY = 10**27;
     uint256 redemptionPriceUpdateTime;
+    uint256 internal constant EIGHTEEN_DECIMAL_NUMBER = 10**18;
 
     CDPManager private immutable CDPManager_CONTARCT;
     CPIController private immutable CPIController_CONTRACT;
@@ -75,8 +76,8 @@ contract RateSetter {
         console.log(redemptionPrice);
         // gather rate from CPI controller
         console.log("============ ETH/RP ============ ");
-        console.log(ethPrice/redemptionPrice);
-        CDPManager_CONTARCT.updateValue(ethPrice/redemptionPrice);
+        console.log(ethPrice * EIGHTEEN_DECIMAL_NUMBER /redemptionPrice);
+        CDPManager_CONTARCT.updateValue(ethPrice * EIGHTEEN_DECIMAL_NUMBER/redemptionPrice);
     }
 
     function updateRatesInternal() public {}
