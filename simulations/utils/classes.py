@@ -1,7 +1,10 @@
 class PriceStation:
     def __init__(self, market_price, redemption_price, accumulated_leak):
+        # market price
         self.mp = market_price
+        # redemption price
         self.rp = redemption_price
+        # accumulated_leak
         self.accumulated_leak = accumulated_leak
 
 class Pool:

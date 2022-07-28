@@ -1,7 +1,7 @@
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import numpy as np
 
-TIME_STEP = 0.01
+TIME_STEP = 10000
 NEGATIVE_RATE_LIMIT = 0.99
 
 class ControllerGains(object):
@@ -28,29 +28,30 @@ def getLastIntegralTerm() -> float:
 def oll() -> int:
     return len(deviationObservations)
 
-def getBoundedRedemptionRate(piOutput: float) -> tuple:
+def getBoundedRedemptionRate(piOutput: float) -> float:
     global defaultRedemptionRate
     global defaultGlobalTimeline
     global feedbackOutputUpperBound
     global feedbackOutputLowerBound
-    boundedPIOutput = piOutput
-    boundedPIOutput = feedbackOutputLowerBound
 
-    if piOutput < feedbackOutputLowerBound:
+    boundedPIOutput = piOutput
+    newRedemptionRate = 0
+
+    if (piOutput < feedbackOutputLowerBound):
         boundedPIOutput = feedbackOutputLowerBound
-    elif piOutput > feedbackOutputUpperBound:
+    elif (piOutput > feedbackOutputUpperBound):
         boundedPIOutput = feedbackOutputUpperBound
 
-    negativeOutputExceedsHundred = boundedPIOutput < 0 and -boundedPIOutput >= defaultRedemptionRate
-    if (negativeOutputExceedsHundred): 
+    negativeOutputExceedsHundred = (boundedPIOutput < 0 and -boundedPIOutput >= defaultRedemptionRate)
+    if (negativeOutputExceedsHundred):
         newRedemptionRate = NEGATIVE_RATE_LIMIT
     else:
-        if boundedPIOutput < 0 and boundedPIOutput <= -NEGATIVE_RATE_LIMIT:
+        if (boundedPIOutput < 0 and boundedPIOutput <= -NEGATIVE_RATE_LIMIT):
             newRedemptionRate = defaultRedemptionRate - NEGATIVE_RATE_LIMIT
         else:
             newRedemptionRate = defaultRedemptionRate + boundedPIOutput
 
-    return (newRedemptionRate, defaultGlobalTimeline)
+    return newRedemptionRate
 
 def breaksNoiseBarrier(piSum: float, redemptionPrice: float) -> bool:
     global noiseBarrier
@@ -61,10 +62,7 @@ def getNextPriceDeviationCumulative(proportionalTerm: float, accumulatedLeak: fl
     global priceDeviationCumulative
 
     lastProportionalTerm = getLastProportionalTerm()
-    if lastUpdateTime == 0:
-        timeElapsed = 0
-    else:
-        timeElapsed = TIME_STEP
+    timeElapsed = TIME_STEP # todo: check this
     
     newTimeAdjustedDeviation = riemannSum(proportionalTerm, lastProportionalTerm) * timeElapsed
     leakedPriceCumulative = accumulatedLeak * priceDeviationCumulative
@@ -89,55 +87,60 @@ def getGainAdjustedTerms(proportionalTerm: float, integralTerm: float) -> tuple:
 def computeRate(marketPrice: float, redemptionPrice: float, accumulatedLeak: float) -> float:
     global lastUpdateTime
     global priceDeviationCumulative
-    scaledMarketPrice = marketPrice
-    proportionalTerm = redemptionPrice - scaledMarketPrice
+    proportionalTerm = redemptionPrice - marketPrice
     updateDeviationHistory(proportionalTerm, accumulatedLeak)
     lastUpdateTime = lastUpdateTime + TIME_STEP
     piOutput = getGainAdjustedPIOutput(proportionalTerm, priceDeviationCumulative)
-    newRedemptionRate, _ = getBoundedRedemptionRate(piOutput)
+    newRedemptionRate = getBoundedRedemptionRate(piOutput)
     return newRedemptionRate
 
 def updateDeviationHistory(proportionalTerm: float, accumulatedLeak: float) -> None:
     global historicalCumulativeDeviations
     global deviationObservations
     global lastUpdateTime
+    global priceDeviationCumulative
 
     (virtualDeviationCumulative, _) = getNextPriceDeviationCumulative(proportionalTerm, accumulatedLeak)
     priceDeviationCumulative = virtualDeviationCumulative
     historicalCumulativeDeviations.append(priceDeviationCumulative)
     deviationObservations.append(DeviationObservation(lastUpdateTime + TIME_STEP, proportionalTerm, priceDeviationCumulative))
 
-def getNextRedemptionRate(marketPrice: float, redemptionPrice: float, accumulatedLeak: float) -> tuple:
-    global defaultGlobalTimeline
-    scaledMarketPrice = marketPrice
+# def getNextRedemptionRate(marketPrice: float, redemptionPrice: float, accumulatedLeak: float) -> tuple:
+#     global defaultGlobalTimeline
+#     scaledMarketPrice = marketPrice
     
-    proportionalTerm = (redemptionPrice - scaledMarketPrice) / redemptionPrice
-    (cumulativeDeviation, _) = getNextPriceDeviationCumulative(proportionalTerm, accumulatedLeak)
-    piOutput = getGainAdjustedPIOutput(proportionalTerm, cumulativeDeviation)
-    if breaksNoiseBarrier(absolute(piOutput), redemptionPrice) and piOutput != 0:
-        (newRedemptionRate, rateTimeline) = getBoundedRedemptionRate(piOutput)
-        return (newRedemptionRate, proportionalTerm, cumulativeDeviation, rateTimeline)
-    else:
-        return (1, proportionalTerm, cumulativeDeviation, defaultGlobalTimeline)
+#     proportionalTerm = (redemptionPrice - scaledMarketPrice) / redemptionPrice
+#     (cumulativeDeviation, _) = getNextPriceDeviationCumulative(proportionalTerm, accumulatedLeak)
+#     piOutput = getGainAdjustedPIOutput(proportionalTerm, cumulativeDeviation)
+#     if breaksNoiseBarrier(absolute(piOutput), redemptionPrice) and piOutput != 0:
+#         newRedemptionRate = getBoundedRedemptionRate(piOutput)
+#         return (newRedemptionRate, proportionalTerm, cumulativeDeviation, rateTimeline)
+#     else:
+#         return (1, proportionalTerm, cumulativeDeviation, defaultGlobalTimeline)
 
-def updateRedemptionPrice(redemptionRate: float) -> float:
+def updateRedemptionPrice(redemptionPrice:float, redemptionRate: float) -> float:
     # Update redemption price
-    _redemptionPrice = (redemptionRate ** TIME_STEP) * _redemptionPrice
-    if _redemptionPrice == 0:
-        _redemptionPrice = 1
+    redemptionPrice = (redemptionRate ** TIME_STEP) * redemptionPrice
+    if redemptionPrice == 0:
+        redemptionPrice = 1
 
     # Return updated redemption price
-    return _redemptionPrice
+    return redemptionPrice
 
 deviationObservations = []
 defaultRedemptionRate = 1
 defaultGlobalTimeline = 1
 historicalCumulativeDeviations = []
-feedbackOutputUpperBound = 1.5
-feedbackOutputLowerBound = 0.5
+feedbackOutputUpperBound = 0.5
+feedbackOutputLowerBound = -0.5
 integralPeriodSize = TIME_STEP
-controllerGains = ControllerGains(0.9, 1.5)
-priceDeviationCumulative = 0
+controllerGains = ControllerGains(7.5*10**(-8), 2.4*10**(-14))
+priceDeviationCumulative = 0.99999
 noiseBarrier = 0.05
 lastUpdateTime = 0
 historicalCumulativeDeviations.append(priceDeviationCumulative)
+ok = True
+
+if __name__ == "__main__":
+    rr = computeRate(2.71, 2.8, 0)
+    rp = updateRedemptionPrice(100, rr)

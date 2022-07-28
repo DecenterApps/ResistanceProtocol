@@ -23,7 +23,7 @@ for i in range(NUM_TRADERS):
 
 genesis_states['agents'] = {'traders': traders}
 
-price_station = PriceStation(100, 100, 0)
+price_station = PriceStation(3, 3, 0)
 data_station = DataStation()
 pool = Pool(ETH_AMOUNT_POOL, NOI_AMOUNT_POOL)
 graph = Graph()
@@ -56,6 +56,8 @@ def exchange_eth_to_noi(eth_value):
 
 def update_traders(substep,  previous_state, policy_input):
     ret = dict() 
+    calculate_redemption_price()
+    print(previous_state['timestep'])
     for i in range(NUM_TRADERS):
         name = 'trader' + str(i)
         trader:Trader = previous_state['agents']['traders'][name]
@@ -100,14 +102,19 @@ def change_market_pool(substep, previous_state, eth_add, noi_add):
     pool.eth += eth_add
     pool.noi += noi_add
     price_station.mp = calculate_market_price(substep, previous_state, False)
-    rr = calculate_redemption_rate()
-    price_station.rp = (1+(rr-1)/3)*price_station.rp
+    # rr = calculate_redemption_rate()
+    # price_station.rp = pi_controller.updateRedemptionPrice(price_station.rp, rr)
     # print(1+(rr-1)/3)
 
+def calculate_redemption_price():
+    rr = calculate_redemption_rate()
+    price_station.rp = pi_controller.updateRedemptionPrice(price_station.rp, rr)
 
 def calculate_redemption_rate():
-    rr = 1
-    # rr = pi_controller.computeRate(market_price, redemption_price, accumulated_leak)
+    # rr = 1
+    global price_station
+    print(price_station.mp, price_station.rp)
+    rr = pi_controller.computeRate(price_station.mp, price_station.rp, price_station.accumulated_leak)
     return rr
 
 
@@ -172,6 +179,13 @@ plt.plot(graph.r_prices)
 plt.legend(['market price', 'redemption price'])
 
 plt.savefig('images/novi_lol.png')
+
+plt.figure()
+plt.plot(graph.m_prices[:100])
+plt.plot(graph.r_prices[:100])
+plt.legend(['market price', 'redemption price'])
+plt.savefig('images/noviji_lol.png')
+
 
 # plt.figure()
 # # plt.plot(simulation_result)
