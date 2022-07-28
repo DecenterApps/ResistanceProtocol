@@ -11,3 +11,6 @@ cache
 artifacts
 
 /deployments
+
+yarn-error.log
+yarn.lock
