@@ -1,34 +1,30 @@
-const hre = require("hardhat");
+const { getNamedAccounts, network, deployments, ethers } = require("hardhat");
 const { assert, expect } = require("chai");
 
 describe("CDPManager", function () {
-    this.timeout(80000);
-
     const senderAccounts = [];
     let owner;
     let noiContractObj;
     let CDPManagerContractObj;
+    let deployer;
 
     before(async () => {
-        const NoiContract = await hre.ethers.getContractFactory("NOI");
-        noiContractObj = await NoiContract.deploy("NOI", "NOI", 42);
-        await noiContractObj.deployed();
-        console.log("Contract deployed to: ", noiContractObj.address);
+        // deployer = accounts[0]
+        deployer = (await getNamedAccounts()).deployer;
 
-        const CDPManagerContract = await hre.ethers.getContractFactory("CDPManager");
-        CDPManagerContractObj = await CDPManagerContract.deploy(noiContractObj.address);
-        await CDPManagerContractObj.deployed();
+        // go through all scripts from the deploy folder and run if it has the same tag
+        await deployments.fixture(["all"]);
 
-        owner = (await hre.ethers.getSigners())[0];
+        // getContract gets the most recent deployment for the specified contract
+        noiContractObj = await ethers.getContract("NOI", deployer);
+        CDPManagerContractObj = await ethers.getContract("CDPManager", deployer);
 
-        // add auth to cdpManager to mint and burn tokens from erc20
-        const txAddAuthToCDPManager = await noiContractObj.connect(owner).addAuthorization(CDPManagerContractObj.address);
-        await txAddAuthToCDPManager.wait();
+        owner = (await ethers.getSigners())[0];
 
-        senderAccounts.push((await hre.ethers.getSigners())[1]);
-        senderAccounts.push((await hre.ethers.getSigners())[2]);
-        senderAccounts.push((await hre.ethers.getSigners())[3]);
-        senderAccounts.push((await hre.ethers.getSigners())[4]);
+        senderAccounts.push((await ethers.getSigners())[1]);
+        senderAccounts.push((await ethers.getSigners())[2]);
+        senderAccounts.push((await ethers.getSigners())[3]);
+        senderAccounts.push((await ethers.getSigners())[4]);
     });
 
     describe("Mint", function () {

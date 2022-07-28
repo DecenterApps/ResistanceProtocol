@@ -1,32 +1,24 @@
 const hre = require('hardhat');
 const { assert, expect } = require("chai");
 
-describe('CDPManager', function () {
-    this.timeout(80000);
+describe('RateSetter', function () {
 
     const senderAccounts = [];
     let owner;
     let noiContractObj;
     let CDPManagerContractObj;
+    let deployer;
 
     before(async () => {
-        const NoiContract = await hre.ethers.getContractFactory("NOI");
-        noiContractObj = await NoiContract.deploy("NOI", "NOI", 42);
-        await noiContractObj.deployed();
-        console.log("Contract deployed to: ", noiContractObj.address);
+        deployer = (await getNamedAccounts()).deployer;
 
-        const CDPManagerContract = await hre.ethers.getContractFactory("CDPManager");
-        CDPManagerContractObj = await CDPManagerContract.deploy(noiContractObj.address);
-        await CDPManagerContractObj.deployed();
+        await deployments.fixture(["all"]);
 
-        const RateSetterContract = await hre.ethers.getContractFactory("RateSetter");
-        RateSetterContractObj = await RateSetterContract.deploy(CDPManagerContractObj.address);
-        await RateSetterContractObj.deployed();
+        noiContractObj = await ethers.getContract("NOI", deployer);
+        CDPManagerContractObj = await ethers.getContract("CDPManager", deployer);
+        RateSetterContractObj = await ethers.getContract("RateSetter", deployer);
 
         owner = (await hre.ethers.getSigners())[0];
-
-        const txAddAuthToCDPManager = await noiContractObj.connect(owner).addAuthorization(CDPManagerContractObj.address);
-        await txAddAuthToCDPManager.wait();
 
         senderAccounts.push((await hre.ethers.getSigners())[1]);
         senderAccounts.push((await hre.ethers.getSigners())[2]);
