@@ -27,7 +27,7 @@ contract RateSetter {
     AggregatorV3Interface private immutable ethPriceFeed;
     AggregatorV3Interface private immutable cpiDataFeed;
 
-    constructor(address _cdpManager, address _AbsPiController) {
+    constructor(address _cdpManager, address _AbsPiController, address _ethPriceFeedAddress, address _cpiDataFeedAddress) {
         CDPManager_CONTARCT = CDPManager(_cdpManager);
         CPIController_CONTRACT = CPIController(address(0));
         MarketController_CONTRACT = MarketController(address(0));
@@ -35,8 +35,8 @@ contract RateSetter {
         redemptionPrice = 314 * RAY / 100;
         redemptionRate = RAY;
 
-        ethPriceFeed = AggregatorV3Interface(address(0));
-        cpiDataFeed = AggregatorV3Interface(address(0));
+        ethPriceFeed = AggregatorV3Interface(_ethPriceFeedAddress);
+        cpiDataFeed = AggregatorV3Interface(_cpiDataFeedAddress);
 
         redemptionPriceUpdateTime=block.timestamp;
     }
