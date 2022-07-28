@@ -6,6 +6,8 @@ error AbsPiController__NotAuthorized();
 error AbsPiController__NotOwner();
 error AbsPiController__TooSoon();
 
+import "hardhat/console.sol";
+
 contract AbsPiController {
     // --- Auth ---
     mapping(address => bool) public authorizedAccounts;
@@ -57,6 +59,7 @@ contract AbsPiController {
     DeviationObservation[] internal deviationObservations;
 
     int256 internal priceDeviationCumulative; // [TWENTY_SEVEN_DECIMAL_NUMBER]
+    uint256 internal perSecondCumulativeLeak; // [TWENTY_SEVEN_DECIMAL_NUMBER]
     uint256 internal lastUpdateTime; // [timestamp]
 
     uint256 internal constant NEGATIVE_RATE_LIMIT =
@@ -69,16 +72,19 @@ contract AbsPiController {
         int256 _Ki,
         uint256 _feedbackOutputUpperBound,
         int256 _feedbackOutputLowerBound,
-        uint256 _integralPeriodSize
+        uint256 _integralPeriodSize,
+        uint256 _perSecondCumulativeLeak
     ) {
         defaultRedemptionRate = TWENTY_SEVEN_DECIMAL_NUMBER;
         owner = msg.sender;
         authorizedAccounts[msg.sender] = true;
         Kp = _Kp;
         Ki = _Ki;
-        feedbackOutputUpperBound = _feedbackOutputUpperBound;
-        feedbackOutputLowerBound = _feedbackOutputLowerBound;
-        integralPeriodSize=_integralPeriodSize;
+        feedbackOutputUpperBound = uint256(type(int256).max);
+        feedbackOutputLowerBound = -type(int256).max;
+        integralPeriodSize = _integralPeriodSize;
+        perSecondCumulativeLeak = _perSecondCumulativeLeak;
+        lastUpdateTime = block.timestamp;
     }
 
     // --- PI Specific Math ---
@@ -184,10 +190,7 @@ contract AbsPiController {
         uint redemptionPrice,
         uint accumulatedLeak
     ) external returns (uint256) {
-        if (
-            block.timestamp - lastUpdateTime >= integralPeriodSize ||
-            lastUpdateTime == 0
-        ) {
+        if (block.timestamp - lastUpdateTime < integralPeriodSize) {
             revert AbsPiController__TooSoon();
         }
         int256 proportionalTerm = int(redemptionPrice) -
@@ -222,5 +225,16 @@ contract AbsPiController {
                 priceDeviationCumulative
             )
         );
+    }
+
+    function tlv() external view returns (uint256) {
+        uint elapsed = (lastUpdateTime == 0)
+            ? 0
+            : block.timestamp - lastUpdateTime;
+        return elapsed;
+    }
+
+    function pscl() external view returns (uint256) {
+        return perSecondCumulativeLeak;
     }
 }

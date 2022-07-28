@@ -23,7 +23,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     log("Deploying RateSetter and waiting for confirmations...");
     const rateSetter = await deploy("RateSetter", {
         from: deployer,
-        args: [cdpManagerAddress, ethUsdPriceFeedAddress, cpiDataFeedAddress],
+        args: [cdpManagerAddress, ethUsdPriceFeedAddress],
         log: true,
         // wait if on a live network so we can verify properly
         waitConfirmations: network.config.blockConfirmations || 1,
@@ -32,7 +32,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 
     // verify contract on etherscan
     if (!developmentChains.includes(network.name) && process.env.ETHERSCAN_API_KEY) {
-        await verify(rateSetter.address, [cdpManagerAddress, ethUsdPriceFeedAddress, cpiDataFeedAddress]);
+        await verify(rateSetter.address, [cdpManagerAddress, ethUsdPriceFeedAddress]);
     }
 };
 
