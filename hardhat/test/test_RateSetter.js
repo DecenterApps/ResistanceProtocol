@@ -8,6 +8,8 @@ describe('RateSetter', function () {
     let noiContractObj;
     let CDPManagerContractObj;
     let deployer;
+    let AbsPiControllerContractObj;
+    let RateSetterContractObj;
 
     before(async () => {
         deployer = (await getNamedAccounts()).deployer;
@@ -17,6 +19,12 @@ describe('RateSetter', function () {
         noiContractObj = await ethers.getContract("NOI", deployer);
         CDPManagerContractObj = await ethers.getContract("CDPManager", deployer);
         RateSetterContractObj = await ethers.getContract("RateSetter", deployer);
+        AbsPiControllerContractObj = await ethers.getContract("AbsPiController", deployer);
+
+        // const AbsPiControllerContract = await hre.ethers.getContractFactory("AbsPiController");
+        // AbsPiControllerContractObj = await AbsPiControllerContract.deploy("75000000000","24000","0","0","0","999999711200000000000000000");
+        // await AbsPiControllerContractObj.deployed();
+
 
         owner = (await hre.ethers.getSigners())[0];
 
@@ -48,7 +56,7 @@ describe('RateSetter', function () {
         const txOpenCDP = await CDPManagerContractObj.connect(senderAccounts[1]).openCDP(senderAccounts[1].address, {value: ethers.utils.parseEther("12")});
         await txOpenCDP.wait();
 
-        const txChangeRate = await RateSetterContractObj.connect(senderAccounts[0]).updateRates();
+        const txChangeRate = await RateSetterContractObj.connect(senderAccounts[0]).updateCDPManagerData();
 
         const getCDPIndex = await CDPManagerContractObj.connect(senderAccounts[1]).cdpi();
 
@@ -64,12 +72,12 @@ describe('RateSetter', function () {
         const txOpenCDP = await CDPManagerContractObj.connect(senderAccounts[1]).openCDP(senderAccounts[1].address, {value: ethers.utils.parseEther("12")});
         await txOpenCDP.wait();
 
-        const txChangeRate = await RateSetterContractObj.connect(senderAccounts[0]).updateRates();
+        const txChangeRate = await RateSetterContractObj.connect(senderAccounts[0]).updateCDPManagerData();
         await txChangeRate.wait();
 
         const txRemoveAuthFromRateSetter = await CDPManagerContractObj.connect(owner).removeAuthorization(RateSetterContractObj.address);
         await txRemoveAuthFromRateSetter.wait();
 
-        await expect(RateSetterContractObj.connect(senderAccounts[0]).updateRates()).to.be.reverted;
+        await expect(RateSetterContractObj.connect(senderAccounts[0]).updateCDPManagerData()).to.be.reverted;
     });
 });
