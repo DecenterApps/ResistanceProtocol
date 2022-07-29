@@ -1,5 +1,6 @@
 const hre = require('hardhat');
 const { assert, expect } = require("chai");
+const { deployedContracts, deployContracts } = require("../scripts/deploy_all_for_testing");
 
 describe('RateSetter', function () {
 
@@ -12,14 +13,13 @@ describe('RateSetter', function () {
     let RateSetterContractObj;
 
     before(async () => {
-        deployer = (await getNamedAccounts()).deployer;
 
-        //await deployments.fixture(["all"]);
+        await deployContracts();
 
-        noiContractObj = await ethers.getContract("NOI", deployer);
-        CDPManagerContractObj = await ethers.getContract("CDPManager", deployer);
-        RateSetterContractObj = await ethers.getContract("RateSetter", deployer);
-        AbsPiControllerContractObj = await ethers.getContract("AbsPiController", deployer);
+        noiContractObj = deployedContracts.get("NOI");
+        CDPManagerContractObj = deployedContracts.get("CDPManager");
+        RateSetterContractObj = deployedContracts.get("RateSetter");
+        AbsPiControllerContractObj = deployedContracts.get("AbsPiController");
 
         owner = (await hre.ethers.getSigners())[0];
 
@@ -41,11 +41,11 @@ describe('RateSetter', function () {
 
         const cdpIndex = getCDPIndex.toString();
 
-        const txmintFromCDPManager = await CDPManagerContractObj.connect(senderAccounts[1]).mintFromCDP(cdpIndex, "9999");
+        const txmintFromCDPManager = await CDPManagerContractObj.connect(senderAccounts[1]).mintFromCDP(cdpIndex, "9999000000000000000000");
         await txmintFromCDPManager.wait();
         const receipt = await noiContractObj.connect(senderAccounts[1]).balanceOf(senderAccounts[1].address);
 
-        assert.equal("9999", receipt.toString());
+        assert.equal("9999000000000000000000", receipt.toString());
     });
 
     it('... mint tokens with changing the rate', async () => {        
@@ -61,7 +61,7 @@ describe('RateSetter', function () {
 
         const cdpIndex = getCDPIndex.toString();
 
-        await expect(CDPManagerContractObj.connect(senderAccounts[1]).mintFromCDP(cdpIndex, "9999")).to.be.reverted;
+        await expect(CDPManagerContractObj.connect(senderAccounts[1]).mintFromCDP(cdpIndex, "9999000000000000000000")).to.be.reverted;
     });
 
     it('... remove auth from RateSetter', async () => {        

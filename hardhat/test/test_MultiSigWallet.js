@@ -1,5 +1,6 @@
 const { getNamedAccounts, network, deployments, ethers } = require("hardhat");
 const { assert, expect } = require("chai");
+const { deployedContracts, deployContracts } = require("../scripts/deploy_all_for_testing");
 
 describe("MultiSigWallet", function () {
 
@@ -9,11 +10,10 @@ describe("MultiSigWallet", function () {
     let deployer;
 
     before(async () => {
-        deployer = (await getNamedAccounts()).deployer;
 
-        //await deployments.fixture(["all"]);
+        await deployContracts();
 
-        multiSigWallet = await ethers.getContract("MultiSigWallet", deployer);
+        multiSigWallet = deployedContracts.get("MultiSigWallet");
 
         owner = (await hre.ethers.getSigners())[0];
 

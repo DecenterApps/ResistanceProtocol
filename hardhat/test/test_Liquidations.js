@@ -2,6 +2,8 @@ const { getNamedAccounts, network, deployments, ethers } = require("hardhat");
 const chai = require('chai')
 const expect = chai.expect;
 const BigNumber = require('big-number');
+const { deployedContracts, deployContracts } = require("../scripts/deploy_all_for_testing");
+
 
 describe("Liquidations", function () {
   this.timeout(80000);
@@ -12,17 +14,15 @@ describe("Liquidations", function () {
   let LiquidatorContract;
   const wei = BigNumber(10).pow(18);
   before(async () => {
-    deployer = (await getNamedAccounts()).deployer;
-
-    // go through all scripts from the deploy folder and run if it has the same tag
-    //await deployments.fixture(["all"]);
+    
+    await deployContracts();
 
     // getContract gets the most recent deployment for the specified contract
-    noiContractObj = await ethers.getContract("NOI", deployer);
-    CDPManagerContractObj = await ethers.getContract("CDPManager", deployer);
-    LiquidatorContractObj = await ethers.getContract("Liquidator", deployer);
-    ParametersContractObj = await ethers.getContract("Parameters", deployer);
-    TreasuryContractObj = await ethers.getContract("Treasury", deployer);
+    noiContractObj = deployedContracts.get("NOI");
+    CDPManagerContractObj = deployedContracts.get("CDPManager");
+    LiquidatorContractObj = deployedContracts.get("Liquidator");
+    ParametersContractObj = deployedContracts.get("Parameters");
+    TreasuryContractObj = deployedContracts.get("Treasury");
 
     senderAcc = await hre.ethers.getSigners();
     owner = senderAcc[0];
@@ -75,9 +75,6 @@ describe("Liquidations", function () {
     await txmintFromCDPManager.wait();
 
     // const liquidateCDP = await LiquidatorContractObj.connect(owner).liquidateCDP(cdpIndex);
-    await expect(LiquidatorContractObj.connect(owner).liquidateCDP(cdpIndex)).to.be.revertedWithCustomError(
-      LiquidatorContract,
-      "Liquidator__CDPNotEligibleForLiquidation"
-    );
+    await expect(LiquidatorContractObj.connect(owner).liquidateCDP(cdpIndex)).to.be.reverted;
   });
 });

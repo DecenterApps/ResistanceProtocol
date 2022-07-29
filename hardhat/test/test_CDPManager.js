@@ -1,6 +1,7 @@
 const { getNamedAccounts, network, deployments, ethers } = require("hardhat");
 const { assert, expect } = require("chai");
-const BigNumber = require('big-number');
+const BigNumber = require("big-number");
+const { deployedContracts, deployContracts } = require("../scripts/deploy_all_for_testing");
 
 describe("CDPManager", function () {
     const senderAccounts = [];
@@ -18,9 +19,10 @@ describe("CDPManager", function () {
         // go through all scripts from the deploy folder and run if it has the same tag
         //await deployments.fixture(["all"]);
 
-        // getContract gets the most recent deployment for the specified contract
-        noiContractObj = await ethers.getContract("NOI", deployer);
-        CDPManagerContractObj = await ethers.getContract("CDPManager", deployer);
+        await deployContracts();
+
+        noiContractObj = deployedContracts.get("NOI");
+        CDPManagerContractObj = deployedContracts.get("CDPManager");
 
         owner = (await ethers.getSigners())[0];
 
@@ -62,7 +64,8 @@ describe("CDPManager", function () {
 
             const getCDPIndex = await CDPManagerContractObj.connect(senderAccounts[1]).cdpi();
 
-            await expect(CDPManagerContractObj.connect(senderAccounts[1]).mintFromCDP(getCDPIndex.toString(), BigNumber(10).pow(18).mult(10000).toString())).to.be.reverted;
+            await expect(CDPManagerContractObj.connect(senderAccounts[1]).mintFromCDP(getCDPIndex.toString(), BigNumber(10).pow(18).mult(10000).toString())).to
+                .be.reverted;
         });
 
         it("... mint tokens from invalid user address", async () => {

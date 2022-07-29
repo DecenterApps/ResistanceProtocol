@@ -14,6 +14,7 @@ module.exports = {
     networks: {
         hardhat: {
             chainId: 31337,
+            allowUnlimitedContractSize: true
         },
         kovan: {
             url: KOVAN_RPC_URL,
@@ -23,6 +24,7 @@ module.exports = {
         },
         local: {
             url: "https://127.0.0.1:8545",
+            allowUnlimitedContractSize: true
         },
     },
     etherscan: {
