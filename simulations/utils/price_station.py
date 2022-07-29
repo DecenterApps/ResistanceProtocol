@@ -2,7 +2,6 @@ from utils.eth_data import ETHData
 from utils.pool import Pool
 from pi_controller import updateRedemptionPrice, computeRate
 
-
 class PriceStation:
     def __init__(self, market_price, redemption_price, accumulated_leak):
         # market price
@@ -33,10 +32,3 @@ class PriceStation:
 
     def get_rp_value_for_amount(self, noi_amount):
         return noi_amount * self.rp
-
-class Graph:
-    def __init__(self):
-        self.eth = []
-        self.noi = []
-        self.r_prices = []
-        self.m_prices = []

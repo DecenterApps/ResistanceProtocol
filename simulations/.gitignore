@@ -1,2 +1,6 @@
 dataset/eth_dollar.csv
 images/
+
+__pycache__/
+
+utils/__pycache__
