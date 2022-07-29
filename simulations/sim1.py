@@ -10,10 +10,11 @@ import numpy as np
 import pi_controller
 from utils.eth_data import *
 from utils.classes import *
+from utils.price_station import *
 from utils.constants import *
-from trader import *
+from simulations.agents.trader import *
 from utils.exchange import *
-from utils.pool import Pool
+from utils.pool import *
 
 exp = Experiment()
 
@@ -115,12 +116,11 @@ exp.append_configs(initial_state=genesis_states,  # dict containing variable nam
 exec_mode = ExecutionMode()
 local_mode_ctx = ExecutionContext(exec_mode.multi_proc)
 
-
 # Pass the configuration object inside an array
 simulation = Executor(exec_context=local_mode_ctx, configs=exp.configs)
 # The `execute()` method returns a tuple; its first elements contains the raw results
 raw_system_events, tensor_field, sessions = simulation.execute()
-0
+
 
 simulation_result = pd.DataFrame(raw_system_events)
 simulation_result.set_index(['subset', 'run', 'timestep', 'substep'])
@@ -142,20 +142,8 @@ plt.legend(['market price', 'redemption price'])
 
 plt.savefig('images/novi_lol.png')
 
-plt.figure()
-plt.plot(graph.m_prices[:100])
-plt.plot(graph.r_prices[:100])
-plt.legend(['market price', 'redemption price'])
-plt.savefig('images/noviji_lol.png')
-
-
 # plt.figure()
-# # plt.plot(simulation_result)
-# # # plt.show()
-# plt.savefig('test.png')
-
-# simulation_result.plot('timestep', ['box_A', 'box_B'], grid=True,
-#                        colormap='RdYlGn',
-#                        xticks=list(
-#                            simulation_result['timestep'].drop_duplicates()),
-#                        yticks=list(range(1+(simulation_result['box_A']+simulation_result['box_B']).max())))
+# plt.plot(graph.m_prices[:100])
+# plt.plot(graph.r_prices[:100])
+# plt.legend(['market price', 'redemption price'])
+# plt.savefig('images/noviji_lol.png')
