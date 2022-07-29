@@ -188,7 +188,8 @@ contract MultiSigWallet {
      * @notice kick a owner from the owners array
      * @param _owner address of the owner to kick
      */
-    function kickOwner(address _owner) private {
+    function kickOwner(address _owner) public {
+        if (msg.sender != address(this)) revert MultiSigWallet__NotOwner();
         if (!owners[_owner]) revert MultiSigWallet__InvalidOwner();
         delete owners[_owner];
         ownersNumber -= 1;
@@ -198,7 +199,8 @@ contract MultiSigWallet {
      * @notice add a owner from the owners array
      * @param _owner address of the owner to add
      */
-    function addOwner(address _owner) private {
+    function addOwner(address _owner) public {
+        if (msg.sender != address(this)) revert MultiSigWallet__NotOwner();
         if (owners[_owner]) revert MultiSigWallet__InvalidOwner();
         owners[_owner] = true;
         ownersNumber += 1;

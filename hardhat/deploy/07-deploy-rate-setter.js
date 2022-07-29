@@ -7,8 +7,9 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     const { deployer } = await getNamedAccounts();
     const chainId = network.config.chainId;
 
-    let ethUsdPriceFeedAddress = networkConfig[42].ethUsdPriceFeed;
-    let cpiDataFeedAddress = ethers.constants.AddressZero;
+    // get from mainnet chain id 1
+    let ethUsdPriceFeedAddress = networkConfig[1].ethUsdPriceFeed;
+    let cpiDataFeedAddress = networkConfig[1].cpiDataFeed;
 
     // if (chainId == 31337) {
     //     const ethUsdAggregator = await deployments.get("MockV3Aggregator");

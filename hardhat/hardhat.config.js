@@ -19,7 +19,7 @@ module.exports = {
             url: KOVAN_RPC_URL,
             accounts: [KOVAN_ACCOUNT],
             chainId: 42,
-            blockConfirmations: 5,
+            blockConfirmations: 1,
         },
         local: {
             url: "https://127.0.0.1:8545",
