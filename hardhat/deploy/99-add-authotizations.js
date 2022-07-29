@@ -4,24 +4,27 @@ const { verify } = require("../utils/verify");
 
 module.exports = async ({ getNamedAccounts }) => {
     const { deployer } = await getNamedAccounts();
-    const chainId = network.config.chainId;
+
+    owner = (await ethers.getSigners())[0];
 
     console.log("----------------------------------------------------");
     console.log("Adding Authorizations...");
 
     const noiContract = await ethers.getContract("NOI", deployer);
     const cdpManagerContract = await ethers.getContract("CDPManager", deployer);
-
-    signerDeployer = (await hre.ethers.getSigners())[0];
+    const LiquidatorContractObj = await ethers.getContract("Liquidator", deployer);
+    const ParametersContractObj = await ethers.getContract("Parameters", deployer);
 
     // add auth to cdpManager to mint and burn tokens from erc20
-    if (chainId == 31337) {
-        const tx = await noiContract.addAuthorization(cdpManagerContract.address);
-        await tx.wait();
-    } else {
-        const tx = await noiContract.addAuthorization(cdpManagerContract.address);
-        await tx.wait();
-    }
+    const tx = await noiContract.addAuthorization(cdpManagerContract.address);
+    await tx.wait();
+
+    await LiquidatorContractObj.setCdpManagerContractAddress(cdpManagerContract.address);
+    await LiquidatorContractObj.setParametersContractAddress(ParametersContractObj.address);
+    await LiquidatorContractObj.setTreasuryContractAddress(owner.address);
+    await LiquidatorContractObj.setNoiContractAddress(noiContract.address);
+    await cdpManagerContract.setLiquidatorContractAddress(LiquidatorContractObj.address);
+    await cdpManagerContract.setParametersContractAddress(ParametersContractObj.address);
 };
 
 module.exports.tags = ["all", "addauthorization"];

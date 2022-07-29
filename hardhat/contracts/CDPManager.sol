@@ -66,7 +66,6 @@ contract CDPManager {
 
     // --- Auth ---
     mapping(address => bool) public authorizedAccounts;
-    address private owner;
 
     function addAuthorization(address account) external isOwner {
         authorizedAccounts[account] = true;
@@ -97,6 +96,7 @@ contract CDPManager {
         cdpi = 0;
         NOI_COIN = NOI(_noiCoin);
         liquidationRatio = 120;
+        ethRp = 1000;
         owner = msg.sender;
     }
 
@@ -220,6 +220,7 @@ contract CDPManager {
         totalSupply = totalSupply - cdpList[_cdpIndex].lockedCollateral;
         emit CDPClose(cdpList[_cdpIndex].owner,_cdpIndex);
         delete cdpList[_cdpIndex];
+    }
 
     /*
      * @notice update ETH/RP value

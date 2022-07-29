@@ -1,5 +1,6 @@
 const { getNamedAccounts, network, deployments, ethers } = require("hardhat");
 const { assert, expect } = require("chai");
+const BigNumber = require('big-number');
 
 describe("CDPManager", function () {
     const senderAccounts = [];
@@ -7,6 +8,8 @@ describe("CDPManager", function () {
     let noiContractObj;
     let CDPManagerContractObj;
     let deployer;
+
+    const wei = BigNumber(10).pow(18);
 
     before(async () => {
         // deployer = accounts[0]
@@ -36,16 +39,16 @@ describe("CDPManager", function () {
 
             const getCDPIndex = await CDPManagerContractObj.connect(senderAccounts[1]).cdpi();
 
-            const txmintFromCDPManager = await CDPManagerContractObj.connect(senderAccounts[1]).mintFromCDP(getCDPIndex.toString(), "9999");
+            const txmintFromCDPManager = await CDPManagerContractObj.connect(senderAccounts[1]).mintFromCDP(getCDPIndex.toString(), wei.mult(9999).toString());
             await txmintFromCDPManager.wait();
             const balance = await noiContractObj.connect(senderAccounts[1]).balanceOf(senderAccounts[1].address);
 
-            assert.equal("9999", balance.toString());
+            assert.equal(wei.mult(9999).toString(), balance.toString());
 
-            const txApprove = await noiContractObj.connect(senderAccounts[1]).approve(CDPManagerContractObj.address, "9999");
+            const txApprove = await noiContractObj.connect(senderAccounts[1]).approve(CDPManagerContractObj.address, wei.mult(9999).toString());
             await txApprove.wait();
 
-            const txBurn = await CDPManagerContractObj.connect(senderAccounts[1]).repayToCDP(getCDPIndex.toString(), "9999");
+            const txBurn = await CDPManagerContractObj.connect(senderAccounts[1]).repayToCDP(getCDPIndex.toString(), wei.mult(9999).toString());
             await txBurn.wait();
         });
 
@@ -57,7 +60,7 @@ describe("CDPManager", function () {
 
             const getCDPIndex = await CDPManagerContractObj.connect(senderAccounts[1]).cdpi();
 
-            await expect(CDPManagerContractObj.connect(senderAccounts[1]).mintFromCDP(getCDPIndex.toString(), "10000")).to.be.reverted;
+            await expect(CDPManagerContractObj.connect(senderAccounts[1]).mintFromCDP(getCDPIndex.toString(), wei.mult(10000).toString())).to.be.reverted;
         });
 
         it("... mint tokens from invalid user address", async () => {
