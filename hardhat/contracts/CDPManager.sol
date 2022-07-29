@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import "./NOI.sol";
 import "./Parameters.sol";
+import "hardhat/console.sol";
 
 error CDPManager__OnlyOwnerAuthorization();
 error CDPManager__UnauthorizedLiquidator();
@@ -25,8 +26,6 @@ contract CDPManager {
         address owner;
     }
 
-    address owner;
-
     uint256 private totalSupply;
     uint256 public cdpi; // auto increment index for CDPs
     mapping(uint256 => CDP) private cdpList; // CDPId => CDP
@@ -38,6 +37,8 @@ contract CDPManager {
     address liquidatorContractAddress;
     address parametersContractAddress;
 
+    address public owner;
+
     modifier onlyOwner(){
         if(msg.sender != owner) revert CDPManager__OnlyOwnerAuthorization();
         _;
@@ -47,6 +48,8 @@ contract CDPManager {
         if(msg.sender != liquidatorContractAddress) revert CDPManager__UnauthorizedLiquidator();
         _;
     }
+    uint256 internal constant TWENTY_SEVEN_DECIMAL_NUMBER = 10**27;
+    uint256 internal constant EIGHTEEN_DECIMAL_NUMBER = 10**18;
 
     modifier HasAccess(address _user) {
         if(msg.sender != _user) revert CDPManager__NotAuthorized();
@@ -95,9 +98,8 @@ contract CDPManager {
         totalSupply = 0;
         cdpi = 0;
         NOI_COIN = NOI(_noiCoin);
-        liquidationRatio = 120;
-        ethRp = 1000;
-        owner = msg.sender;
+        ethRp = 1000 * EIGHTEEN_DECIMAL_NUMBER;
+        liquidationRatio = 120 * EIGHTEEN_DECIMAL_NUMBER / 100;
     }
 
     function setLiquidatorContractAddress(address _liquidatorContractAddress) public onlyOwner{
@@ -189,8 +191,9 @@ contract CDPManager {
             revert CDPManager__ZeroTokenMint();
         CDP memory user_cdp = cdpList[_cdpIndex];
 
+        console.log("AMOUNT: ",_amount," GENERATED DEBT: ",user_cdp.generatedDebt);
         // check if the new minted coins will be under liquidation ratio
-        uint256 newTotalDebt = (user_cdp.generatedDebt + _amount) * liquidationRatio/100;
+        uint256 newTotalDebt = (user_cdp.generatedDebt + _amount) * liquidationRatio;
         if(newTotalDebt >= ethRp * user_cdp.lockedCollateral) 
             revert CDPManager__LiquidationRatioReached();
 
