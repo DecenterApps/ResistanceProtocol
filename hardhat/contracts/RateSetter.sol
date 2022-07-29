@@ -44,9 +44,6 @@ contract RateSetter {
         ethPriceFeed = AggregatorV3Interface(_ethPriceFeedAddress);
         cpiDataFeed = CPITrackerOracle(_cpiDataFeedAddress);
 
-        // getEthPrice();
-        // getCpiData();
-
         redemptionPriceUpdateTime=block.timestamp;
     }
 

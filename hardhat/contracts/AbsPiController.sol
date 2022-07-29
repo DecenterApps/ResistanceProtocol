@@ -5,6 +5,7 @@ pragma solidity >=0.8.0 <0.9.0;
 error AbsPiController__NotAuthorized();
 error AbsPiController__NotOwner();
 error AbsPiController__TooSoon();
+error AbsPiController__ContractNotEnabled();
 
 import "hardhat/console.sol";
 
@@ -12,6 +13,8 @@ contract AbsPiController {
     // --- Auth ---
     mapping(address => bool) public authorizedAccounts;
     address private owner;
+
+    bool public contractEnabled;
 
     function addAuthorization(address account) external isOwner {
         authorizedAccounts[account] = true;
@@ -34,10 +37,17 @@ contract AbsPiController {
         _;
     }
 
+    modifier isContractEnabled() {
+        if (!contractEnabled) revert AbsPiController__ContractNotEnabled();
+        _;
+    }
+
     // EVENTS
 
     event AddAuthorization(address _account);
     event RemoveAuthorization(address _account);
+    event ModifyUintParameter(bytes32 parameter, uint256 data);
+    event ModifyIntParameter(bytes32 parameter, int256 data);
 
     // --- Structs ---
     struct DeviationObservation {
@@ -75,6 +85,7 @@ contract AbsPiController {
         uint256 _integralPeriodSize,
         uint256 _perSecondCumulativeLeak
     ) {
+        contractEnabled = true;
         defaultRedemptionRate = TWENTY_SEVEN_DECIMAL_NUMBER;
         owner = msg.sender;
         authorizedAccounts[msg.sender] = true;
@@ -85,6 +96,52 @@ contract AbsPiController {
         integralPeriodSize = _integralPeriodSize;
         perSecondCumulativeLeak = _perSecondCumulativeLeak;
         lastUpdateTime = block.timestamp;
+
+        emit ModifyIntParameter("Kp", Kp);
+        emit ModifyIntParameter("Ki", Ki);
+        emit ModifyUintParameter("integralPeriodSize", integralPeriodSize);
+        emit ModifyUintParameter(
+            "feedbackOutputUpperBound",
+            feedbackOutputUpperBound
+        );
+        emit ModifyIntParameter(
+            "feedbackOutputLowerBound",
+            feedbackOutputLowerBound
+        );
+        emit ModifyUintParameter(
+            "perSecondCumulativeLeak",
+            perSecondCumulativeLeak
+        );
+    }
+
+    function setEnabled(bool _enabled) public isOwner {
+        contractEnabled = _enabled;
+    }
+
+    function modifyIntParameter(bytes32 parameter, int256 data)
+        external
+        isOwner
+        isContractEnabled
+    {
+        if (parameter == "Kp") Kp = data;
+        else if (parameter == "Ki") Ki = data;
+        else if (parameter == "Ki") Ki = data;
+        else if (parameter == "feedbackOutputLowerBound")
+            feedbackOutputLowerBound = data;
+        emit ModifyIntParameter(parameter, data);
+    }
+
+    function modifyUintParameter(bytes32 parameter, uint256 data)
+        external
+        isOwner
+        isContractEnabled
+    {
+        if (parameter == "feedbackOutputUpperBound")
+            feedbackOutputUpperBound = data;
+        else if (parameter == "integralPeriodSize") integralPeriodSize = data;
+        else if (parameter == "perSecondCumulativeLeak")
+            perSecondCumulativeLeak = data;
+        emit ModifyUintParameter(parameter, data);
     }
 
     // --- PI Specific Math ---
@@ -221,7 +278,7 @@ contract AbsPiController {
         uint _marketPrice,
         uint _redemptionPrice,
         uint _accumulatedLeak
-    ) external returns (uint256) {
+    ) external isContractEnabled returns (uint256) {
         if (block.timestamp - lastUpdateTime < integralPeriodSize) {
             revert AbsPiController__TooSoon();
         }

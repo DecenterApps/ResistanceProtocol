@@ -13,7 +13,7 @@ describe("AbsPiController", function () {
     before(async () => {
         deployer = (await getNamedAccounts()).deployer;
 
-        await deployments.fixture(["all"]);
+        //await deployments.fixture(["all"]);
 
         AbsPiControllerContractObj = await ethers.getContract("AbsPiController", deployer);
 

@@ -18,10 +18,10 @@ async function deployContracts() {
 
     const name = "ResistanceProtocol";
     const symbol = "NOI";
-    const chainId = network.config.chainId;
+    //const chainId = network.config.chainId;
 
     const Noi = await hre.ethers.getContractFactory("NOI");
-    NoiContract = await Noi.deploy(name, symbol, chainId);
+    NoiContract = await Noi.deploy(name, symbol, "1");
     await NoiContract.deployed();
     deployedContracts.set("NOI", NoiContract);
 
