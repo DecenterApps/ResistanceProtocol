@@ -11,7 +11,7 @@ describe("MultiSigWallet", function () {
     before(async () => {
         deployer = (await getNamedAccounts()).deployer;
 
-        await deployments.fixture(["all"]);
+        //await deployments.fixture(["all"]);
 
         multiSigWallet = await ethers.getContract("MultiSigWallet", deployer);
 

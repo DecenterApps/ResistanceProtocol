@@ -15,7 +15,7 @@ describe("Liquidations", function () {
     deployer = (await getNamedAccounts()).deployer;
 
     // go through all scripts from the deploy folder and run if it has the same tag
-    await deployments.fixture(["all"]);
+    //await deployments.fixture(["all"]);
 
     // getContract gets the most recent deployment for the specified contract
     noiContractObj = await ethers.getContract("NOI", deployer);

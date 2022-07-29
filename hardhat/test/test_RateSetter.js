@@ -14,7 +14,7 @@ describe('RateSetter', function () {
     before(async () => {
         deployer = (await getNamedAccounts()).deployer;
 
-        await deployments.fixture(["all"]);
+        //await deployments.fixture(["all"]);
 
         noiContractObj = await ethers.getContract("NOI", deployer);
         CDPManagerContractObj = await ethers.getContract("CDPManager", deployer);
@@ -30,6 +30,10 @@ describe('RateSetter', function () {
     });
 
     it('... mint tokens without changing the rate', async () => {        
+
+        
+
+
         const txOpenCDP = await CDPManagerContractObj.connect(senderAccounts[1]).openCDP(senderAccounts[1].address, {value: ethers.utils.parseEther("12")});
         await txOpenCDP.wait();
 
