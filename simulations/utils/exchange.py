@@ -1,5 +1,4 @@
-from utils.eth_data import ETHData
-from utils.classes import Pool, PriceStation
+from classes.pool import Pool
 
 #get_noi_value
 #get_noi_value_for_amount

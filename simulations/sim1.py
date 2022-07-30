@@ -7,28 +7,39 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import csv
 import numpy as np
+import random
 import pi_controller
-from utils.eth_data import *
-from utils.classes import *
-from utils.price_station import *
+from classes.eth_data import *
+from classes.util_classes import *
+from classes.price_station import *
+from agents.leverager import Leverager, create_new_leverager
 from utils.constants import *
-from simulations.agents.trader import *
+from agents.trader import *
 from utils.exchange import *
-from utils.pool import *
+from classes.pool import *
 
 exp = Experiment()
 
-genesis_states = {}
+price_station = PriceStation(2, 2, 0)
+eth_data = ETHData()
+
+agents = dict()
 
 traders = dict()
 for i in range(NUM_TRADERS):
     name = 'trader' + str(i)
-    traders[name] = create_new_trader(name, ETH_AMOUNT_TRADER, NOI_AMOUNT_TRADER)
+    traders[name] = create_new_trader(
+        name, ETH_AMOUNT_TRADER, NOI_AMOUNT_TRADER)
+    agents[name] = traders[name]
 
-genesis_states['agents'] = {'traders': traders}
+leveragers = dict()
+for i in range(NUM_LEVERAGERS):
+    name = 'leverager' + str(i)
+    leveragers[name] = create_new_leverager(
+        name, ETH_AMOUNT_LEVERAGER, price_station)
+    agents[name] = leveragers[name]
 
-price_station = PriceStation(3, 3, 0)
-eth_data = ETHData()
+genesis_states = {'agents': agents}
 
 pool = Pool(ETH_AMOUNT_POOL, NOI_AMOUNT_POOL)
 graph = Graph()
@@ -41,39 +52,66 @@ with open('dataset/eth_dollar.csv', 'r') as csvfile:
     eth_data.eth_dollar = [float(i) for i in eth_dollar]
 
 
-def update_traders(substep,  previous_state, policy_input):
-    ret = dict()
-    price_station.calculate_redemption_price()
-    add_to_graph()
-    print(previous_state['timestep'])
-    for i in range(NUM_TRADERS):
-        name = 'trader' + str(i)
-        trader:Trader = previous_state['agents']['traders'][name]
-        relative_gap = pi_controller.absolute(price_station.mp - price_station.rp) / price_station.rp
-        if relative_gap < trader.relative_gap or pool.eth < 0.1:
-            ret[name] = create_modified_trader(trader, 0, 0)
-            continue
-        # buy eth, sell noi
-        noi_add = +1*trader.noi * trader.perc_amount  # value of noi to be added to pool
-        # value of eth to be added to pool
-        eth_add = -1*exchange_noi_to_eth(noi_add, pool)
-        if price_station.mp < price_station.rp:
-            # buy noi, sell eth
-            eth_add = +1*trader.eth * trader.perc_amount
-            noi_add = -1*exchange_eth_to_noi(eth_add, pool)
+def update_trader(substep,  previous_state, policy_input):
+    i = random.randint(0, NUM_TRADERS - 1)
+    name = 'trader' + str(i)
+    trader: Trader = previous_state['agents'][name]
+    relative_gap = pi_controller.absolute(
+        price_station.mp - price_station.rp) / price_station.rp
+    if relative_gap < trader.relative_gap or pool.eth < 0.1:
+        agents[name] = create_modified_trader(trader, 0, 0)
+        return
+    # buy eth, sell noi
+    noi_add = +1*trader.noi * trader.perc_amount  # value of noi to be added to pool
+    # value of eth to be added to pool
+    eth_add = -1*exchange_noi_to_eth(noi_add, pool)
+    if price_station.mp < price_station.rp:
+        # buy noi, sell eth
+        eth_add = +1*trader.eth * trader.perc_amount
+        noi_add = -1*exchange_eth_to_noi(eth_add, pool)
 
-        if (pool.noi + noi_add <= 0
+    if (pool.noi + noi_add <= 0
         or pool.eth + eth_add <= 0
         or trader.eth - eth_add <= 0
-        or trader.noi - noi_add <= 0):
-            #TODO ako nema dovoljno para u poolu da uzme deo ili nesto tako(zbog velikih tradera)
-            eth_add = 0
-            noi_add = 0
-        pool.change_pool(substep, previous_state, eth_add, noi_add, price_station, eth_data)
-        ret[name] = create_modified_trader(trader, eth_add, noi_add)
-    graph.eth.append(pool.eth)
-    graph.noi.append(pool.noi)
-    return ret
+            or trader.noi - noi_add <= 0):
+        # TODO ako nema dovoljno para u poolu da uzme deo ili nesto tako(zbog velikih tradera)
+        eth_add = 0
+        noi_add = 0
+    pool.change_pool(substep, previous_state, eth_add,
+                        noi_add, price_station, eth_data)
+    agents[name] = create_modified_trader(trader, eth_add, noi_add)
+
+global_max_relative_gap = 0
+
+def update_leverager(substep, previous_state, policy_input):
+    global global_max_relative_gap
+    i = random.randint(0, NUM_LEVERAGERS - 1)
+    name = 'leverager' + str(i)
+    leverager: Leverager = previous_state['agents'][name]
+    relative_gap = pi_controller.absolute(
+        price_station.mp - price_station.rp) / price_station.rp
+    
+    if price_station.mp > price_station.rp:
+        global_max_relative_gap = max(relative_gap, global_max_relative_gap)
+
+    if leverager.opened_position:
+        current_cr = leverager.cdp_position.calculate_cr(substep, previous_state, eth_data, price_station)
+        if current_cr < LIQUIDATION_RATIO:
+            leverager.liquidation()
+        else:
+            if relative_gap > leverager.relative_gap and price_station.rp > price_station.mp:
+                leverager.close_position(substep, previous_state, eth_data, price_station, pool)
+            elif current_cr > leverager.boost_cr:
+                leverager.boost(substep, previous_state, eth_data, price_station, pool)
+            elif current_cr < leverager.repay_cr:
+                leverager.repay(substep, previous_state, eth_data, price_station, pool)
+    else:
+        
+        if relative_gap > leverager.relative_gap and price_station.rp < price_station.mp:
+            leverager.open_position(substep, previous_state, eth_data, price_station, pool)
+    
+    agents[name] = leverager
+
 
 def add_to_graph():
     global price_station, graph
@@ -81,20 +119,37 @@ def add_to_graph():
     graph.r_prices.append(price_station.rp)
 
 
-def update_agents(params, substep, state_history,  previous_state, policy_input):
+def update_agents(params, substep, state_history, previous_state, policy_input):
+    global agents
+    ret = agents
+    
+    print(previous_state['timestep'])
     price_station.get_fresh_mp(substep, previous_state, pool, eth_data)
-    return ('agents', {'traders': update_traders(substep,  previous_state, policy_input)})
-
+    price_station.calculate_redemption_price()
+    add_to_graph()
+    graph.eth.append(pool.eth)
+    graph.noi.append(pool.noi)
+    
+    for _ in range((NUM_LEVERAGERS + NUM_TRADERS) // 2):
+        p = np.random.random()
+        if p < 0.1:
+            update_leverager(substep, previous_state, policy_input)
+        else:
+            update_trader(substep, previous_state, policy_input)
+    return ('agents', ret)
 
 partial_state_update_blocks = [
-    {
-        'policies': {
+    { 
+        'label': 'Marble Update',
+        'policies': { # We'll ignore policies for now
         },
-        'variables': {
+        'variables': { # The following state variables will be updated simultaneously
             'agents': update_agents,
         }
     }
 ]
+
+
 
 sim_config_dict = {
     'T': range(999),
@@ -120,6 +175,8 @@ local_mode_ctx = ExecutionContext(exec_mode.multi_proc)
 simulation = Executor(exec_context=local_mode_ctx, configs=exp.configs)
 # The `execute()` method returns a tuple; its first elements contains the raw results
 raw_system_events, tensor_field, sessions = simulation.execute()
+
+print(global_max_relative_gap)
 
 
 simulation_result = pd.DataFrame(raw_system_events)

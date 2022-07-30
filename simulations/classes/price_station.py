@@ -1,5 +1,5 @@
-from utils.eth_data import ETHData
-from utils.pool import Pool
+from classes.eth_data import ETHData
+from classes.pool import Pool
 from pi_controller import updateRedemptionPrice, computeRate
 
 class PriceStation:
@@ -27,8 +27,24 @@ class PriceStation:
         rr = computeRate(self.mp, self.rp, self.accumulated_leak)
         return rr
     
+    #returns the value of noi in usd with market price
+    #input: amount of noi
+    #output: dollar value of noi with market price
     def get_mp_value_for_amount(self, noi_amount):
         return noi_amount * self.mp
 
+    #returns the value of noi in usd with redemption price
+    #input: amount of noi
+    #output: dollar value of noi with redemption price
     def get_rp_value_for_amount(self, noi_amount):
         return noi_amount * self.rp
+    
+    #input: amount of dollars
+    #output: amount of noi that can be purchased with redemption_price
+    def get_amount_of_noi_for_rp_value(self, dollar_amount):
+        return dollar_amount / self.rp
+
+    #input: amount of dollars
+    #output: amount of noi that can be purchased with market_price
+    def get_amount_of_noi_for_mp_value(self, dollar_amount):
+        return dollar_amount / self.mp
