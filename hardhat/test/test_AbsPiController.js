@@ -1,31 +1,34 @@
 const hre = require("hardhat");
 const { assert, expect } = require("chai");
 const { BigNumber } = require("@ethersproject/bignumber");
+const { takeSnapshot, revertToSnapshot } = require("../utils/snapshot");
 
 describe("AbsPiController", function () {
-    this.timeout(80000);
-
     const senderAccounts = [];
     let owner;
     let absPiController;
     let deployer;
 
+    beforeEach(async () => {
+        snapshot = await takeSnapshot();
+    });
+
+    afterEach(async () => {
+        await revertToSnapshot(snapshot);
+    });
+
     before(async () => {
         deployer = (await getNamedAccounts()).deployer;
 
-        //await deployments.fixture(["all"]);
+        absPiController = await ethers.getContract("AbsPiController", deployer);
 
-        AbsPiControllerContractObj = await ethers.getContract("AbsPiController", deployer);
+        owner = (await ethers.getSigners())[0];
 
-        owner = (await hre.ethers.getSigners())[0];
-
-        senderAccounts.push((await hre.ethers.getSigners())[1]);
-        senderAccounts.push((await hre.ethers.getSigners())[2]);
-        senderAccounts.push((await hre.ethers.getSigners())[3]);
-        senderAccounts.push((await hre.ethers.getSigners())[4]);
+        senderAccounts.push((await ethers.getSigners())[1]);
+        senderAccounts.push((await ethers.getSigners())[2]);
+        senderAccounts.push((await ethers.getSigners())[3]);
+        senderAccounts.push((await ethers.getSigners())[4]);
     });
 
-    it("... submit new tx from valid owner", async () => {
-        
-    });
+    it("... submit new tx from valid owner", async () => {});
 });
