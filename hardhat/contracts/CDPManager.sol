@@ -4,7 +4,6 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import "./NOI.sol";
 import "./Parameters.sol";
-import "hardhat/console.sol";
 
 error CDPManager__OnlyOwnerAuthorization();
 error CDPManager__UnauthorizedLiquidator();
@@ -37,7 +36,7 @@ contract CDPManager {
     address liquidatorContractAddress;
     address parametersContractAddress;
 
-    address public owner;
+    address public immutable owner;
 
     modifier onlyOwner(){
         if(msg.sender != owner) revert CDPManager__OnlyOwnerAuthorization();
@@ -92,8 +91,8 @@ contract CDPManager {
         _;
     }
 
-    constructor(address _noiCoin) {
-        owner = msg.sender;
+    constructor(address _owner, address _noiCoin) {
+        owner = _owner;
         authorizedAccounts[msg.sender] = true;
         totalSupply = 0;
         cdpi = 0;
@@ -191,7 +190,6 @@ contract CDPManager {
             revert CDPManager__ZeroTokenMint();
         CDP memory user_cdp = cdpList[_cdpIndex];
 
-        console.log("AMOUNT: ",_amount," GENERATED DEBT: ",user_cdp.generatedDebt);
         // check if the new minted coins will be under liquidation ratio
         uint256 newTotalDebt = (user_cdp.generatedDebt + _amount) * liquidationRatio;
         if(newTotalDebt >= ethRp * user_cdp.lockedCollateral) 

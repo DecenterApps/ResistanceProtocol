@@ -8,12 +8,10 @@ error NOI__InvalidDestination();
 error NOI__InsufficientBalance();
 error NOI__InsufficientAllowance();
 
-
-
 contract NOI {
     // --- Auth ---
     mapping(address => bool) public authorizedAccounts;
-    address public owner;
+    address public immutable owner;
 
     function addAuthorization(address account) external isOwner {
         authorizedAccounts[account] = true;
@@ -37,26 +35,17 @@ contract NOI {
         _;
     }
 
-    // The name of this coin
-    string public name;
-    // The symbol of this coin
-    string public symbol;
-    // The version of this Coin contract
-    string public version = "1";
-    // The number of decimals that this coin has
+    string public constant name = "Resistance Protocol";
+    string public constant symbol = "NOI";
+    string public constant version = "1";
     uint8 public constant decimals = 18;
-
-    // The id of the chain where this coin was deployed
-    uint256 public chainId;
-    // The total supply of this coin
+    uint256 public immutable chainId;
     uint256 public totalSupply;
 
     // Mapping of coin balances
     mapping(address => uint256) public balanceOf;
     // Mapping of allowances
     mapping(address => mapping(address => uint256)) public allowance;
-    // Mapping of nonces used for permits
-    mapping(address => uint256) public nonces;
 
     // --- Events ---
     event AddAuthorization(address account);
@@ -65,14 +54,11 @@ contract NOI {
     event Transfer(address indexed src, address indexed dst, uint256 amount);
 
     constructor(
-        string memory _name,
-        string memory _symbol,
+        address _owner,
         uint256 _chainId
     ) {
-        owner=msg.sender;
+        owner = _owner;
         authorizedAccounts[msg.sender] = true;
-        name = _name;
-        symbol = _symbol;
         chainId = _chainId;
         emit AddAuthorization(msg.sender);
     }

@@ -18,10 +18,10 @@ contract Liquidator{
     address noiContractAddress;
     uint8 treasuryPercent = 25; // percent of profit from liquidation
 
-    address private owner;
+    address public owner;
 
-    constructor(){
-        owner = msg.sender;
+    constructor(address _owner){
+        owner = _owner;
     }
 
     modifier onlyOwner(){
@@ -38,7 +38,7 @@ contract Liquidator{
         uint256 ethPrice = 1000;     // should get it from RateSetter contract
         uint256 CR = _cdp.lockedCollateral*ethPrice*100/(_cdp.generatedDebt*redemptionPrice);
         
-        return CR<LR;
+        return CR <= LR;
     }
 
     function isEligibleForLiquidation(uint256 _cdpIndex) public view returns(bool){

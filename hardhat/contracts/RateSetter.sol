@@ -4,17 +4,17 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
-import "hardhat/console.sol";
 import "./CDPManager.sol";
 import "./MarketController.sol";
 import "./CPIController.sol";
 import "./AbsPiController.sol";
 
 abstract contract CPITrackerOracle {
-    function currPegPrice() virtual external view returns (uint256);
+    function currPegPrice() external view virtual returns (uint256);
 }
 
 contract RateSetter {
+    address public immutable owner;
     uint256 redemptionPrice;
     uint256 marketPrice;
     uint256 CPI;
@@ -32,19 +32,26 @@ contract RateSetter {
     AggregatorV3Interface private immutable ethPriceFeed;
     CPITrackerOracle private immutable cpiDataFeed;
 
-    constructor(address _cdpManager, address _AbsPiController, address _ethPriceFeedAddress, address _cpiDataFeedAddress) {
+    constructor(
+        address _owner,
+        address _cdpManager,
+        address _AbsPiController,
+        address _ethPriceFeedAddress,
+        address _cpiDataFeedAddress
+    ) {
+        owner = _owner;
         CDPManager_CONTARCT = CDPManager(_cdpManager);
         CPIController_CONTRACT = CPIController(address(0));
         MarketController_CONTRACT = MarketController(address(0));
         AbsPiController_CONTRACT = AbsPiController(_AbsPiController);
-        redemptionPrice = 314 * RAY / 100;
+        redemptionPrice = (314 * RAY) / 100;
         redemptionRate = RAY;
         ethPrice = 1000 * RAY;
 
         ethPriceFeed = AggregatorV3Interface(_ethPriceFeedAddress);
         cpiDataFeed = CPITrackerOracle(_cpiDataFeedAddress);
 
-        redemptionPriceUpdateTime=block.timestamp;
+        redemptionPriceUpdateTime = block.timestamp;
     }
 
     /*
@@ -52,9 +59,7 @@ contract RateSetter {
      */
     function updateCDPManagerData() public {
         // gather rate from market/redemption controller
-        marketPrice = 5 * 10**18 ; // should get it from oracle
-        console.log("============ RP Before ============ ");
-        console.log(redemptionPrice);
+        marketPrice = 5 * 10**18; // should get it from oracle
         // reward caller
         uint256 tlv = AbsPiController_CONTRACT.tlv();
         uint256 iapcr = rpower(AbsPiController_CONTRACT.pscl(), tlv, RAY);
@@ -63,9 +68,8 @@ contract RateSetter {
             redemptionPrice,
             iapcr
         );
-        console.log("============ Validated ============ ");
-        console.log(validated);
-        redemptionRate=validated;
+
+        redemptionRate = validated;
 
         redemptionPrice = rmultiply(
             rpower(
@@ -75,27 +79,23 @@ contract RateSetter {
             ),
             redemptionPrice
         );
-        redemptionPriceUpdateTime=block.timestamp;
-        console.log("============ RP After ============ ");
-        console.log(redemptionPrice);
+        redemptionPriceUpdateTime = block.timestamp;
         // gather rate from CPI controller
-        console.log("============ ETH/RP ============ ");
-        console.log(ethPrice * EIGHTEEN_DECIMAL_NUMBER /redemptionPrice);
-        CDPManager_CONTARCT.updateValue(ethPrice * EIGHTEEN_DECIMAL_NUMBER/redemptionPrice);
+        CDPManager_CONTARCT.updateValue(
+            (ethPrice * EIGHTEEN_DECIMAL_NUMBER) / redemptionPrice
+        );
     }
 
     function updateRatesInternal() public {}
 
     function getEthPrice() public view returns (int256) {
+        // price has 1e8 decimal points!
         (, int256 price, , , ) = ethPriceFeed.latestRoundData();
-        // has 1e8 decimal points!
-        console.log('ethPrice', uint256(price));
         return price;
     }
 
     function getCpiData() public view returns (uint256) {
         uint256 data = cpiDataFeed.currPegPrice();
-        console.log("cpi", data);
         return data;
     }
 
