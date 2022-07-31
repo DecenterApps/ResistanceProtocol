@@ -7,13 +7,15 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     const { deployer } = await getNamedAccounts();
 
     // getContract gets the most recent deployment for the specified contract
-    let coinAddress = (await ethers.getContract("NOI", deployer)).address;
+    const coinAddress = (await ethers.getContract("NOI", deployer)).address;
+
+    const multiSigWalletAddress = (await ethers.getContract("MultiSigWallet", deployer)).address;
 
     log("----------------------------------------------------");
     log("Deploying CDPManager and waiting for confirmations...");
     const CDPManager = await deploy("CDPManager", {
         from: deployer,
-        args: [coinAddress],
+        args: [multiSigWalletAddress, coinAddress],
         log: true,
         // wait if on a live network so we can verify properly
         waitConfirmations: network.config.blockConfirmations || 1,
@@ -22,7 +24,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 
     // verify contract on etherscan
     if (!developmentChains.includes(network.name) && process.env.ETHERSCAN_API_KEY) {
-        await verify(CDPManager.address, [coinAddress]);
+        await verify(CDPManager.address, [multiSigWalletAddress, coinAddress]);
     }
 };
 
