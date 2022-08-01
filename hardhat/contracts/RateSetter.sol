@@ -24,7 +24,7 @@ contract RateSetter {
     uint256 redemptionPriceUpdateTime;
     uint256 internal constant EIGHTEEN_DECIMAL_NUMBER = 10**18;
 
-    CDPManager private immutable CDPManager_CONTARCT;
+    CDPManager private immutable CDPManager_CONTRACT;
     CPIController private immutable CPIController_CONTRACT;
     MarketController private immutable MarketController_CONTRACT;
     AbsPiController private immutable AbsPiController_CONTRACT;
@@ -33,7 +33,7 @@ contract RateSetter {
     CPITrackerOracle private immutable cpiDataFeed;
 
     constructor(address _cdpManager, address _AbsPiController, address _ethPriceFeedAddress, address _cpiDataFeedAddress) {
-        CDPManager_CONTARCT = CDPManager(_cdpManager);
+        CDPManager_CONTRACT = CDPManager(_cdpManager);
         CPIController_CONTRACT = CPIController(address(0));
         MarketController_CONTRACT = MarketController(address(0));
         AbsPiController_CONTRACT = AbsPiController(_AbsPiController);
@@ -81,7 +81,7 @@ contract RateSetter {
         // gather rate from CPI controller
         console.log("============ ETH/RP ============ ");
         console.log(ethPrice * EIGHTEEN_DECIMAL_NUMBER /redemptionPrice);
-        CDPManager_CONTARCT.updateValue(ethPrice * EIGHTEEN_DECIMAL_NUMBER/redemptionPrice);
+        CDPManager_CONTRACT.updateValue(ethPrice * EIGHTEEN_DECIMAL_NUMBER/redemptionPrice);
     }
 
     function updateRatesInternal() public {}

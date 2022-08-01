@@ -24,6 +24,10 @@ contract CDPManager {
         uint256 generatedDebt; // [wad]
         // Address of owner
         address owner;
+        // accumulated stability fee before changing generatedDebt amount
+        uint256 accumulatedFee;
+        // time of last calculation of accumulated stability fee
+        uint256 updatedTime;
     }
 
     uint256 private totalSupply;
@@ -106,8 +110,8 @@ contract CDPManager {
         liquidatorContractAddress = _liquidatorContractAddress;
     }
 
-    function setParametersContractAddress(address _parametersContractAdress) public onlyOwner{
-        parametersContractAddress = _parametersContractAdress;
+    function setParametersContractAddress(address _parametersContractAddress) public onlyOwner{
+        parametersContractAddress = _parametersContractAddress;
     } 
 
     /*
@@ -116,8 +120,9 @@ contract CDPManager {
      */
     function openCDP(address _user) public payable HasAccess(_user) returns (uint256){
         cdpi = cdpi + 1;
-        cdpList[cdpi] = CDP(msg.value, 0, _user);
+        cdpList[cdpi] = CDP(msg.value, 0, _user,0,block.timestamp);
         totalSupply = totalSupply + msg.value;
+
         emit CDPOpen(_user,cdpi,msg.value);
         return cdpi;
     }
