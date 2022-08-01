@@ -1,7 +1,7 @@
 class TRADER:
-    NUM = 100
+    NUM = 1000
 
-    ETH_AMOUNT = 2
+    ETH_AMOUNT = 1
     NOI_AMOUNT = 1000
 
     RISKY = 0.5
@@ -13,11 +13,10 @@ class TRADER:
     BOUND_MID = 0.2
     BOUND_LOW = 1 - BOUND_HIGH - BOUND_MID
 
-
 class LEVERAGER:
     NUM = 100
 
-    ETH_AMOUNT = 20
+    ETH_AMOUNT = 5
 
     RISKY = 0.2
     MODERATE = 0.3
@@ -44,8 +43,8 @@ class LEVERAGER:
     RELATIVE_GAP_SAFE = 0.5
 
 class POOL:
-    ETH_AMOUNT = 2000
-    NOI_AMOUNT = 1000000
+    ETH_AMOUNT = 200
+    NOI_AMOUNT = 100000
 
 MONTE_CARLO_SIMULATIONS = 1
 
