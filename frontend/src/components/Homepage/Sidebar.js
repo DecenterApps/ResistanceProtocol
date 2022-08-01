@@ -15,9 +15,18 @@ import { Button, VStack, HStack, Text, Tooltip, Box } from "@chakra-ui/react";
 import { useIntl } from "react-intl";
 import { useWeb3React } from "@web3-react/core";
 import { CheckCircleIcon, WarningIcon } from "@chakra-ui/icons";
+import { MdSettings } from "react-icons/md";
+import { VscHome,VscPulse } from "react-icons/vsc";
+import './Sidebar.css'
 export default function Sidebar({ onOpenModal, onDisconnect }) {
   const intl = useIntl();
-  const { chainId, account,active } = useWeb3React();
+  const [selectedItem,setSelectedItem]=useState("Dashboard")
+
+  const selectItem=(item)=>{
+    setSelectedItem(item)
+  }
+
+  const { chainId, account, active, chain } = useWeb3React();
   return (
     <ProSidebar image={sidebarBg} breakPoint="md">
       <SidebarHeader>
@@ -35,7 +44,7 @@ export default function Sidebar({ onOpenModal, onDisconnect }) {
               overflow: "hidden",
               textOverflow: "ellipsis",
               whiteSpace: "nowrap",
-              fontFamily: "Lucida Console"
+              fontFamily: "Lucida Console",
             }}
           >
             {intl.formatMessage({ id: "sidebarTitle" })}
@@ -68,8 +77,13 @@ export default function Sidebar({ onOpenModal, onDisconnect }) {
           <Text>{`Network ID: ${chainId ? chainId : "No Network"}`}</Text>
         </VStack>
       </SidebarHeader>
-
       <SidebarContent>
+        {active && (
+          <Menu iconShape="square">
+            <MenuItem className={selectedItem==="Dashboard" && "selected"} icon={<VscHome />} onClick={()=>{selectItem("Dashboard")}}>Dashboard</MenuItem>
+            <MenuItem className={selectedItem==="CDPs" && "selected"} icon={<VscPulse />} onClick={()=>{selectItem("CDPs")}}>My CDPs</MenuItem>
+          </Menu>
+        )}
       </SidebarContent>
     </ProSidebar>
   );

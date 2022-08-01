@@ -1,0 +1,13 @@
+.dashboard {
+    height: 77vh;
+    top: 5%;
+    left: 10%;
+    height: 90vh !important;
+    width: 80vw !important;
+    position: absolute;
+    overflow: hidden;
+    z-index: 20;
+    border-width: 3px;
+    border-radius: 1%;
+    border-color: #1f456e;
+  }
