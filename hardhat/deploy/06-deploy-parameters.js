@@ -6,11 +6,13 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     const { deploy, log } = deployments;
     const { deployer } = await getNamedAccounts();
 
+    const multiSigWalletAddress = (await ethers.getContract("MultiSigWallet", deployer)).address;
+
     log("----------------------------------------------------");
     log("Deploying Parameters and waiting for confirmations...");
     const Parameters = await deploy("Parameters", {
         from: deployer,
-        args: [],
+        args: [multiSigWalletAddress],
         log: true,
         // wait if on a live network so we can verify properly
         waitConfirmations: network.config.blockConfirmations || 1,
@@ -19,7 +21,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 
     // verify contract on etherscan
     if (!developmentChains.includes(network.name) && process.env.ETHERSCAN_API_KEY) {
-        await verify(Parameters.address, []);
+        await verify(Parameters.address, [multiSigWalletAddress]);
     }
 };
 

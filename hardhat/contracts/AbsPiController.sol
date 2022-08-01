@@ -7,12 +7,10 @@ error AbsPiController__NotOwner();
 error AbsPiController__TooSoon();
 error AbsPiController__ContractNotEnabled();
 
-import "hardhat/console.sol";
-
 contract AbsPiController {
     // --- Auth ---
     mapping(address => bool) public authorizedAccounts;
-    address private owner;
+    address public immutable owner;
 
     bool public contractEnabled;
 
@@ -78,6 +76,7 @@ contract AbsPiController {
     uint256 internal constant EIGHTEEN_DECIMAL_NUMBER = 10**18;
 
     constructor(
+        address _owner,
         int256 _Kp,
         int256 _Ki,
         uint256 _feedbackOutputUpperBound,
@@ -85,9 +84,9 @@ contract AbsPiController {
         uint256 _integralPeriodSize,
         uint256 _perSecondCumulativeLeak
     ) {
+        owner = _owner;
         contractEnabled = true;
         defaultRedemptionRate = TWENTY_SEVEN_DECIMAL_NUMBER;
-        owner = msg.sender;
         authorizedAccounts[msg.sender] = true;
         Kp = _Kp;
         Ki = _Ki;

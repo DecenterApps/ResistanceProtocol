@@ -13,6 +13,7 @@ error MultiSigWallet__CannotExecuteTx();
 error MultiSigWallet__txFailed();
 error MultiSigWallet__txNotConfirmed();
 
+
 contract MultiSigWallet {
     struct Transaction {
         address to;

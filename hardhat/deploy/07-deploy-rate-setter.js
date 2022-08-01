@@ -18,6 +18,9 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     // } else {
     //     ethUsdPriceFeedAddress = networkConfig[chainId]["ethUsdPriceFeed"];
     // }
+
+    const multiSigWalletAddress = (await ethers.getContract("MultiSigWallet", deployer)).address;
+
     log("----------------------------------------------------");
     log("Deploying RateSetter and waiting for confirmations...");
 
@@ -26,7 +29,13 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 
     const rateSetter = await deploy("RateSetter", {
         from: deployer,
-        args: [cdpManager.address, absPiController.address, ethUsdPriceFeedAddress, cpiDataFeedAddress],
+        args: [
+            multiSigWalletAddress,
+            cdpManager.address,
+            absPiController.address,
+            ethUsdPriceFeedAddress,
+            cpiDataFeedAddress,
+        ],
         log: true,
         // wait if on a live network so we can verify properly
         waitConfirmations: network.config.blockConfirmations || 1,
@@ -35,7 +44,13 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 
     // verify contract on etherscan
     if (!developmentChains.includes(network.name) && process.env.ETHERSCAN_API_KEY) {
-        await verify(rateSetter.address, [cdpManager.address, absPiController.address, ethUsdPriceFeedAddress, cpiDataFeedAddress]);
+        await verify(rateSetter.address, [
+            multiSigWalletAddress,
+            cdpManager.address,
+            absPiController.address,
+            ethUsdPriceFeedAddress,
+            cpiDataFeedAddress,
+        ]);
     }
 };
 

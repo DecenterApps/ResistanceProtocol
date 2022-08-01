@@ -8,9 +8,11 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     log("----------------------------------------------------");
     log("Deploying AbsPiControllerContract and waiting for confirmations...");
 
+    const multiSigWalletAddress = (await ethers.getContract("MultiSigWallet", deployer)).address;
+
     const AbsPiControllerContract = await deploy("AbsPiController", {
         from: deployer,
-        args: ["75000000000","24000","0","0","0","999999711200000000000000000"],
+        args: [multiSigWalletAddress, "75000000000","24000","0","0","0","999999711200000000000000000"],
         log: true,
         // wait if on a live network so we can verify properly
         waitConfirmations: network.config.blockConfirmations || 1,
@@ -20,7 +22,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 
     // verify contract on etherscan
     if (!developmentChains.includes(network.name) && process.env.ETHERSCAN_API_KEY) {
-        await verify(AbsPiControllerContract.address, ["75000000000","24000","0","0","0","999999711200000000000000000"]);
+        await verify(AbsPiControllerContract.address, [multiSigWalletAddress, "75000000000","24000","0","0","0","999999711200000000000000000"]);
     }
 };
 

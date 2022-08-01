@@ -8,7 +8,7 @@ error Treasury_TransactionFailed();
 
 contract Treasury{
 
-    address private owner;
+    address public immutable owner;
     mapping (address => bool) userAuthorized;
 
 
@@ -23,8 +23,8 @@ contract Treasury{
         _;
     }
 
-    constructor() {
-        owner = msg.sender;
+    constructor(address _owner) {
+        owner = _owner;
         userAuthorized[owner] = true;
     }
 

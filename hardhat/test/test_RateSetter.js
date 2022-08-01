@@ -1,9 +1,9 @@
 const hre = require('hardhat');
 const { assert, expect } = require("chai");
-const { deployedContracts, deployContracts } = require("../scripts/deploy_all_for_testing");
+const { takeSnapshot, revertToSnapshot } = require("../utils/snapshot");
+const { executeActionFromMSW } = require("../utils/multiSigAction");
 
 describe('RateSetter', function () {
-
     const senderAccounts = [];
     let owner;
     let noiContractObj;
@@ -11,17 +11,24 @@ describe('RateSetter', function () {
     let deployer;
     let AbsPiControllerContractObj;
     let RateSetterContractObj;
+    let multiSigWallet;
+
+    beforeEach(async () => {
+        snapshot = await takeSnapshot();
+    });
+
+    afterEach(async () => {
+        await revertToSnapshot(snapshot);
+    });
 
     before(async () => {
+        deployer = (await getNamedAccounts()).deployer;
 
-        await deployContracts();
-
-        noiContractObj = deployedContracts.get("NOI");
-        CDPManagerContractObj = deployedContracts.get("CDPManager");
-        RateSetterContractObj = deployedContracts.get("RateSetter");
-        AbsPiControllerContractObj = deployedContracts.get("AbsPiController");
-
-        owner = (await hre.ethers.getSigners())[0];
+        multiSigWallet = await ethers.getContract("MultiSigWallet", deployer);
+        noiContractObj = await ethers.getContract("NOI", deployer);
+        CDPManagerContractObj = await ethers.getContract("CDPManager", deployer);
+        RateSetterContractObj = await ethers.getContract("RateSetter", deployer);
+        AbsPiControllerContractObj = await ethers.getContract("AbsPiController", deployer);
 
         senderAccounts.push((await hre.ethers.getSigners())[1]);
         senderAccounts.push((await hre.ethers.getSigners())[2]);
@@ -30,10 +37,6 @@ describe('RateSetter', function () {
     });
 
     it('... mint tokens without changing the rate', async () => {        
-
-        
-
-
         const txOpenCDP = await CDPManagerContractObj.connect(senderAccounts[1]).openCDP(senderAccounts[1].address, {value: ethers.utils.parseEther("12")});
         await txOpenCDP.wait();
 
@@ -49,9 +52,6 @@ describe('RateSetter', function () {
     });
 
     it('... mint tokens with changing the rate', async () => {        
-        const txAddAuthToRateSetter = await CDPManagerContractObj.connect(owner).addAuthorization(RateSetterContractObj.address);
-        await txAddAuthToRateSetter.wait();
-
         const txOpenCDP = await CDPManagerContractObj.connect(senderAccounts[1]).openCDP(senderAccounts[1].address, {value: ethers.utils.parseEther("12")});
         await txOpenCDP.wait();
 
@@ -65,17 +65,20 @@ describe('RateSetter', function () {
     });
 
     it('... remove auth from RateSetter', async () => {        
-        const txAddAuthToRateSetter = await CDPManagerContractObj.connect(owner).addAuthorization(RateSetterContractObj.address);
-        await txAddAuthToRateSetter.wait();
-
         const txOpenCDP = await CDPManagerContractObj.connect(senderAccounts[1]).openCDP(senderAccounts[1].address, {value: ethers.utils.parseEther("12")});
         await txOpenCDP.wait();
 
         const txChangeRate = await RateSetterContractObj.connect(senderAccounts[0]).updateCDPManagerData();
         await txChangeRate.wait();
 
-        const txRemoveAuthFromRateSetter = await CDPManagerContractObj.connect(owner).removeAuthorization(RateSetterContractObj.address);
-        await txRemoveAuthFromRateSetter.wait();
+        await executeActionFromMSW(
+            multiSigWallet,
+            0,
+            CDPManagerContractObj.address,
+            "removeAuthorization",
+            ["address"],
+            [RateSetterContractObj.address]
+        );
 
         await expect(RateSetterContractObj.connect(senderAccounts[0]).updateCDPManagerData()).to.be.reverted;
     });
