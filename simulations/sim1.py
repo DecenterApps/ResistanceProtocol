@@ -55,7 +55,7 @@ def update_agents(params, substep, state_history, previous_state, policy_input):
     global agents
     ret = agents
     
-    print(previous_state['timestep'])
+    # print(previous_state['timestep'])
 
     eth_data.set_parameters(substep, previous_state)
     price_station.get_fresh_mp(pool, eth_data)
@@ -82,7 +82,7 @@ partial_state_update_blocks = [
 ]
 
 sim_config_dict = {
-    'T': range(359),
+    'T': range(999),
     'N': 1,
     # 'M': ,
 }

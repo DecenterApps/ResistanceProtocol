@@ -1,6 +1,5 @@
 from classes.eth_data import ETHData
 from classes.price_station import PriceStation
-from utils.exchange import exchange_noi_to_eth
 from utils.constants import *
 from classes.pool import Pool
 
@@ -64,7 +63,9 @@ class CDP_Position:
             added_eth, added_noi = pool.put_noi_get_eth(noi_add, price_station, eth_data)
             return self.collateral_eth + added_eth
         diff_noi = self.debt_noi - total_noi_val
-        eth_amount = exchange_noi_to_eth(diff_noi, pool)
+        
+        eth_amount = pool.eth * diff_noi / (pool.noi - diff_noi)
+
         eth_amount, noi_am = pool.put_eth_get_noi(eth_amount, price_station, eth_data)
         # print('closed position')
         if abs(noi_am - diff_noi) > 0.0001:

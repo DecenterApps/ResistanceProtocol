@@ -120,7 +120,7 @@ def updateDeviationHistory(proportionalTerm: float, accumulatedLeak: float) -> N
 
 def updateRedemptionPrice(redemptionPrice:float, redemptionRate: float) -> float:
     # Update redemption price
-    print(redemptionRate, redemptionPrice)
+    # print(redemptionRate, redemptionPrice)
     redemptionPrice = (redemptionRate ** TIME_STEP) * redemptionPrice
     if redemptionPrice == 0:
         redemptionPrice = 1

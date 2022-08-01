@@ -1,5 +1,5 @@
 class TRADER:
-    NUM = 1000
+    NUM = 100
 
     ETH_AMOUNT = 1
     NOI_AMOUNT = 1000
@@ -14,7 +14,7 @@ class TRADER:
     BOUND_LOW = 1 - BOUND_HIGH - BOUND_MID
 
 class LEVERAGER:
-    NUM = 100
+    NUM = 500
 
     ETH_AMOUNT = 5
 
