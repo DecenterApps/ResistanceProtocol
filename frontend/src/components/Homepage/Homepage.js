@@ -1,7 +1,7 @@
 import React from "react";
 import { useState, useEffect } from "react";
-import Sidebar from "./Sidebar";
-import MainContent from "./MainContent";
+import Sidebar from "../Sidebar/Sidebar";
+import MainContent from "../MainContent/MainContent";
 import "./Homepage.scss";
 import { useWeb3React } from "@web3-react/core";
 import MyModal from "../MyModal";
@@ -10,6 +10,7 @@ export default function Homepage() {
   const [openModal, setOpenModal] = useState(false);
   const [contract, setContract] = useState();
   const { library, chainId, account, deactivate, active } = useWeb3React();
+  const [join,setJoin]=useState(false)
 
   const closeModal = () => {
     setOpenModal(false);
@@ -33,11 +34,11 @@ export default function Homepage() {
   return (
     <div className={`app `}>
         <MyModal open={openModal} handleClose={closeModal}></MyModal>
-      <Sidebar
+      {join && <Sidebar
         onOpenModal={setOpenModal}
         onDisconnect={disconnect}
-      />
-      <MainContent />
+      />}
+      <MainContent onJoin={setJoin}/>
     </div>
   );
 }

@@ -28,7 +28,7 @@ export default function Sidebar({ onOpenModal, onDisconnect }) {
 
   const { chainId, account, active, chain } = useWeb3React();
   return (
-    <ProSidebar image={sidebarBg} breakPoint="md">
+    <ProSidebar image={sidebarBg} breakPoint="md" className="my-pro-sidebar">
       <SidebarHeader>
         <VStack
           style={{

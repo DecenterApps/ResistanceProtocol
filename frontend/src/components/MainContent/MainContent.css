@@ -1,10 +1,16 @@
 .content {
-	width: 80vmin;
+	width: 80vh;
 	height: 80vmin;
 	animation: spin 5s linear 0s infinite;
   }
 
-.container{
+.container1{
+	width: 60vw;
+	top: -5vh;
+	position: relative;
+}
+
+.container2{
 	width: 80vmin;
 	height: 80vmin;
 	position: relative;
@@ -150,4 +156,19 @@ h1 {
   font-family: lato;
   font-weight: 100;
   text-shadow: 0 2px 0 #000, 0 0 20px #fff;
+}
+
+.btn{
+  position: absolute;
+  margin: 0;
+  top: 58%;
+  left: 38%;
+  text-align: center;
+  font-size: 2rem !important;
+  transform: translateY(-50%);
+  font-weight: normal;
+  color: #d7dde2 !important;
+  font-family: lato !important;
+  font-weight: 100 !important;
+  text-shadow: 0 2px 0 #000, 0 0 20px #aaa;
 }
