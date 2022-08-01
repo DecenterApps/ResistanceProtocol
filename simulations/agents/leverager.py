@@ -63,22 +63,22 @@ def create_new_leverager(name, eth_amount, price_station: PriceStation):
 
 def get_leverager_values():
     p = np.random.random()
-    if p < PERC_RISKY_LEVERAGER:
-        return R_LEV_DIFF, R_LEV_CR
-    p -= PERC_RISKY_TRADERS
-    if p < PERC_MODERATE_TRADERS:
-        return M_LEV_DIFF, M_LEV_CR
-    return S_LEV_DIFF, S_LEV_CR
+    if p < LEVERAGER.RISKY:
+        return LEVERAGER.R_DIFF, LEVERAGER.R_CR
+    p -= LEVERAGER.RISKY
+    if p < LEVERAGER.MODERATE:
+        return LEVERAGER.M_DIFF, LEVERAGER.M_CR
+    return LEVERAGER.S_DIFF, LEVERAGER.S_CR
 
 # relative difference between redemption price and market price when trader is activated
 
 
 def get_leverager_perc_amount() -> float:
     p = np.random.random()
-    if p < PERCENT_R_LEV_COLLATERAL:
+    if p < LEVERAGER.R_COLLATERAL:
         return 0.95
-    p -= PERCENT_R_LEV_COLLATERAL
-    if p < PERCENT_M_LEV_COLLATERAL:
+    p -= LEVERAGER.R_COLLATERAL
+    if p < LEVERAGER.M_COLLATERAL:
         return 0.7
     return 0.45
 
@@ -87,9 +87,9 @@ def get_leverager_perc_amount() -> float:
 
 def get_leverager_relative_gap():
     p = np.random.random()
-    if p < RELATIVE_GAP_RISKY_LEVERAGER:
+    if p < LEVERAGER.RELATIVE_GAP_RISKY:
         return 0.02
-    p -= RELATIVE_GAP_RISKY_LEVERAGER
-    if p < RELATIVE_GAP_MODERATE_LEVERAGER:
+    p -= LEVERAGER.RELATIVE_GAP_RISKY
+    if p < LEVERAGER.RELATIVE_GAP_MODERATE:
         return 0.05
     return 0.1

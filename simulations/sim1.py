@@ -26,22 +26,22 @@ eth_data = ETHData()
 agents = dict()
 
 traders = dict()
-for i in range(NUM_TRADERS):
+for i in range(TRADER.NUM):
     name = 'trader' + str(i)
     traders[name] = create_new_trader(
-        name, ETH_AMOUNT_TRADER, NOI_AMOUNT_TRADER)
+        name, TRADER.ETH_AMOUNT, TRADER.NOI_AMOUNT)
     agents[name] = traders[name]
 
 leveragers = dict()
-for i in range(NUM_LEVERAGERS):
+for i in range(LEVERAGER.NUM):
     name = 'leverager' + str(i)
     leveragers[name] = create_new_leverager(
-        name, ETH_AMOUNT_LEVERAGER, price_station)
+        name, LEVERAGER.ETH_AMOUNT, price_station)
     agents[name] = leveragers[name]
 
 genesis_states = {'agents': agents}
 
-pool = Pool(ETH_AMOUNT_POOL, NOI_AMOUNT_POOL)
+pool = Pool(POOL.ETH_AMOUNT, POOL.NOI_AMOUNT)
 graph = Graph()
 
 graph.eth = [pool.eth]
@@ -53,7 +53,9 @@ with open('dataset/eth_dollar.csv', 'r') as csvfile:
 
 
 def update_trader(substep,  previous_state, policy_input):
-    i = random.randint(0, NUM_TRADERS - 1)
+    if TRADER.NUM == 0:
+        return
+    i = random.randint(0, TRADER.NUM - 1)
     name = 'trader' + str(i)
     trader: Trader = previous_state['agents'][name]
     relative_gap = pi_controller.absolute(
@@ -85,7 +87,9 @@ global_max_relative_gap = 0
 
 def update_leverager(substep, previous_state, policy_input):
     global global_max_relative_gap
-    i = random.randint(0, NUM_LEVERAGERS - 1)
+    if LEVERAGER.NUM == 0:
+        return
+    i = random.randint(0, LEVERAGER.NUM - 1)
     name = 'leverager' + str(i)
     leverager: Leverager = previous_state['agents'][name]
     relative_gap = pi_controller.absolute(
@@ -130,7 +134,7 @@ def update_agents(params, substep, state_history, previous_state, policy_input):
     graph.eth.append(pool.eth)
     graph.noi.append(pool.noi)
     
-    for _ in range((NUM_LEVERAGERS + NUM_TRADERS) // 2):
+    for _ in range((LEVERAGER.NUM + TRADER.NUM) // 2):
         p = np.random.random()
         if p < 0.1:
             update_leverager(substep, previous_state, policy_input)

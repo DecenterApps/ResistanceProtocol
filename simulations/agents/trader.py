@@ -18,10 +18,10 @@ def create_modified_trader(trader: Trader, eth_add, noi_add):
 # percentage of traders resource when trading
 def get_trader_perc_amount() -> float:
     p = np.random.random()
-    if p < PERC_RISKY_TRADERS:
+    if p < TRADER.RISKY:
         return 0.9
-    p -= PERC_RISKY_TRADERS
-    if p < PERC_MODERATE_TRADERS:
+    p -= TRADER.RISKY
+    if p < TRADER.MODERATE:
         return 0.7
     return 0.3
 
@@ -30,9 +30,9 @@ def get_trader_perc_amount() -> float:
 
 def get_trader_relative_gap():
     p = np.random.random()
-    if p < PERCENT_BOUND_HIGH:
+    if p < TRADER.BOUND_HIGH:
         return 0.03
-    p -= PERCENT_BOUND_HIGH
-    if p < PERCENT_BOUND_MID:
+    p -= TRADER.BOUND_HIGH
+    if p < TRADER.BOUND_MID:
         return 0.06
     return 0.1

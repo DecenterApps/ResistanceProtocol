@@ -1,49 +1,53 @@
-NUM_TRADERS = 1000
-PERC_RISKY_TRADERS = 0.5
-PERC_MODERATE_TRADERS = 0.3
-PERC_SAFE_TRADERS = 1 - PERC_MODERATE_TRADERS - PERC_RISKY_TRADERS
+class TRADER:
+    NUM = 100
 
-# relative difference between redemption price and market price when trader is activated
-PERCENT_BOUND_HIGH = 0.3
-PERCENT_BOUND_MID = 0.2
-PERCENT_BOUND_LOW = 1 - PERCENT_BOUND_HIGH - PERCENT_BOUND_MID
+    ETH_AMOUNT = 2
+    NOI_AMOUNT = 1000
+
+    RISKY = 0.5
+    MODERATE = 0.3
+    SAFE = 1 - MODERATE - RISKY
+
+    # relative difference between redemption price and market price when trader is activated
+    BOUND_HIGH = 0.3
+    BOUND_MID = 0.2
+    BOUND_LOW = 1 - BOUND_HIGH - BOUND_MID
+
+
+class LEVERAGER:
+    NUM = 100
+
+    ETH_AMOUNT = 20
+
+    RISKY = 0.2
+    MODERATE = 0.3
+    SAFE = 1 - MODERATE - RISKY
+
+    # relative difference between initial cr and repay/boost cr of leverager
+    R_DIFF = 0.1
+    M_DIFF = 0.25
+    S_DIFF = 0.5
+
+    #initial cr of leverager
+    R_CR = 1.5
+    M_CR = 1.9
+    S_CR = 2.5
+
+    #percent of leveragers(risky leveragers put more percent of their money in collateral)
+    R_COLLATERAL = 1
+    M_COLLATERAL = 0.7
+    S_COLLATERAL = 0.5
+
+    #gap between market price and redemption price when leverager opens/closes a position
+    RELATIVE_GAP_RISKY = 0.5
+    RELATIVE_GAP_MODERATE = 0.25
+    RELATIVE_GAP_SAFE = 0.5
+
+class POOL:
+    ETH_AMOUNT = 2000
+    NOI_AMOUNT = 1000000
+
 MONTE_CARLO_SIMULATIONS = 1
-
-NUM_LEVERAGERS = 100
-PERC_RISKY_LEVERAGER = 0.2
-PERC_MODERATE_LEVERAGER = 0.3
-PERC_SAFE_LEVERAGER = 1 - PERC_MODERATE_LEVERAGER - PERC_RISKY_LEVERAGER
-
-# relative difference between initial cr and repay/boost cr of leverager
-R_LEV_DIFF = 0.1
-M_LEV_DIFF = 0.25
-S_LEV_DIFF = 0.5
-
-#initial cr of leverager
-R_LEV_CR = 1.5
-M_LEV_CR = 1.9
-S_LEV_CR = 2.5
-
-#percent of leveragers(risky leveragers put more percent of their money in collateral)
-PERCENT_R_LEV_COLLATERAL = 1
-PERCENT_M_LEV_COLLATERAL = 0.7
-PERCENT_S_LEV_COLLATERAL = 0.5
-
-#gap between market price and redemption price when leverager opens/closes a position
-RELATIVE_GAP_RISKY_LEVERAGER = 1
-RELATIVE_GAP_MODERATE_LEVERAGER = 0.25
-RELATIVE_GAP_SAFE_LEVERAGER = 0.5
-
-
-ETH_AMOUNT_TRADER = 2
-NOI_AMOUNT_TRADER = 1000
-
-ETH_AMOUNT_LEVERAGER = 2
-
-ETH_AMOUNT_POOL = 2000
-NOI_AMOUNT_POOL = 1000000
-
-INITIAL_CR = 1.5
 
 LIQUIDATION_RATIO = 1.2
 
