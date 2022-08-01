@@ -61,12 +61,12 @@ contract CDPManager {
 
     // EVENTS
 
-    event CDPOpen(address indexed _user,uint256 indexed _cdpId, uint _value);
-    event TransferCollateral(address indexed _user,uint256 indexed _cdpId, uint _value);
-    event CDPClose(address indexed _user,uint256 indexed _cdpId);
-    event OwnershipTransfer(address indexed _from,address indexed _to,uint256 indexed _cdpId);
-    event MintCDP(address indexed _from,uint256 indexed _cdpId, uint _amount);
-    event RepayCDP(address indexed _from,uint256 indexed _cdpId, uint _amount);
+    event CDPOpen(address indexed _user,uint256 indexed _cdpIndex, uint _value);
+    event TransferCollateral(address indexed _user,uint256 indexed _cdpIndex, uint _value);
+    event CDPClose(address indexed _user,uint256 indexed _cdpIndex);
+    event OwnershipTransfer(address indexed _from,address indexed _to,uint256 indexed _cdpIndex);
+    event MintCDP(address indexed _from,uint256 indexed _cdpIndex, uint _amount);
+    event RepayCDP(address indexed _from,uint256 indexed _cdpIndex, uint _amount);
     event AddAuthorization(address _account);
     event RemoveAuthorization(address _account);
 
@@ -209,7 +209,7 @@ contract CDPManager {
     /*
      * @notice repay debt in coins
      * @param _cdpIndex index of cdp
-     * @param _amount amount of tokens to repay
+     * @param _liquidatorUsr address that initiated liquidation
      */
     function repayToCDP(uint256 _cdpIndex, uint256 _amount) public HasAccess(cdpList[_cdpIndex].owner){
         NOI_COIN.burn(cdpList[_cdpIndex].owner, _amount);
@@ -217,13 +217,22 @@ contract CDPManager {
         emit RepayCDP(cdpList[_cdpIndex].owner,_cdpIndex,_amount);
     }
 
-    function liquidatePosition(uint _cdpIndex) public payable onlyLiquidatorContract {
+    /*
+     * @notice liquidate position
+     * @param _cdpIndex index of cdp
+     * @param _amount amount of tokens to repay
+     */
+    function liquidatePosition(uint _cdpIndex, address _liquidatorUsr) public payable onlyLiquidatorContract {
         
         (bool sent, ) = payable(msg.sender).call{
             value: cdpList[_cdpIndex].lockedCollateral
         }("");
         if (sent == false) revert();
         totalSupply = totalSupply - cdpList[_cdpIndex].lockedCollateral;
+
+        // burn dept from liquidator balance
+        NOI_COIN.burn(_liquidatorUsr,cdpList[_cdpIndex].generatedDebt);
+
         emit CDPClose(cdpList[_cdpIndex].owner,_cdpIndex);
         delete cdpList[_cdpIndex];
     }

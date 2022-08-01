@@ -30,6 +30,10 @@ contract Liquidator{
         _;
     }
 
+
+    event LiquidateCDP(uint256 indexed _cdpIndex, uint _collateral, uint _debt, address indexed _liquidator);
+
+
     function isEligibleForLiquidation(CDPManager.CDP memory _cdp) private view returns(bool){
 
         uint8 LR = Parameters(parametersContractAddress).getLR();
@@ -37,7 +41,7 @@ contract Liquidator{
         uint256 redemptionPrice=1000; // should get it from RateSetter contract
         uint256 ethPrice = 1000;     // should get it from RateSetter contract
         uint256 CR = _cdp.lockedCollateral*ethPrice*100/(_cdp.generatedDebt*redemptionPrice);
-        
+
         return CR <= LR;
     }
 
@@ -54,12 +58,7 @@ contract Liquidator{
         if(!isEligibleForLiquidation(cdp)) 
             revert Liquidator__CDPNotEligibleForLiquidation();
 
-
-        // burn dept from liquidator balance
-        NOI noiContract = NOI(noiContractAddress);
-        noiContract.burn(msg.sender,cdp.generatedDebt);
-
-        cdpManager.liquidatePosition(_cdpIndex);
+        cdpManager.liquidatePosition(_cdpIndex, msg.sender);
 
         // calculate distribution of collateral
         uint256 total = cdp.lockedCollateral;
@@ -77,6 +76,8 @@ contract Liquidator{
             value: liquidatorPart
         }("");
         if(sentLiquidator == false) revert();
+
+        emit LiquidateCDP(_cdpIndex,cdp.lockedCollateral,cdp.generatedDebt,msg.sender);
     }
 
 
