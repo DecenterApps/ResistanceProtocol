@@ -14,6 +14,7 @@ import {
 import { Image } from "@chakra-ui/react";
 import { useWeb3React } from "@web3-react/core";
 import { connectors } from "../utils/connectors";
+import './MyModal.css'
 
 export default function MyModal({ open, handleClose }) {
   const { activate } = useWeb3React();
@@ -23,8 +24,8 @@ export default function MyModal({ open, handleClose }) {
   };
   return (
     <Modal isOpen={open} onClose={handleClose} isCentered>
-      <ModalOverlay />
-      <ModalContent w="300px">
+      <ModalOverlay/>
+      <ModalContent className="modal" w="300px">
         <ModalHeader>Select Wallet</ModalHeader>
         <ModalCloseButton
           _focus={{

@@ -3,8 +3,9 @@ import { useIntl } from "react-intl";
 import "./MainContent.css";
 import Dashboard from "../Dashboard/Dashboard";
 import { Button } from "@chakra-ui/react";
+import CDPs from '../CDPs/CDPs'
 
-export default function MainContent({onJoin}) {
+export default function MainContent({onJoin,show}) {
   const intl = useIntl();
 
   const [join,setJoin]=useState(false)
@@ -18,7 +19,7 @@ export default function MainContent({onJoin}) {
 
   return (
     <div className={join ? "container2" : "container1"}>
-      <div className="subcontainer">
+      <div className="subcontainer animated bounceIn">
         <div className="content">
           <div className="top-left"></div>
           <div className="left-bot"></div>
@@ -32,7 +33,7 @@ export default function MainContent({onJoin}) {
           </Button></>}
         </div>
       </div>
-      {join && <Dashboard />}
+      <div className="center-div">{join && <>{ show==="Dashboard" && <Dashboard />}{ show==="CDPs" && <CDPs></CDPs>}</>}</div>
     </div>
   );
 }

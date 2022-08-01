@@ -16,15 +16,15 @@ import { useIntl } from "react-intl";
 import { useWeb3React } from "@web3-react/core";
 import { CheckCircleIcon, WarningIcon } from "@chakra-ui/icons";
 import { MdSettings } from "react-icons/md";
-import { VscHome,VscPulse } from "react-icons/vsc";
-import './Sidebar.css'
-export default function Sidebar({ onOpenModal, onDisconnect }) {
+import { VscHome, VscPulse } from "react-icons/vsc";
+import "./Sidebar.css";
+export default function Sidebar({ onOpenModal, onDisconnect, setShow }) {
   const intl = useIntl();
-  const [selectedItem,setSelectedItem]=useState("Dashboard")
+  const [selectedItem, setSelectedItem] = useState("Dashboard");
 
-  const selectItem=(item)=>{
-    setSelectedItem(item)
-  }
+  const selectItem = (item) => {
+    setSelectedItem(item);
+  };
 
   const { chainId, account, active, chain } = useWeb3React();
   return (
@@ -80,8 +80,26 @@ export default function Sidebar({ onOpenModal, onDisconnect }) {
       <SidebarContent>
         {active && (
           <Menu iconShape="square">
-            <MenuItem className={selectedItem==="Dashboard" && "selected"} icon={<VscHome />} onClick={()=>{selectItem("Dashboard")}}>Dashboard</MenuItem>
-            <MenuItem className={selectedItem==="CDPs" && "selected"} icon={<VscPulse />} onClick={()=>{selectItem("CDPs")}}>My CDPs</MenuItem>
+            <MenuItem
+              className={selectedItem === "Dashboard" && "selected"}
+              icon={<VscHome />}
+              onClick={() => {
+                selectItem("Dashboard");
+                setShow("Dashboard");
+              }}
+            >
+              Dashboard
+            </MenuItem>
+            <MenuItem
+              className={selectedItem === "CDPs" && "selected"}
+              icon={<VscPulse />}
+              onClick={() => {
+                selectItem("CDPs");
+                setShow("CDPs");
+              }}
+            >
+              My CDPs
+            </MenuItem>
           </Menu>
         )}
       </SidebarContent>

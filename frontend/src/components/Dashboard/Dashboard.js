@@ -99,7 +99,7 @@ export const data3 = {
 
 export default function Dashboard() {
   return (
-    <div className="dashboard">
+    <div className="dashboard animated bounceIn">
       <Box>
         <VStack spacing="7vh">
           <HStack spacing="5vw" marginTop={"2vh"}>

@@ -5,12 +5,14 @@ import MainContent from "../MainContent/MainContent";
 import "./Homepage.scss";
 import { useWeb3React } from "@web3-react/core";
 import MyModal from "../MyModal";
+import Toolbar from "../Toolbar/Toolbar";
 
 export default function Homepage() {
   const [openModal, setOpenModal] = useState(false);
   const [contract, setContract] = useState();
   const { library, chainId, account, deactivate, active } = useWeb3React();
-  const [join,setJoin]=useState(false)
+  const [join, setJoin] = useState(false);
+  const [show, setShow] = useState("Dashboard");
 
   const closeModal = () => {
     setOpenModal(false);
@@ -33,12 +35,16 @@ export default function Homepage() {
   }, [library]);
   return (
     <div className={`app `}>
-        <MyModal open={openModal} handleClose={closeModal}></MyModal>
-      {join && <Sidebar
-        onOpenModal={setOpenModal}
-        onDisconnect={disconnect}
-      />}
-      <MainContent onJoin={setJoin}/>
+      <MyModal open={openModal} handleClose={closeModal}></MyModal>
+      {false && (
+        <Sidebar
+          onOpenModal={setOpenModal}
+          onDisconnect={disconnect}
+          setShow={setShow}
+        />
+      )}
+      {join && <Toolbar onOpenModal={setOpenModal} setShow={setShow} show={show} onDisconnect={disconnect}></Toolbar>}
+      <MainContent onJoin={setJoin} show={show} />
     </div>
   );
 }
