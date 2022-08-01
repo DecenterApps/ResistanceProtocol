@@ -130,12 +130,14 @@ contract NOI {
      * @param _amount The amount to remove
      */
     function checkAndRemoveAmount(address _usr, uint256 _amount) private {
-        if (balanceOf[_usr] < _amount) revert NOI__InsufficientBalance();
+        uint256 userBalance = balanceOf[_usr];
+        if (userBalance < _amount) revert NOI__InsufficientBalance();
         if (_usr != msg.sender) {
-            if (allowance[_usr][msg.sender] < _amount)
+            uint256 userAllowance = allowance[_usr][msg.sender];
+            if (userAllowance < _amount)
                 revert NOI__InsufficientAllowance();
-            allowance[_usr][msg.sender] = allowance[_usr][msg.sender] - _amount;
+            allowance[_usr][msg.sender] = userAllowance - _amount;
         }
-        balanceOf[_usr] = balanceOf[_usr] - _amount;
+        balanceOf[_usr] = userBalance - _amount;
     }
 }
