@@ -80,8 +80,8 @@ contract Liquidator{
     }
 
 
-    function setParametersContractAddress(address _parametersContractAdress) public onlyOwner{
-        parametersContractAddress = _parametersContractAdress;
+    function setParametersContractAddress(address _parametersContractAddress) public onlyOwner{
+        parametersContractAddress = _parametersContractAddress;
     } 
 
     function setCdpManagerContractAddress(address _cdpManagerContractAddress) public onlyOwner{
