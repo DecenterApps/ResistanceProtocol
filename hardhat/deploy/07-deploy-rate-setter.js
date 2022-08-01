@@ -7,17 +7,24 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     const { deployer } = await getNamedAccounts();
     const chainId = network.config.chainId;
 
-    // get from mainnet chain id 1
-    let ethUsdPriceFeedAddress = networkConfig[1].ethUsdPriceFeed;
-    let cpiDataFeedAddress = networkConfig[1].cpiDataFeed;
+    let ethUsdPriceFeedAddress, cpiDataFeedAddress;
 
-    // if (chainId == 31337) {
-    //     const ethUsdAggregator = await deployments.get("MockV3Aggregator");
-    //     ethUsdPriceFeedAddress = ethUsdAggregator.address;
-    //     cpiDataFeedAddress = ethers.constants.AddressZero;
-    // } else {
-    //     ethUsdPriceFeedAddress = networkConfig[chainId]["ethUsdPriceFeed"];
-    // }
+    if (chainId == 31337) {
+        // real for fork
+        // ethUsdPriceFeedAddress = networkConfig[1].ethUsdPriceFeed;
+        // cpiDataFeedAddress = networkConfig[1].cpiDataFeed;
+
+        // mock contracts
+        ethUsdPriceFeedAddress = (await ethers.getContract("EthPriceFeedMock", deployer)).address;
+        cpiDataFeedAddress = (await ethers.getContract("CPIDataFeedMock", deployer)).address;
+    } else if (chainId == 42) {
+        // cpi for testnet doesnt exist so we mock
+        ethUsdPriceFeedAddress = networkConfig[chainId].ethUsdPriceFeed;
+        cpiDataFeedAddress = (await ethers.getContract("CPIDataFeedMock", deployer)).address;
+    } else if (chainId == 1) {
+        ethUsdPriceFeedAddress = networkConfig[chainId].ethUsdPriceFeed;
+        cpiDataFeedAddress = networkConfig[chainId].cpiDataFeed;
+    }
 
     const multiSigWalletAddress = (await ethers.getContract("MultiSigWallet", deployer)).address;
 
