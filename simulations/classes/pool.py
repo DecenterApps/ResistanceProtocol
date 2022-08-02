@@ -39,3 +39,13 @@ class Pool:
 
         price_station.update_mp(self, eth_data)
         return eth_sum, noi_add
+    
+    #given the resulting eth, calculates how much noi should agent put into the pool
+    def how_much_noi_for_eth(self, eth_add) -> float:
+        noi_val = self.noi * eth_add / (self.eth - eth_add)
+        return noi_val
+
+    #given the resulting noi, calculates how much eth should agent put into the pool
+    def how_much_eth_for_noi(self, noi_add) -> float:
+        eth_val = self.eth * noi_add / (self.noi - noi_add)
+        return eth_val

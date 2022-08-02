@@ -15,7 +15,7 @@ class PRICE_TRADER:
     BOUND_LOW = 1 - BOUND_HIGH - BOUND_MID
 
 class RATE_TRADER:
-    NUM = 200
+    NUM = 0
 
     ETH_AMOUNT = 1
     NOI_AMOUNT = 1000
@@ -31,7 +31,7 @@ class RATE_TRADER:
     RR_LOW = 1 - RR_HIGH - RR_MID
 
 class LEVERAGER:
-    NUM = 500
+    NUM = 0
 
     ETH_AMOUNT = 5
 
@@ -55,6 +55,35 @@ class LEVERAGER:
     S_COLLATERAL = 0.5
 
     #gap between market price and redemption price when leverager opens/closes a position
+    RELATIVE_GAP_RISKY = 0.5
+    RELATIVE_GAP_MODERATE = 0.25
+    RELATIVE_GAP_SAFE = 0.5
+
+class SAFE_OWNER:
+    NUM = 100
+
+    ETH_AMOUNT = 5
+
+    RISKY = 0.2
+    MODERATE = 0.3
+    SAFE = 1 - MODERATE - RISKY
+
+    # relative difference between initial cr and repay/boost cr of safe owner
+    R_DIFF = 0.1
+    M_DIFF = 0.25
+    S_DIFF = 0.5
+
+    #initial cr of safe owner
+    R_CR = 1.7
+    M_CR = 2.2
+    S_CR = 3
+
+    #percent of safe owners(risky safe owners put more percent of their money in collateral)
+    R_COLLATERAL = 1
+    M_COLLATERAL = 0.7
+    S_COLLATERAL = 0.5
+
+    #gap between market price and redemption price when safe owner opens a position
     RELATIVE_GAP_RISKY = 0.5
     RELATIVE_GAP_MODERATE = 0.25
     RELATIVE_GAP_SAFE = 0.5

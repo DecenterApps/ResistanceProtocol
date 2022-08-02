@@ -2,6 +2,7 @@ from classes.eth_data import ETHData
 from classes.price_station import PriceStation
 from utils.constants import *
 from classes.pool import Pool
+import numpy as np
 
 class CDP_Position:
     def __init__(self, collateral_eth, debt_noi, stable_cr, repay_cr, boost_cr):
@@ -18,7 +19,7 @@ class CDP_Position:
             return INF
         return eth_total_val / noi_total_val
     
-    def boost_position(self, eth_data: ETHData, price_station: PriceStation, pool: Pool):
+    def dfs_boost_position(self, eth_data: ETHData, price_station: PriceStation, pool: Pool):
         eth_total_val = eth_data.get_eth_value_for_amount(self.collateral_eth)
         noi_total_val = price_station.get_rp_value_for_amount(self.debt_noi)
         if noi_total_val != 0 and eth_total_val / noi_total_val < self.boost_cr:
@@ -37,7 +38,7 @@ class CDP_Position:
         # print("targeted cr: ", self.stable_cr, "real cr: ", self.calculate_cr(eth_data, price_station))
         return
     
-    def repay_position(self, eth_data: ETHData, price_station: PriceStation, pool: Pool):
+    def dfs_repay_position(self, eth_data: ETHData, price_station: PriceStation, pool: Pool):
         eth_total_val = eth_data.get_eth_value_for_amount(self.collateral_eth)
         noi_total_val = price_station.get_rp_value_for_amount(self.debt_noi)
 
@@ -54,6 +55,34 @@ class CDP_Position:
         # print("repaid position")
         # print("targeted cr: ", self.stable_cr, "real cr: ", self.calculate_cr(eth_data, price_station))
         return
+
+    def boost_position(self, eth_data: ETHData, price_station: PriceStation, pool: Pool):
+        cr = self.calculate_cr(eth_data, price_station)
+        if cr < self.boost_cr:
+            return
+        noi_add = eth_data.get_eth_value_for_amount(self.collateral_eth) / price_station.rp / self.stable_cr - self.debt_noi
+        eth_amount, noi_am = pool.put_noi_get_eth(noi_add, price_station, eth_data)
+        if np.abs(noi_add - noi_am) > 0.00001:
+            assert False, "ASSERT 04, not correct boost"
+        self.debt_noi += noi_am
+
+        return
+
+    def repay_position(self, eth_data: ETHData, price_station: PriceStation, pool: Pool):
+        cr = self.calculate_cr(eth_data, price_station)
+        if cr > self.repay_cr:
+            return
+        noi_add = self.debt_noi - eth_data.get_eth_value_for_amount(self.collateral_eth) / price_station.rp / self.stable_cr
+        eth_amount = pool.how_much_eth_for_noi(noi_add)
+        eth_amount, noi_am = pool.put_eth_get_noi(eth_amount, price_station, eth_data)
+        if np.abs(noi_add - noi_am) > 0.00001:
+            assert False, "ASSERT 03, not correct repayment"
+        
+        self.debt_noi -= noi_am
+        if np.abs(self.calculate_cr(eth_data, price_station) - self.stable_cr) > 0.01:
+            assert False, "ASSERT 03.1, not correct repayment"
+        
+        return
     
     #returns eth value to the position owner
     def close_position(self, total_noi_val, eth_data: ETHData, price_station: PriceStation, pool: Pool):
@@ -64,12 +93,12 @@ class CDP_Position:
             return self.collateral_eth + added_eth
         diff_noi = self.debt_noi - total_noi_val
         
-        eth_amount = pool.eth * diff_noi / (pool.noi - diff_noi)
+        eth_amount = pool.how_much_eth_for_noi(diff_noi)
 
         eth_amount, noi_am = pool.put_eth_get_noi(eth_amount, price_station, eth_data)
         # print('closed position')
         if abs(noi_am - diff_noi) > 0.0001:
-            print("ASSERT 01, POSITION NOT CLOSED", noi_am - diff_noi)
+            assert False, ("ASSERT 01, POSITION NOT CLOSED", noi_am - diff_noi)
         # print('diff', diff_noi, 'real noi', noi_am)
         left_collateral = self.collateral_eth - eth_amount
         # print('left collateral', left_collateral)

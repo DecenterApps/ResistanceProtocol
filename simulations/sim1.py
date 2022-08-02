@@ -9,12 +9,13 @@ import numpy as np
 from classes.eth_data import *
 from classes.graph import *
 from classes.price_station import *
+from classes.pool import *
 from agents.leverager import *
 from agents.rate_trader import *
-from utils.constants import *
 from agents.price_trader import *
+from agents.safe_owner import *
+from utils.constants import *
 from utils.exchange import *
-from classes.pool import *
 
 exp = Experiment()
 
@@ -25,6 +26,7 @@ agents = dict()
 create_price_traders(agents)
 create_rate_traders(agents)
 create_leveragers(agents)
+create_safe_owners(agents)
 
 genesis_states = {'agents': agents}
 
@@ -54,17 +56,24 @@ def update_agents(params, substep, state_history, previous_state, policy_input):
     global agents
     ret = agents
     
-    # print(previous_state['timestep'])
+    print(previous_state['timestep'])
 
     eth_data.set_parameters(substep, previous_state)
     price_station.get_fresh_mp(pool, eth_data)
     price_station.calculate_redemption_price(graph)
     add_to_graph(previous_state)
 
-    total_sum = LEVERAGER.NUM + PRICE_TRADER.NUM + RATE_TRADER.NUM
+    total_sum = LEVERAGER.NUM + PRICE_TRADER.NUM + RATE_TRADER.NUM + SAFE_OWNER.NUM
     
-    for _ in range(total_sum // 2):
+    for i in range(total_sum // 2):
         p = np.random.random()
+        if i % 2 == 0:
+            if p < RATE_TRADER.NUM / (RATE_TRADER.NUM + PRICE_TRADER.NUM):
+                update_rate_trader(previous_state, agents, price_station, pool, eth_data)
+            else:
+                update_price_trader(previous_state, agents, price_station, pool, eth_data)
+            continue
+
         if p < LEVERAGER.NUM / (total_sum):
             update_leverager(previous_state, agents, price_station, pool, eth_data)
             continue
@@ -72,8 +81,11 @@ def update_agents(params, substep, state_history, previous_state, policy_input):
         if p < RATE_TRADER.NUM / (total_sum):
             update_rate_trader(previous_state, agents, price_station, pool, eth_data)
             continue
-        else:
+        p -= RATE_TRADER.NUM / (total_sum)
+        if p < PRICE_TRADER.NUM / (total_sum):
             update_price_trader(previous_state, agents, price_station, pool, eth_data)
+            continue
+        update_safe_owner(previous_state, agents, price_station, pool, eth_data)
     return ('agents', ret)
 
 partial_state_update_blocks = [
