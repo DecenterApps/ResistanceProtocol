@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./components/App/App";
 import { Web3ReactProvider } from "@web3-react/core";
-import Web3Provider from "web3";
+import {providers} from 'ethers'
 import { ChakraProvider } from "@chakra-ui/react";
 
 import Decimal from "decimal.js";
@@ -14,7 +14,7 @@ Decimal.set({
 });
 
 function getLibrary(provider) {
-  return new Web3Provider(provider);
+  return new providers.Web3Provider(provider);
 }
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
