@@ -5,13 +5,13 @@ import { VscHome, VscPulse } from "react-icons/vsc";
 import { useWeb3React } from "@web3-react/core";
 import { truncateAddress } from "../../utils/general";
 
-export default function Toolbar({ onOpenModal, setShow, show,onDisconnect }) {
+export default function Toolbar({ onOpenModal, setShow, show, onDisconnect }) {
   const { chainId, account, active, chain } = useWeb3React();
 
-  const disconnect=()=>{
-    setShow("Dashboard")
-    onDisconnect()
-  }
+  const disconnect = () => {
+    setShow("Dashboard");
+    onDisconnect();
+  };
 
   return (
     <div className="toolbar animated bounceInLeft">
@@ -56,7 +56,9 @@ export default function Toolbar({ onOpenModal, setShow, show,onDisconnect }) {
                 Connect
               </Button>
             ) : (
-              <Button className="connect-btn raise" onClick={disconnect}>Disconnect</Button>
+              <Button className="connect-btn raise" onClick={disconnect}>
+                Disconnect
+              </Button>
             )}
           </HStack>
         </div>

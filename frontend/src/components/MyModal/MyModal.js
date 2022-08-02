@@ -13,7 +13,7 @@ import {
 } from "@chakra-ui/react";
 import { Image } from "@chakra-ui/react";
 import { useWeb3React } from "@web3-react/core";
-import { connectors } from "../utils/connectors";
+import { connectors } from "../../utils/connectors";
 import './MyModal.css'
 
 export default function MyModal({ open, handleClose }) {

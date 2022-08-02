@@ -4,7 +4,7 @@ import Sidebar from "../Sidebar/Sidebar";
 import MainContent from "../MainContent/MainContent";
 import "./Homepage.scss";
 import { useWeb3React } from "@web3-react/core";
-import MyModal from "../MyModal";
+import MyModal from "../MyModal/MyModal";
 import Toolbar from "../Toolbar/Toolbar";
 
 export default function Homepage() {
