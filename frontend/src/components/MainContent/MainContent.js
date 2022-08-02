@@ -29,7 +29,7 @@ export default function MainContent({onJoin,show}) {
         <div className="block  style-11">
           {!join &&<><h1>Resistance</h1>
           <Button variant="ghost" className="btn" onClick={joinTheFight}>
-            Join the fight
+            Fight inflation with us
           </Button></>}
         </div>
       </div>
