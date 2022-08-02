@@ -11,7 +11,7 @@ contract ExchangePool{
     address noiAddr;
     address daiAddr;
 
-    uint scale = 10**18;
+    uint constant scale = 10**18;
     uint constant MAX_UINT = 2**256 - 1;
 
     constructor(address _noiAddr){
