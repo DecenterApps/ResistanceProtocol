@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 import "./CDPs.css";
-import { Box, VStack, HStack, Image, Button } from "@chakra-ui/react";
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
+import { Box, VStack, HStack, Image, Button, Tooltip } from "@chakra-ui/react";
+import { Chart as ChartJS, ArcElement, Tooltip as TP, Legend } from "chart.js";
 import { Pie } from "react-chartjs-2";
 import OpenCdpModal from "../OpenCdpModal/OpenCdpModal";
+import { FcInfo } from "react-icons/fc";
 
-ChartJS.register(ArcElement, Tooltip, Legend);
+ChartJS.register(ArcElement, TP, Legend);
 
 export default function CDPs() {
   const [cdps, setCdps] = useState([
@@ -103,6 +104,13 @@ export default function CDPs() {
           <VStack spacing="7vh">
             <HStack spacing="5vw" marginTop={"2vh"}>
               <Box className="div-line1">
+                <div className="div-info ">
+                  <Tooltip label="TO DO: WRITE INFO" placement="right">
+                    <div>
+                      <FcInfo></FcInfo>
+                    </div>
+                  </Tooltip>
+                </div>
                 <VStack>
                   <Image
                     src="eth.png"
@@ -116,6 +124,13 @@ export default function CDPs() {
                 </VStack>
               </Box>
               <Box className="div-line1">
+                <div className="div-info ">
+                  <Tooltip label="TO DO: WRITE INFO" placement="right">
+                    <div>
+                      <FcInfo></FcInfo>
+                    </div>
+                  </Tooltip>
+                </div>
                 <VStack>
                   <Image
                     src="dai.png"
@@ -129,6 +144,13 @@ export default function CDPs() {
                 </VStack>
               </Box>
               <Box className="div-line1">
+                <div className="div-info ">
+                  <Tooltip label="TO DO: WRITE INFO" placement="right">
+                    <div>
+                      <FcInfo></FcInfo>
+                    </div>
+                  </Tooltip>
+                </div>
                 <VStack>
                   <Image
                     src="eth.png"
@@ -145,9 +167,12 @@ export default function CDPs() {
             <HStack>
               <Box className="cdp-line2">
                 <h2 className="h-cdp">Your CDPs</h2>
-                <Button className="selected-tlbr-btn raise open-btn" onClick={()=>{
-                  setOpenModal(true)
-                }}>
+                <Button
+                  className="selected-tlbr-btn raise open-btn"
+                  onClick={() => {
+                    setOpenModal(true);
+                  }}
+                >
                   Open CDP
                 </Button>
                 <Box className="cdp-line2-holder">

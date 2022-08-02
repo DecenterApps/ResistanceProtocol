@@ -8,6 +8,7 @@
   width: 90vw;
   height: 10vh;
   top: 2vh;
+  z-index: 11;
 }
 
 .toolbar-right {
@@ -19,6 +20,7 @@
   -webkit-box-align: center;
   width: 90vw;
   align-items: flex-end !important;
+  z-index: 99;
 }
 
 .toolbar-left {
@@ -30,6 +32,7 @@
   -webkit-box-align: center;
   width: 15vw;
   align-items: flex-end !important;
+  z-index: 100;
 }
 
 .animated {

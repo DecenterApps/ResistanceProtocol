@@ -1,7 +1,8 @@
 import React from "react";
 import "./Toolbar.css";
-import { HStack, Button, Tooltip, Text } from "@chakra-ui/react";
+import { HStack, Button, Tooltip, Text, Image } from "@chakra-ui/react";
 import { VscHome, VscPulse } from "react-icons/vsc";
+import { BsGithub } from "react-icons/bs";
 import { useWeb3React } from "@web3-react/core";
 import { truncateAddress } from "../../utils/general";
 
@@ -13,15 +14,26 @@ export default function Toolbar({ onOpenModal, setShow, show, onDisconnect }) {
     onDisconnect();
   };
 
+  const github = () => {
+    window.location.replace(
+      "https://github.com/DecenterApps/ResistanceProtocol"
+    );
+  };
+
   return (
     <div className="toolbar animated bounceInLeft">
       <HStack>
         <div className="toolbar-left">
-          <Tooltip label={account} placement="right">
-            <Text className="address-text">{`${truncateAddress(
-              account
-            )}`}</Text>
-          </Tooltip>
+          <HStack>
+            <Tooltip label={account} placement="right">
+              <Text className="address-text">{`${truncateAddress(
+                account
+              )}`}</Text>
+            </Tooltip>
+            <Button onClick={github} className="selected-tlbr-btn raise" leftIcon={<BsGithub />}>
+                Github
+            </Button>
+          </HStack>
         </div>
         <div className="toolbar-right">
           <HStack spacing="2vw">

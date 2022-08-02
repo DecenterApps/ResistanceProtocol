@@ -43,8 +43,8 @@ export default function Homepage() {
           setShow={setShow}
         />
       )}
-      {join && <Toolbar onOpenModal={setOpenModal} setShow={setShow} show={show} onDisconnect={disconnect}></Toolbar>}
       <MainContent onJoin={setJoin} show={show} />
+      {join && <Toolbar onOpenModal={setOpenModal} setShow={setShow} show={show} onDisconnect={disconnect}></Toolbar>}
     </div>
   );
 }

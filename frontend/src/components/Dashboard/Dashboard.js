@@ -15,6 +15,8 @@ import {
   VStack,
   Image,
   Center,
+  Icon,
+  Tooltip,
 } from "@chakra-ui/react";
 import {
   Chart as ChartJS,
@@ -23,12 +25,13 @@ import {
   PointElement,
   LineElement,
   Title,
-  Tooltip,
+  Tooltip as TP,
   Filler,
   BarElement,
   Legend,
 } from "chart.js";
-import { Line,Bar } from "react-chartjs-2";
+import { Line, Bar } from "react-chartjs-2";
+import { FcInfo } from "react-icons/fc";
 
 ChartJS.register(
   CategoryScale,
@@ -37,7 +40,7 @@ ChartJS.register(
   LineElement,
   BarElement,
   Title,
-  Tooltip,
+  TP,
   Filler,
   Legend
 );
@@ -89,11 +92,11 @@ export const data3 = {
     },
     {
       fill: true,
-      label: 'Redemption price',
-      data: [3.14,3.12,3.1,3.08,3.06,3.04],
-      borderColor: 'rgb(255, 99, 132)',
-      backgroundColor: 'rgba(255, 99, 132, 0.5)',
-    }
+      label: "Redemption price",
+      data: [3.14, 3.12, 3.1, 3.08, 3.06, 3.04],
+      borderColor: "rgb(255, 99, 132)",
+      backgroundColor: "rgba(255, 99, 132, 0.5)",
+    },
   ],
 };
 
@@ -104,6 +107,13 @@ export default function Dashboard() {
         <VStack spacing="7vh">
           <HStack spacing="5vw" marginTop={"2vh"}>
             <Box className="div-line1">
+              <div className="div-info ">
+                <Tooltip label="TO DO: WRITE INFO" placement="right">
+                  <div>
+                    <FcInfo></FcInfo>
+                  </div>
+                </Tooltip>
+              </div>
               <VStack>
                 <Image
                   src="eth.png"
@@ -117,6 +127,13 @@ export default function Dashboard() {
               </VStack>
             </Box>
             <Box className="div-line1">
+              <div className="div-info ">
+                <Tooltip label="TO DO: WRITE INFO" placement="right">
+                  <div>
+                    <FcInfo></FcInfo>
+                  </div>
+                </Tooltip>
+              </div>
               <VStack>
                 <Image
                   src="dai.png"
@@ -130,6 +147,13 @@ export default function Dashboard() {
               </VStack>
             </Box>
             <Box className="div-line1">
+              <div className="div-info ">
+                <Tooltip label="TO DO: WRITE INFO" placement="right">
+                  <div>
+                    <FcInfo></FcInfo>
+                  </div>
+                </Tooltip>
+              </div>
               <VStack>
                 <Image
                   src="eth.png"
@@ -148,12 +172,26 @@ export default function Dashboard() {
               <h2 className="h-test">System rates</h2>
               <HStack spacing="2vw">
                 <Box className="div-indiv-line2 ">
+                  <div className="div-info ">
+                    <Tooltip label="TO DO: WRITE INFO" placement="right">
+                      <div>
+                        <FcInfo></FcInfo>
+                      </div>
+                    </Tooltip>
+                  </div>
                   <VStack>
                     <div>Stability fee</div>
                     <div className="bold-text">2%</div>
                   </VStack>
                 </Box>
                 <Box className="div-indiv-line2 ">
+                  <div className="div-info ">
+                    <Tooltip label="TO DO: WRITE INFO" placement="right">
+                      <div>
+                        <FcInfo></FcInfo>
+                      </div>
+                    </Tooltip>
+                  </div>
                   <VStack>
                     <div>Redemption rate</div>
                     <div className="bold-text">-8.234%</div>
@@ -166,6 +204,13 @@ export default function Dashboard() {
                   </VStack>
                 </Box>
                 <Box className="div-indiv-line2 ">
+                  <div className="div-info ">
+                    <Tooltip label="TO DO: WRITE INFO" placement="right">
+                      <div>
+                        <FcInfo></FcInfo>
+                      </div>
+                    </Tooltip>
+                  </div>
                   <VStack>
                     <div>Liquidation ratio</div>
                     <div className="bold-text">120%</div>
@@ -178,12 +223,26 @@ export default function Dashboard() {
               <VStack spacing="2vh">
                 <HStack spacing="2vw">
                   <Box className="div-indiv2-line2 ">
+                    <div className="div-info ">
+                      <Tooltip label="TO DO: WRITE INFO" placement="right">
+                        <div>
+                          <FcInfo></FcInfo>
+                        </div>
+                      </Tooltip>
+                    </div>
                     <VStack>
                       <div>ERC20 NOI Supply</div>
                       <div className="bold-text">4,664,863</div>
                     </VStack>
                   </Box>
                   <Box className="div-indiv2-line2 ">
+                    <div className="div-info ">
+                      <Tooltip label="TO DO: WRITE INFO" placement="right">
+                        <div>
+                          <FcInfo></FcInfo>
+                        </div>
+                      </Tooltip>
+                    </div>
                     <VStack>
                       <div>NOI in Uniswap V2 (NOI/ETH)</div>
                       <div className="bold-text">521,245</div>
@@ -191,6 +250,13 @@ export default function Dashboard() {
                   </Box>
                 </HStack>
                 <Box className="div-indiv3-line2 ">
+                  <div className="div-info ">
+                    <Tooltip label="TO DO: WRITE INFO" placement="right">
+                      <div>
+                        <FcInfo></FcInfo>
+                      </div>
+                    </Tooltip>
+                  </div>
                   <VStack>
                     <div>NOI in treasury</div>
                     <div className="bold-text">97,026 NOI</div>
@@ -204,24 +270,52 @@ export default function Dashboard() {
               <h2 className="h-test">Prices</h2>
               <HStack spacing="2vw">
                 <Box className="div-indiv-line3 ">
+                  <div className="div-info ">
+                    <Tooltip label="TO DO: WRITE INFO" placement="right">
+                      <div>
+                        <FcInfo></FcInfo>
+                      </div>
+                    </Tooltip>
+                  </div>
                   <VStack>
                     <div>NOI Market Price (TWAP)</div>
                     <div className="bold-text">2.9235 USD</div>
                   </VStack>
                 </Box>
                 <Box className="div-indiv-line3 ">
+                  <div className="div-info ">
+                    <Tooltip label="TO DO: WRITE INFO" placement="right">
+                      <div>
+                        <FcInfo></FcInfo>
+                      </div>
+                    </Tooltip>
+                  </div>
                   <VStack>
                     <div>NOI Redemption Price</div>
                     <div className="bold-text">2.9079 USD</div>
                   </VStack>
                 </Box>
                 <Box className="div-indiv-line3 ">
+                  <div className="div-info ">
+                    <Tooltip label="TO DO: WRITE INFO" placement="right">
+                      <div>
+                        <FcInfo></FcInfo>
+                      </div>
+                    </Tooltip>
+                  </div>
                   <VStack>
                     <div>Market/Redemption Delta (TWAP)</div>
                     <div className="bold-text">0.0156 USD</div>
                   </VStack>
                 </Box>
                 <Box className="div-indiv-line3 ">
+                  <div className="div-info ">
+                    <Tooltip label="TO DO: WRITE INFO" placement="right">
+                      <div>
+                        <FcInfo></FcInfo>
+                      </div>
+                    </Tooltip>
+                  </div>
                   <VStack>
                     <div>ETH Price</div>
                     <StatGroup>

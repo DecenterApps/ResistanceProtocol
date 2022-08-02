@@ -10,14 +10,13 @@
   border-color: #1f456e;
   color: azure;
   overflow: scroll;
-  -ms-overflow-style: none; 
-  scrollbar-width: none;  
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 .dashboard::-webkit-scrollbar {
   display: none;
 }
-
 
 .div-line1 {
   width: 23vw;
@@ -31,6 +30,7 @@
   flex-direction: column;
   -webkit-box-align: center;
   align-items: center;
+  position: relative;
 }
 
 .div-line2 {
@@ -59,6 +59,7 @@
   flex-direction: column;
   -webkit-box-align: center;
   align-items: center;
+  position: relative;
 }
 
 .div-indiv2-line2 {
@@ -72,6 +73,7 @@
   flex-direction: column;
   -webkit-box-align: center;
   align-items: center;
+  position: relative;
 }
 
 .div-indiv3-line2 {
@@ -85,6 +87,7 @@
   flex-direction: column;
   -webkit-box-align: center;
   align-items: center;
+  position: relative;
 }
 
 .div-line3 {
@@ -113,6 +116,7 @@
   flex-direction: column;
   -webkit-box-align: center;
   align-items: center;
+  position: relative;
 }
 
 .bold-text {
@@ -131,4 +135,11 @@
   margin: 0px auto;
   text-align: center;
   top: -20px;
+}
+
+.div-info {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
 }
