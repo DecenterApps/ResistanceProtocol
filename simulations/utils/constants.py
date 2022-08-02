@@ -1,9 +1,10 @@
-class TRADER:
-    NUM = 100
+class PRICE_TRADER:
+    NUM = 200
 
     ETH_AMOUNT = 1
     NOI_AMOUNT = 1000
 
+    #percentage of traders resource when trading
     RISKY = 0.5
     MODERATE = 0.3
     SAFE = 1 - MODERATE - RISKY
@@ -12,6 +13,22 @@ class TRADER:
     BOUND_HIGH = 0.3
     BOUND_MID = 0.2
     BOUND_LOW = 1 - BOUND_HIGH - BOUND_MID
+
+class RATE_TRADER:
+    NUM = 200
+
+    ETH_AMOUNT = 1
+    NOI_AMOUNT = 1000
+
+    #percentage of traders resource when trading
+    RISKY = 0.5
+    MODERATE = 0.3
+    SAFE = 1 - MODERATE - RISKY
+
+    # redemption rate when trader is activated
+    RR_HIGH = 0.4
+    RR_MID = 0.25
+    RR_LOW = 1 - RR_HIGH - RR_MID
 
 class LEVERAGER:
     NUM = 500

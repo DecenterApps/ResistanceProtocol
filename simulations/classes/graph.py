@@ -8,6 +8,9 @@ class Graph:
         self.m_prices = []
         self.pool_ratio = []
         self.trader_money_ratio = []
+        self.redemption_rate = []
+        self.redemption_rate_up = []
+        self.redemption_rate_down = []
     
     def plot(self):
         figure, axis = plt.subplots(2, 2, figsize=(15,8))
@@ -31,9 +34,15 @@ class Graph:
         axis[0, 1].set_title("Amount of eth in pool")
         axis[0, 1].legend(['eth amount'])
 
-        axis[1, 1].plot(self.noi)
-        axis[1, 1].set_title("Amount of noi in pool")
-        axis[1, 1].legend(['noi amount'])
+        # axis[1, 1].plot(self.noi)
+        # axis[1, 1].set_title("Amount of noi in pool")
+        # axis[1, 1].legend(['noi amount'])
+
+        axis[1, 1].plot(self.redemption_rate)
+        axis[1, 1].plot(self.redemption_rate_up)
+        axis[1, 1].plot(self.redemption_rate_down)
+        axis[1, 1].set_title("Redemption rate")
+        axis[1, 1].legend(['redemption rate'])
 
         plt.tight_layout()
 

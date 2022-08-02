@@ -10,22 +10,21 @@ from classes.eth_data import *
 from classes.graph import *
 from classes.price_station import *
 from agents.leverager import *
+from agents.rate_trader import *
 from utils.constants import *
-from agents.trader import *
+from agents.price_trader import *
 from utils.exchange import *
 from classes.pool import *
 
 exp = Experiment()
 
-price_station = PriceStation(2, 2, 0)
+price_station = PriceStation(2, 2, 1, 0)
 eth_data = ETHData()
 agents = dict()
 
-traders = dict()
-create_traders(traders, agents)
-
-leveragers = dict()
-create_leveragers(leveragers, agents)
+create_price_traders(agents)
+create_rate_traders(agents)
+create_leveragers(agents)
 
 genesis_states = {'agents': agents}
 
@@ -48,7 +47,7 @@ def add_to_graph(previous_state):
     graph.pool_ratio.append(pool.eth / (pool.eth + pool.noi))
 
     eth_amount, noi_amount = calculate_traders_amount(previous_state)
-    graph.trader_money_ratio.append(eth_amount / noi_amount)
+    graph.trader_money_ratio.append(eth_amount / (noi_amount+1e-10))
 
 
 def update_agents(params, substep, state_history, previous_state, policy_input):
@@ -59,15 +58,22 @@ def update_agents(params, substep, state_history, previous_state, policy_input):
 
     eth_data.set_parameters(substep, previous_state)
     price_station.get_fresh_mp(pool, eth_data)
-    price_station.calculate_redemption_price()
+    price_station.calculate_redemption_price(graph)
     add_to_graph(previous_state)
+
+    total_sum = LEVERAGER.NUM + PRICE_TRADER.NUM + RATE_TRADER.NUM
     
-    for _ in range((LEVERAGER.NUM + TRADER.NUM) // 2):
+    for _ in range(total_sum // 2):
         p = np.random.random()
-        if p < LEVERAGER.NUM / (LEVERAGER.NUM + TRADER.NUM) / 2:
+        if p < LEVERAGER.NUM / (total_sum):
             update_leverager(previous_state, agents, price_station, pool, eth_data)
+            continue
+        p -= LEVERAGER.NUM / (total_sum)
+        if p < RATE_TRADER.NUM / (total_sum):
+            update_rate_trader(previous_state, agents, price_station, pool, eth_data)
+            continue
         else:
-            update_trader(previous_state, agents, price_station, pool, eth_data)
+            update_price_trader(previous_state, agents, price_station, pool, eth_data)
     return ('agents', ret)
 
 partial_state_update_blocks = [
