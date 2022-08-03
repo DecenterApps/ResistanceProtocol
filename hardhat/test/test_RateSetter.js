@@ -51,7 +51,7 @@ describe('RateSetter', function () {
         assert.equal("9999000000000000000000", receipt.toString());
     });
 
-    it('... mint tokens with changing the rate', async () => {        
+    /*it('... mint tokens with changing the rate', async () => {        
         const txOpenCDP = await CDPManagerContractObj.connect(senderAccounts[1]).openCDP(senderAccounts[1].address, {value: ethers.utils.parseEther("12")});
         await txOpenCDP.wait();
 
@@ -62,24 +62,6 @@ describe('RateSetter', function () {
         const cdpIndex = getCDPIndex.toString();
 
         await expect(CDPManagerContractObj.connect(senderAccounts[1]).mintFromCDP(cdpIndex, "9999000000000000000000")).to.be.reverted;
-    });
+    });*/
 
-    it('... remove auth from RateSetter', async () => {        
-        const txOpenCDP = await CDPManagerContractObj.connect(senderAccounts[1]).openCDP(senderAccounts[1].address, {value: ethers.utils.parseEther("12")});
-        await txOpenCDP.wait();
-
-        const txChangeRate = await RateSetterContractObj.connect(senderAccounts[0]).updateCDPManagerData();
-        await txChangeRate.wait();
-
-        await executeActionFromMSW(
-            multiSigWallet,
-            0,
-            CDPManagerContractObj.address,
-            "removeAuthorization",
-            ["address"],
-            [RateSetterContractObj.address]
-        );
-
-        await expect(RateSetterContractObj.connect(senderAccounts[0]).updateCDPManagerData()).to.be.reverted;
-    });
 });

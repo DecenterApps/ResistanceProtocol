@@ -38,7 +38,7 @@ contract Liquidator{
 
         uint8 LR = Parameters(parametersContractAddress).getLR();
 
-        uint256 redemptionPrice=1000; // should get it from RateSetter contract
+        uint256 redemptionPrice=1; // should get it from RateSetter contract
         uint256 ethPrice = 1000;     // should get it from RateSetter contract
         uint256 CR = _cdp.lockedCollateral*ethPrice*100/(_cdp.generatedDebt*redemptionPrice);
 
@@ -60,9 +60,12 @@ contract Liquidator{
 
         cdpManager.liquidatePosition(_cdpIndex, msg.sender);
 
+        uint256 redemptionPrice=1; // should get it from RateSetter contract
+        uint256 ethPrice = 1000;     // should get it from RateSetter contract
+
         // calculate distribution of collateral
         uint256 total = cdp.lockedCollateral;
-        uint256 treasuryPart = (total-cdp.generatedDebt)*treasuryPercent/100;
+        uint256 treasuryPart = (total-(cdp.generatedDebt*redemptionPrice)/ethPrice)*treasuryPercent/100;
         uint256 liquidatorPart = total-treasuryPart;
 
         // send part to the Treasury

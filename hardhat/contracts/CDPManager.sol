@@ -4,6 +4,8 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import "./NOI.sol";
 import "./Parameters.sol";
+import "./Treasury.sol";
+
 
 error CDPManager__OnlyOwnerAuthorization();
 error CDPManager__UnauthorizedLiquidator();
@@ -29,16 +31,20 @@ contract CDPManager {
         uint256 updatedTime;
     }
 
+    uint constant SECONDS_PER_YEAR = 31536000;
+
     uint256 private totalSupply;
+    uint256 private totalDebt;
     uint256 public cdpi; // auto increment index for CDPs
     mapping(uint256 => CDP) private cdpList; // CDPId => CDP
 
     NOI private immutable NOI_COIN;
-    uint256 ethRp; // ETH/RP rate
-    uint256 liquidationRatio;
+
+    uint256 private lastUnmintedNOICalculationTimestamp;
 
     address liquidatorContractAddress;
     address parametersContractAddress;
+    address treasuryContractAddress;
 
     address public immutable owner;
 
@@ -100,9 +106,8 @@ contract CDPManager {
         authorizedAccounts[msg.sender] = true;
         totalSupply = 0;
         cdpi = 0;
+        lastUnmintedNOICalculationTimestamp = block.timestamp;
         NOI_COIN = NOI(_noiCoin);
-        ethRp = 1000 * EIGHTEEN_DECIMAL_NUMBER;
-        liquidationRatio = 120 * EIGHTEEN_DECIMAL_NUMBER / 100;
     }
 
     function setLiquidatorContractAddress(address _liquidatorContractAddress) public onlyOwner{
@@ -112,6 +117,11 @@ contract CDPManager {
     function setParametersContractAddress(address _parametersContractAddress) public onlyOwner{
         parametersContractAddress = _parametersContractAddress;
     } 
+
+    function setTreasuryContractAddress(address _treasuryContractAddress) public onlyOwner{
+        treasuryContractAddress = _treasuryContractAddress;
+    } 
+
 
     /*
      * @notice open a new cdp for a given _user address
@@ -143,7 +153,7 @@ contract CDPManager {
      * @param _cdpIndex index of cdp
      */
     function closeCDP(uint256 _cdpIndex) public HasAccess(cdpList[_cdpIndex].owner){
-        if (cdpList[_cdpIndex].generatedDebt != 0) {
+        if (getDebtWithSF(_cdpIndex) != 0) {
             revert CDPManager__HasDebt();
         }
         (bool sent, ) = payable(cdpList[_cdpIndex].owner).call{
@@ -175,6 +185,28 @@ contract CDPManager {
     }
 
     /*
+     * @notice calculate only debt from stability fee
+     * @param _cdpIndex index of cdp
+     */
+    function getOnlySF(uint256 _cdpIndex) public view returns(uint256){
+        uint8 SF = Parameters(parametersContractAddress).getSF();
+        CDP memory cdp = cdpList[_cdpIndex];
+        uint fee = cdp.generatedDebt*SF*(block.timestamp-cdp.updatedTime)/(SECONDS_PER_YEAR * 100);
+        return fee;
+    }
+
+
+    /*
+     * @notice calculate debt with stability fee included
+     * @param _cdpIndex index of cdp
+     */
+    function getDebtWithSF(uint256 _cdpIndex) public view returns(uint256){
+        uint total = cdpList[_cdpIndex].generatedDebt + cdpList[_cdpIndex].accumulatedFee + getOnlySF(_cdpIndex);
+        return total;
+    }
+
+
+    /*
      * @notice transfer ownership of CDP
      * @param _from address of owner
      * @param _to address of new owner
@@ -195,15 +227,40 @@ contract CDPManager {
             revert CDPManager__ZeroTokenMint();
         CDP memory user_cdp = cdpList[_cdpIndex];
 
+        uint8 LR = Parameters(parametersContractAddress).getLR();
+
         // check if the new minted coins will be under liquidation ratio
-        uint256 newTotalDebt = (user_cdp.generatedDebt + _amount) * liquidationRatio;
-        if(newTotalDebt >= ethRp * user_cdp.lockedCollateral) 
+        uint256 newTotalUserDebt = (getDebtWithSF(_cdpIndex) + _amount);
+        uint256 redemptionPrice=1; // should get it from RateSetter contract
+        uint256 ethPrice = 1000;     // should get it from RateSetter contract
+        uint256 CR = user_cdp.lockedCollateral*ethPrice*100/(newTotalUserDebt*redemptionPrice);
+
+        if(CR<LR) 
             revert CDPManager__LiquidationRatioReached();
 
+        recalculateSF(_cdpIndex);
+        transferSFtoTreasury();
+
         cdpList[_cdpIndex].generatedDebt += _amount;
+        totalDebt = totalDebt + _amount;
+
+
 
         NOI_COIN.mint(user_cdp.owner, _amount);
         emit MintCDP(cdpList[_cdpIndex].owner,_cdpIndex,_amount);
+    }
+
+    function recalculateSF(uint256 _cdpIndex) public{
+        cdpList[_cdpIndex].accumulatedFee += getOnlySF(_cdpIndex);
+        cdpList[_cdpIndex].updatedTime = block.timestamp;
+    }
+
+    function transferSFtoTreasury() private returns(uint256){
+        uint8 SF = Parameters(parametersContractAddress).getSF();
+        uint amount = totalDebt*SF*(block.timestamp-lastUnmintedNOICalculationTimestamp)/(SECONDS_PER_YEAR * 100);
+        lastUnmintedNOICalculationTimestamp = block.timestamp;
+        Treasury(payable(treasuryContractAddress)).receiveUnmintedNoi(amount);
+        return amount;
     }
 
     /*
@@ -211,10 +268,26 @@ contract CDPManager {
      * @param _cdpIndex index of cdp
      * @param _liquidatorUsr address that initiated liquidation
      */
-    function repayToCDP(uint256 _cdpIndex, uint256 _amount) public HasAccess(cdpList[_cdpIndex].owner){
-        NOI_COIN.burn(cdpList[_cdpIndex].owner, _amount);
-        cdpList[_cdpIndex].generatedDebt -= _amount;
-        emit RepayCDP(cdpList[_cdpIndex].owner,_cdpIndex,_amount);
+    function repayToCDP(uint256 _cdpIndex, uint256 _amount) public{
+        uint256 amount = _amount;
+        recalculateSF(_cdpIndex);
+        uint totalUserDebt = cdpList[_cdpIndex].generatedDebt + cdpList[_cdpIndex].accumulatedFee;
+
+        transferSFtoTreasury();
+
+        if(amount > totalUserDebt)
+            amount = totalUserDebt;
+        if(amount <= cdpList[_cdpIndex].accumulatedFee){
+            cdpList[_cdpIndex].accumulatedFee -= amount;
+        }
+        else {
+            uint256 onlyDebt = amount - cdpList[_cdpIndex].accumulatedFee;
+            cdpList[_cdpIndex].accumulatedFee = 0;
+            cdpList[_cdpIndex].generatedDebt -= onlyDebt;
+            totalDebt -= onlyDebt;
+        }
+        NOI_COIN.burn(msg.sender, amount);
+        emit RepayCDP(cdpList[_cdpIndex].owner,_cdpIndex,amount);
     }
 
     /*
@@ -231,20 +304,11 @@ contract CDPManager {
         totalSupply = totalSupply - cdpList[_cdpIndex].lockedCollateral;
 
         // burn dept from liquidator balance
-        NOI_COIN.burn(_liquidatorUsr,cdpList[_cdpIndex].generatedDebt);
+        NOI_COIN.burn(_liquidatorUsr,getDebtWithSF(_cdpIndex));
 
         emit CDPClose(cdpList[_cdpIndex].owner,_cdpIndex);
         delete cdpList[_cdpIndex];
     }
-
-    /*
-     * @notice update ETH/RP value
-     * @param _ethrp new value
-     */
-    function updateValue(uint _ethrp) external isAuthorized{
-        ethRp = _ethrp;
-    }
-
 
 
 }

@@ -7,7 +7,7 @@ error Parameters_NotAuthorized();
 contract Parameters{
 
     uint8 public LR=120; // Liquidation Ratio percentage
-    uint8 public SF; // Stability Fee percentage
+    uint8 public SF=2; // Stability Fee percentage
     address public immutable owner;
 
     modifier onlyOwner(){

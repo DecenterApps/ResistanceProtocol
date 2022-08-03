@@ -87,7 +87,7 @@ describe("CDPManager", function () {
             await expect(
                 CDPManagerContractObj.connect(senderAccounts[1]).mintFromCDP(
                     getCDPIndex.toString(),
-                    BigNumber(10).pow(18).mult(10000).toString()
+                    BigNumber(10).pow(18).mult(10000).plus(1).toString()
                 )
             ).to.be.reverted;
         });
@@ -210,7 +210,7 @@ describe("CDPManager", function () {
             await txApprove.wait();
 
             await expect(
-                CDPManagerContractObj.connect(senderAccounts[2]).repayToCDP(
+                CDPManagerContractObj.connect(senderAccounts[3]).repayToCDP(
                     getCDPIndex.toString(),
                     repayValue
                 )

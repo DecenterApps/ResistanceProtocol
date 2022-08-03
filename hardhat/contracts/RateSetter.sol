@@ -57,7 +57,7 @@ contract RateSetter {
     /*
      * @notice updates rates with values gathered from PI controllers
      */
-    function updateCDPManagerData() public {
+    function updatePrices() public {
         // gather rate from market/redemption controller
         marketPrice = 5 * 10**18; // should get it from oracle
         // reward caller
@@ -80,10 +80,7 @@ contract RateSetter {
             redemptionPrice
         );
         redemptionPriceUpdateTime = block.timestamp;
-        // gather rate from CPI controller
-        CDPManager_CONTRACT.updateValue(
-            (ethPrice * EIGHTEEN_DECIMAL_NUMBER) / redemptionPrice
-        );
+        
     }
 
     function updateRatesInternal() public {}
