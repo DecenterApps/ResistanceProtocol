@@ -8,6 +8,7 @@ import "./CDPManager.sol";
 import "./MarketController.sol";
 import "./CPIController.sol";
 import "./AbsPiController.sol";
+import "./EthTwapFeed.sol";
 
 abstract contract CPITrackerOracle {
     function currPegPrice() external view virtual returns (uint256);
@@ -20,6 +21,7 @@ contract RateSetter {
     uint256 CPI;
     uint256 redemptionRate;
     uint256 ethPrice;
+
     uint256 public constant RAY = 10**27;
     uint256 redemptionPriceUpdateTime;
     uint256 internal constant EIGHTEEN_DECIMAL_NUMBER = 10**18;
@@ -29,15 +31,15 @@ contract RateSetter {
     MarketController private immutable MarketController_CONTRACT;
     AbsPiController private immutable AbsPiController_CONTRACT;
 
-    AggregatorV3Interface private immutable ethPriceFeed;
+    EthTwapFeed private immutable ethTwapFeed;
     CPITrackerOracle private immutable cpiDataFeed;
 
     constructor(
         address _owner,
         address _cdpManager,
         address _AbsPiController,
-        address _ethPriceFeedAddress,
-        address _cpiDataFeedAddress
+        address _ethTwapFeed,
+        address _cpiDataFeed
     ) {
         owner = _owner;
         CDPManager_CONTRACT = CDPManager(_cdpManager);
@@ -48,8 +50,8 @@ contract RateSetter {
         redemptionRate = RAY;
         ethPrice = 1000 * RAY;
 
-        ethPriceFeed = AggregatorV3Interface(_ethPriceFeedAddress);
-        cpiDataFeed = CPITrackerOracle(_cpiDataFeedAddress);
+        ethTwapFeed = EthTwapFeed(_ethTwapFeed);
+        cpiDataFeed = CPITrackerOracle(_cpiDataFeed);
 
         redemptionPriceUpdateTime = block.timestamp;
     }
@@ -85,11 +87,6 @@ contract RateSetter {
 
     function updateRatesInternal() public {}
 
-    function getEthPrice() public view returns (int256) {
-        // price has 1e8 decimal points!
-        (, int256 price, , , ) = ethPriceFeed.latestRoundData();
-        return price;
-    }
 
     function getCpiData() public view returns (uint256) {
         uint256 data = cpiDataFeed.currPegPrice();

@@ -10,12 +10,12 @@ import "./Treasury.sol";
 error CDPManager__OnlyOwnerAuthorization();
 error CDPManager__UnauthorizedLiquidator();
 error CDPManager__NotAuthorized();
+error CDPManager__InvalidCDPIndex();
 error CDPManager__ContractNotAuthorized();
 error CDPManager__NotOwner();
 error CDPManager__HasDebt();
 error CDPManager__LiquidationRatioReached();
 error CDPManager__ZeroTokenMint();
-
 
 contract CDPManager {
     struct CDP {
@@ -48,20 +48,21 @@ contract CDPManager {
 
     address public immutable owner;
 
-    modifier onlyOwner(){
-        if(msg.sender != owner) revert CDPManager__OnlyOwnerAuthorization();
+    modifier onlyOwner() {
+        if (msg.sender != owner) revert CDPManager__OnlyOwnerAuthorization();
         _;
     }
 
-    modifier onlyLiquidatorContract(){
-        if(msg.sender != liquidatorContractAddress) revert CDPManager__UnauthorizedLiquidator();
+    modifier onlyLiquidatorContract() {
+        if (msg.sender != liquidatorContractAddress)
+            revert CDPManager__UnauthorizedLiquidator();
         _;
     }
     uint256 internal constant TWENTY_SEVEN_DECIMAL_NUMBER = 10**27;
     uint256 internal constant EIGHTEEN_DECIMAL_NUMBER = 10**18;
 
     modifier HasAccess(address _user) {
-        if(msg.sender != _user) revert CDPManager__NotAuthorized();
+        if (msg.sender != _user) revert CDPManager__NotAuthorized();
         _;
     }
 
@@ -87,11 +88,14 @@ contract CDPManager {
     function removeAuthorization(address account) external isOwner {
         authorizedAccounts[account] = false;
         emit RemoveAuthorization(account);
+    modifier CDPExists(uint256 _cdpIndx) {
+        if (cdpList[_cdpIndx].owner == address(0))
+            revert CDPManager__InvalidCDPIndex();
+        _;
     }
 
     modifier isOwner() {
-        if (owner != msg.sender)
-            revert CDPManager__NotOwner();
+        if (owner != msg.sender) revert CDPManager__NotOwner();
         _;
     }
 
@@ -101,6 +105,25 @@ contract CDPManager {
         _;
     }
 
+    // EVENTS
+
+    event CDPOpen(address indexed _user, uint256 indexed _cdpId, uint _value);
+    event TransferCollateral(
+        address indexed _user,
+        uint256 indexed _cdpId,
+        uint _value
+    );
+    event CDPClose(address indexed _user, uint256 indexed _cdpId);
+    event OwnershipTransfer(
+        address indexed _from,
+        address indexed _to,
+        uint256 indexed _cdpId
+    );
+    event MintCDP(address indexed _from, uint256 indexed _cdpId, uint _amount);
+    event RepayCDP(address indexed _from, uint256 indexed _cdpId, uint _amount);
+    event AddAuthorization(address _account);
+    event RemoveAuthorization(address _account);
+
     constructor(address _owner, address _noiCoin) {
         owner = _owner;
         authorizedAccounts[msg.sender] = true;
@@ -108,9 +131,13 @@ contract CDPManager {
         cdpi = 0;
         lastUnmintedNOICalculationTimestamp = block.timestamp;
         NOI_COIN = NOI(_noiCoin);
+
     }
 
-    function setLiquidatorContractAddress(address _liquidatorContractAddress) public onlyOwner{
+    function setLiquidatorContractAddress(address _liquidatorContractAddress)
+        public
+        onlyOwner
+    {
         liquidatorContractAddress = _liquidatorContractAddress;
     }
 
@@ -127,12 +154,17 @@ contract CDPManager {
      * @notice open a new cdp for a given _user address
      * @param _user address of cdp owner
      */
-    function openCDP(address _user) public payable HasAccess(_user) returns (uint256){
+    function openCDP(address _user)
+        public
+        payable
+        HasAccess(_user)
+        returns (uint256)
+    {
         cdpi = cdpi + 1;
         cdpList[cdpi] = CDP(msg.value, 0, _user,0,block.timestamp);
         totalSupply = totalSupply + msg.value;
 
-        emit CDPOpen(_user,cdpi,msg.value);
+        emit CDPOpen(_user, cdpi, msg.value);
         return cdpi;
     }
 
@@ -140,19 +172,27 @@ contract CDPManager {
      * @notice adds collateral to an existing CDP
      * @param _cdpIndex index of cdp
      */
-    function transferCollateralToCDP(uint _cdpIndex) public payable {
+    function transferCollateralToCDP(uint _cdpIndex)
+        public
+        payable
+        CDPExists(_cdpIndex)
+    {
         cdpList[_cdpIndex].lockedCollateral =
             cdpList[_cdpIndex].lockedCollateral +
             msg.value;
         totalSupply = totalSupply + msg.value;
-        emit TransferCollateral(cdpList[_cdpIndex].owner,_cdpIndex,msg.value);
+        emit TransferCollateral(cdpList[_cdpIndex].owner, _cdpIndex, msg.value);
     }
 
     /*
      * @notice close CDP if you have 0 debt
      * @param _cdpIndex index of cdp
      */
-    function closeCDP(uint256 _cdpIndex) public HasAccess(cdpList[_cdpIndex].owner){
+     function closeCDP(uint256 _cdpIndex)
+        public
+        CDPExists(_cdpIndex)
+        HasAccess(cdpList[_cdpIndex].owner)
+    
         if (getDebtWithSF(_cdpIndex) != 0) {
             revert CDPManager__HasDebt();
         }
@@ -161,7 +201,7 @@ contract CDPManager {
         }("");
         if (sent == false) revert();
         totalSupply = totalSupply - cdpList[_cdpIndex].lockedCollateral;
-        emit CDPClose(cdpList[_cdpIndex].owner,_cdpIndex);
+        emit CDPClose(cdpList[_cdpIndex].owner, _cdpIndex);
         delete cdpList[_cdpIndex];
     }
 
@@ -179,6 +219,7 @@ contract CDPManager {
     function getOneCDP(uint256 _cdpIndex)
         public
         view
+        CDPExists(_cdpIndex)
         returns (CDP memory searchedCDP)
     {
         searchedCDP = cdpList[_cdpIndex];
@@ -212,19 +253,26 @@ contract CDPManager {
      * @param _to address of new owner
      * @param _cdpIndex index of cdp
      */
-    function transferOwnership(address _from,address _to,uint256 _cdpIndex) public HasAccess(_from){
-        cdpList[_cdpIndex].owner=_to;
-        emit OwnershipTransfer(_from,_to,_cdpIndex);
+    function transferOwnership(
+        address _from,
+        address _to,
+        uint256 _cdpIndex
+    ) public CDPExists(_cdpIndex) HasAccess(_from) {
+        cdpList[_cdpIndex].owner = _to;
+        emit OwnershipTransfer(_from, _to, _cdpIndex);
     }
 
     /*
-     * @notice mint coins for cdp 
+     * @notice mint coins for cdp
      * @param _cdpIndex index of cdp
      * @param _amount amount of tokens to mint
      */
-    function mintFromCDP(uint256 _cdpIndex, uint256 _amount) public HasAccess(cdpList[_cdpIndex].owner) {
-        if(_amount == 0)
-            revert CDPManager__ZeroTokenMint();
+    function mintFromCDP(uint256 _cdpIndex, uint256 _amount)
+        public
+        CDPExists(_cdpIndex)
+        HasAccess(cdpList[_cdpIndex].owner)
+    {
+        if (_amount == 0) revert CDPManager__ZeroTokenMint();
         CDP memory user_cdp = cdpList[_cdpIndex];
 
         uint8 LR = Parameters(parametersContractAddress).getLR();
@@ -247,7 +295,7 @@ contract CDPManager {
 
 
         NOI_COIN.mint(user_cdp.owner, _amount);
-        emit MintCDP(cdpList[_cdpIndex].owner,_cdpIndex,_amount);
+        emit MintCDP(cdpList[_cdpIndex].owner, _cdpIndex, _amount);
     }
 
     function recalculateSF(uint256 _cdpIndex) public{
@@ -268,7 +316,7 @@ contract CDPManager {
      * @param _cdpIndex index of cdp
      * @param _liquidatorUsr address that initiated liquidation
      */
-    function repayToCDP(uint256 _cdpIndex, uint256 _amount) public{
+     function repayToCDP(uint256 _cdpIndex, uint256 _amount) public{
         uint256 amount = _amount;
         recalculateSF(_cdpIndex);
         uint totalUserDebt = cdpList[_cdpIndex].generatedDebt + cdpList[_cdpIndex].accumulatedFee;

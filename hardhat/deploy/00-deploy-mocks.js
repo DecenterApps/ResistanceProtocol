@@ -1,23 +1,34 @@
-const { network } = require("hardhat")
+const { network } = require("hardhat");
 
-const DECIMALS = "8"
-const INITIAL_PRICE = "1000"
+const DECIMALS = "8";
+const INITIAL_ETH_PRICE = "100000000000";
+
+const INITIAL_CPI = "1048699183321964674";
 
 module.exports = async ({ getNamedAccounts, deployments }) => {
-    const { deploy, log } = deployments
-    const { deployer } = await getNamedAccounts()
-    const chainId = network.config.chainId
+    const { deploy, log } = deployments;
+    const { deployer } = await getNamedAccounts();
+    const chainId = network.config.chainId;
 
-    // If on local network, deploy mocks
+    // If on localhost, deploy mock
     if (chainId == 31337) {
-        log("Deploying mocks...")
-        await deploy("MockV3Aggregator", {
-            contract: "MockV3Aggregator",
+        log("Deploying mocks...");
+        await deploy("EthPriceFeedMock", {
+            contract: "EthPriceFeedMock",
             from: deployer,
             log: true,
-            args: [DECIMALS, INITIAL_PRICE],
-        })
-        log("Mocks Deployed to Local Network!")
+            args: [INITIAL_ETH_PRICE],
+        });
     }
-}
-module.exports.tags = ["all", "mocks"]
+
+    // cpi data feed doesnt exist for testnet so we mock it
+    if(chainId != 1) {
+        await deploy("CPIDataFeedMock", {
+            contract: "CPIDataFeedMock",
+            from: deployer,
+            log: true,
+            args: [INITIAL_CPI],
+        });
+    }
+};
+module.exports.tags = ["all", "mocks"];

@@ -30,8 +30,13 @@ contract NOI {
     }
 
     modifier isOwner() {
-        if (msg.sender!=owner)
-            revert NOI__NotOwner();
+        if (msg.sender != owner) revert NOI__NotOwner();
+        _;
+    }
+
+    modifier validDestination(address _dst) {
+        if (_dst == address(0) || _dst == address(this))
+            revert NOI__InvalidDestination();
         _;
     }
 
@@ -53,10 +58,7 @@ contract NOI {
     event Approval(address indexed src, address indexed guy, uint256 amount);
     event Transfer(address indexed src, address indexed dst, uint256 amount);
 
-    constructor(
-        address _owner,
-        uint256 _chainId
-    ) {
+    constructor(address _owner, uint256 _chainId) {
         owner = _owner;
         authorizedAccounts[msg.sender] = true;
         chainId = _chainId;
@@ -82,16 +84,8 @@ contract NOI {
         address _src,
         address _dst,
         uint256 _amount
-    ) public returns (bool) {
-        if (_dst == address(0) || _dst == address(this))
-            revert NOI__InvalidDestination();
-        if (balanceOf[_src] < _amount) revert NOI__InsufficientBalance();
-        if (_src != msg.sender) {
-            if(allowance[_src][msg.sender] < _amount)
-                revert NOI__InsufficientAllowance();
-            allowance[_src][msg.sender] = allowance[_src][msg.sender] - _amount;
-        }
-        balanceOf[_src] = balanceOf[_src] - _amount;
+    ) public validDestination(_dst) returns (bool) {
+        checkAndRemoveAmount(_src, _amount);
         balanceOf[_dst] = balanceOf[_dst] + _amount;
         emit Transfer(_src, _dst, _amount);
         return true;
@@ -114,14 +108,7 @@ contract NOI {
      * @param _amount The amount of coins to burn
      */
     function burn(address _usr, uint256 _amount) external isAuthorized {
-        
-        if(balanceOf[_usr] < _amount) revert NOI__InsufficientBalance();
-        if (_usr != msg.sender) {
-            if(allowance[_usr][msg.sender] < _amount) 
-                revert NOI__InsufficientAllowance();
-            allowance[_usr][msg.sender] = allowance[_usr][msg.sender] - _amount;
-        }
-        balanceOf[_usr] = balanceOf[_usr] - _amount;
+        checkAndRemoveAmount(_usr, _amount);
         totalSupply = totalSupply - _amount;
         emit Transfer(_usr, address(0), _amount);
     }
@@ -135,5 +122,22 @@ contract NOI {
         allowance[msg.sender][_usr] = _amount;
         emit Approval(msg.sender, _usr, _amount);
         return true;
+    }
+
+    /*
+     * @notice Check the users balance and remove amount if user is tx sender or allowance exists for tx sender
+     * @param _usr The address whose allowance is removed
+     * @param _amount The amount to remove
+     */
+    function checkAndRemoveAmount(address _usr, uint256 _amount) private {
+        uint256 userBalance = balanceOf[_usr];
+        if (userBalance < _amount) revert NOI__InsufficientBalance();
+        if (_usr != msg.sender) {
+            uint256 userAllowance = allowance[_usr][msg.sender];
+            if (userAllowance < _amount)
+                revert NOI__InsufficientAllowance();
+            allowance[_usr][msg.sender] = userAllowance - _amount;
+        }
+        balanceOf[_usr] = userBalance - _amount;
     }
 }

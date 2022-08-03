@@ -110,6 +110,19 @@ describe("CDPManager", function () {
                 )
             ).to.be.reverted;
         });
+
+        it("... mint tokens from invalid cdp index", async () => {
+            const txOpenCDP = await CDPManagerContractObj.connect(senderAccounts[1]).openCDP(
+                senderAccounts[1].address,
+                {
+                    value: ethers.utils.parseEther("12"),
+                }
+            );
+            await txOpenCDP.wait();
+
+            await expect(CDPManagerContractObj.connect(senderAccounts[2]).mintFromCDP(69, 1)).to.be
+                .reverted;
+        });
     });
 
     describe("Burn", function () {

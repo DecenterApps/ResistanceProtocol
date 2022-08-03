@@ -8,34 +8,31 @@ contract Parameters{
 
     uint8 public LR=120; // Liquidation Ratio percentage
     uint8 public SF=2; // Stability Fee percentage
+
     address public immutable owner;
 
-    modifier onlyOwner(){
-        if (msg.sender != owner)
-            revert Parameters_NotAuthorized();
+    modifier onlyOwner() {
+        if (msg.sender != owner) revert Parameters_NotAuthorized();
         _;
     }
 
-    constructor(address _owner){
+    constructor(address _owner) {
         owner = _owner;
     }
 
-
-    function setLR(uint8 _LR) public onlyOwner{
+    function setLR(uint8 _LR) public onlyOwner {
         LR = _LR;
     }
 
-    function getLR() public view returns(uint8){
-        return LR;
-    }
-
-   function setSF(uint8 _SF) public onlyOwner{
+    function setSF(uint8 _SF) public onlyOwner {
         SF = _SF;
     }
 
-    function getSF() public view returns(uint8){
+    function getSF() public view returns (uint8) {
         return SF;
     }
 
-
+    function getLR() public view returns (uint8) {
+        return LR;
+    }
 }
