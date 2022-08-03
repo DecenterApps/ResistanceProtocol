@@ -14,12 +14,6 @@ export default function Toolbar({ onOpenModal, setShow, show, onDisconnect }) {
     onDisconnect();
   };
 
-  const github = () => {
-    window.location.replace(
-      "https://github.com/DecenterApps/ResistanceProtocol"
-    );
-  };
-
   return (
     <div className="toolbar animated bounceInLeft">
       <HStack>
@@ -30,9 +24,6 @@ export default function Toolbar({ onOpenModal, setShow, show, onDisconnect }) {
                 account
               )}`}</Text>
             </Tooltip>
-            <Button onClick={github} className="selected-tlbr-btn raise" leftIcon={<BsGithub />}>
-                Github
-            </Button>
           </HStack>
         </div>
         <div className="toolbar-right">

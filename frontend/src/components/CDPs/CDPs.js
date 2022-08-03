@@ -9,7 +9,7 @@ import Footer from '../Footer/Footer'
 
 ChartJS.register(ArcElement, TP, Legend);
 
-export default function CDPs() {
+export default function CDPs({bAnimation,setBAnimation}) {
   const [cdps, setCdps] = useState([
     {
       id: 1,
@@ -246,7 +246,7 @@ export default function CDPs() {
               </Box>
             </HStack>
           </VStack>
-          <Footer></Footer>
+          <Footer bAnimation={bAnimation} setBAnimation={setBAnimation}></Footer>
         </Box>
       </div>
     </>

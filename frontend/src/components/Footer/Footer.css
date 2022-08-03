@@ -28,11 +28,11 @@
 
 .ftr-left {
   display: flex;
-  -webkit-box-pack: center;
-  justify-content: center;
+  -webkit-box-pack: start;
+  justify-content:flex-start;
   flex-direction: column;
-  -webkit-box-align: center;
-  width: 90vw;
+  -webkit-box-align: start;
+  width: 20vw;
   align-items: flex-start !important;
   z-index: 99;
 }

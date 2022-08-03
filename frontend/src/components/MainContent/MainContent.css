@@ -4,11 +4,30 @@
   animation: spin 5s linear 0s infinite;
 }
 
+.canvas {
+  position: relative;
+  z-index: 1;
+}
+
+.test-center {
+  z-index: 20;
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 0;
+	padding: 0;
+	width: 100vw;
+	height: 100vh;
+	overflow: hidden;
+	display: flex;
+}
+
 .container1 {
   top: -9vh !important;
   width: 60vw;
   left: 2vw;
   position: relative;
+  z-index: 20;
 }
 
 .container2 {
@@ -16,6 +35,7 @@
   left: 2vw;
   width: 60vw;
   position: relative;
+  z-index: 20;
 }
 
 .center-div {

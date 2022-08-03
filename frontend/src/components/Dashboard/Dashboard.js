@@ -101,7 +101,7 @@ export const data3 = {
   ],
 };
 
-export default function Dashboard() {
+export default function Dashboard({bAnimation,setBAnimation}) {
   return (
     <div className="dashboard animated bounceIn">
       <Box>
@@ -354,7 +354,7 @@ export default function Dashboard() {
         </VStack>
       </Box>
       <br></br>
-      <Footer></Footer>
+      <Footer bAnimation={bAnimation} setBAnimation={setBAnimation}></Footer>
     </div>
   );
 }
