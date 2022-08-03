@@ -1,0 +1,317 @@
+.content {
+  width: 80vh;
+  height: 80vmin;
+  animation: spin 5s linear 0s infinite;
+}
+
+.canvas {
+  position: relative;
+  z-index: 1;
+}
+
+.test-center {
+  z-index: 20;
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 0;
+	padding: 0;
+	width: 100vw;
+	height: 100vh;
+	overflow: hidden;
+	display: flex;
+}
+
+.container1 {
+  top: -9vh !important;
+  width: 60vw;
+  left: 2vw;
+  position: relative;
+  z-index: 20;
+}
+
+.container2 {
+  top: -9vh !important;
+  left: 2vw;
+  width: 60vw;
+  position: relative;
+  z-index: 20;
+}
+
+.center-div {
+  top: 21vh !important;
+  position: relative;
+}
+
+.subcontainer {
+  margin-left: 40%;
+  margin-top: 15%;
+  position: absolute;
+}
+
+@keyframes spin {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.content > div {
+  --line: #47c;
+  position: absolute;
+  width: 70%;
+  height: 70%;
+  border-radius: 100%;
+  box-sizing: border-box;
+  box-shadow: -3vmin 3vmin 3vmin 0 #161616 inset,
+    1vmin -1vmin 0.125vmin -1.25vmin var(--line);
+  background: radial-gradient(
+      circle at 36% 64%,
+      #fff0 0 calc(53.5% - 1px),
+      var(--line) 53.5% 54%,
+      #fff0 calc(54% + 1px) 100%
+    ),
+    radial-gradient(
+      circle at 38% 62%,
+      #fff0 0 calc(54.5% - 1px),
+      var(--line) 54.5% 55%,
+      #fff0 calc(55% + 1px) 100%
+    ),
+    radial-gradient(
+      circle at 42% 58%,
+      #fff0 0 calc(57.75% - 1px),
+      var(--line) 57.75% 58%,
+      #fff0 calc(58% + 1px) 100%
+    ),
+    radial-gradient(
+      circle at 40% 60%,
+      #fff0 0 calc(56.75% - 1px),
+      var(--line) 56.75% 57%,
+      #fff0 calc(57% + 1px) 100%
+    ),
+    radial-gradient(
+      circle at 45% 55%,
+      #fff0 0 calc(61.75% - 1px),
+      var(--line) 61.75% 62%,
+      #fff0 calc(62% + 1px) 100%
+    ),
+    radial-gradient(
+      circle at 43.5% 56.5%,
+      #fff0 0 calc(59.75% - 1px),
+      var(--line) 59.75% 60%,
+      #fff0 calc(60% + 1px) 100%
+    ),
+    radial-gradient(
+      circle at 45% 55%,
+      #fff0 0 calc(64.5% - 1px),
+      var(--line) 64.5% 64.75%,
+      #fff0 calc(64.75% + 1px) 100%
+    ),
+    radial-gradient(
+      circle at 46.5% 53.5%,
+      #fff0 0 calc(65.5% - 1px),
+      var(--line) 65.5% 65.75%,
+      #fff0 calc(65.75% + 1px) 100%
+    ),
+    radial-gradient(
+      circle at 48.5% 51.5%,
+      #fff0 0 calc(67.75% - 1px),
+      var(--line) 67.75% 68.25%,
+      #fff0 calc(68.25% + 1px) 100%
+    ),
+    radial-gradient(
+      circle at 49% 51%,
+      #fff0 0 calc(69.5% - 1px),
+      var(--line) 69.5% 70%,
+      #fff0 calc(70% + 1px) 100%
+    );
+}
+
+.top-left {
+  left: 11vmin;
+  top: 2vmin;
+}
+
+.left-bot {
+  bottom: 11vmin;
+  left: 2vmin;
+  transform: rotate(-90deg);
+}
+
+.bot-right {
+  right: 11vmin;
+  bottom: 2vmin;
+  transform: rotate(-180deg);
+}
+
+.right-top {
+  right: 2vmin;
+  top: 11vmin;
+  transform: rotate(-270deg);
+}
+
+@import url(https://fonts.googleapis.com/css?family=Nosifer|Codystar:300,400|Poiret+One|Limelight|Shojumaru|Titan+One|UnifrakturMaguntia|Press+Start+2P|Creepster|Playball|Griffy|Lobster|Bevan|Racing+Sans+One|Fontdiner+Swanky|Wire+One|Lato:100,300,400|Graduate);
+
+.block {
+  height: 77vh;
+  top: 0;
+  left: 0;
+  min-height: 300px;
+  width: 100%;
+  position: absolute;
+  overflow: hidden;
+  z-index: 10;
+}
+
+.block + .block {
+  margin-top: 2px;
+}
+
+h1 {
+  width: 100%;
+  position: absolute;
+  margin: 0;
+  top: 50%;
+  text-align: center;
+  font-size: 5rem !important;
+  transform: translateY(-50%);
+  font-weight: normal;
+}
+
+.style-11 h1 {
+  color: #d7dde2;
+  font-family: lato;
+  font-weight: 100;
+  text-shadow: 0 2px 0 #000, 0 0 20px #fff;
+}
+
+.btn {
+  position: absolute;
+  margin: 0;
+  top: 58%;
+  left: 30%;
+  text-align: center;
+  font-size: 2rem !important;
+  transform: translateY(-50%);
+  font-weight: normal;
+  color: #d7dde2 !important;
+  font-family: lato !important;
+  font-weight: 100 !important;
+  text-shadow: 0 2px 0 #000, 0 0 20px #aaa;
+}
+
+.btn:hover {
+  box-shadow: 0 0.5em 0.5em -0.4em var(--hover);
+  transform: translateY(-0.25em);
+  background-color: transparent !important;
+  transition: 0.25s;
+}
+
+/* OPEN ANIMATIONS */
+
+.animated {
+  visibility: visible;
+
+  -webkit-animation-fill-mode: both;
+  -moz-animation-fill-mode: both;
+  -ms-animation-fill-mode: both;
+  -o-animation-fill-mode: both;
+  animation-fill-mode: both;
+
+  -webkit-animation-duration: 1s;
+  -moz-animation-duration: 1s;
+  -ms-animation-duration: 1s;
+  -o-animation-duration: 1s;
+  animation-duration: 1s;
+
+  -webkit-animation-play-state: running;
+  -moz-animation-play-state: running;
+  -ms-animation-play-state: running;
+  -o-animation-play-state: running;
+  animation-play-state: running;
+}
+
+@-webkit-keyframes bounceIn {
+  0% {
+    opacity: 0;
+    -webkit-transform: scale(0.3);
+  }
+  50% {
+    -webkit-transform: scale(1.05);
+  }
+
+  70% {
+    -webkit-transform: scale(0.9);
+  }
+
+  100% {
+    opacity: 1;
+    -webkit-transform: scale(1);
+  }
+}
+
+@-moz-keyframes bounceIn {
+  0% {
+    opacity: 0;
+    -moz-transform: scale(0.3);
+  }
+
+  50% {
+    -moz-transform: scale(1.05);
+  }
+
+  70% {
+    -moz-transform: scale(0.9);
+  }
+
+  100% {
+    opacity: 1;
+    -moz-transform: scale(1);
+  }
+}
+
+@-o-keyframes bounceIn {
+  0% {
+    opacity: 0;
+    -o-transform: scale(0.3);
+  }
+
+  50% {
+    -o-transform: scale(1.05);
+  }
+
+  70% {
+    -o-transform: scale(0.9);
+  }
+
+  100% {
+    opacity: 1;
+    -o-transform: scale(1);
+  }
+}
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+
+  50% {
+    transform: scale(1.05);
+  }
+
+  70% {
+    transform: scale(0.9);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animated.bounceIn {
+  -webkit-animation-name: bounceIn;
+  -moz-animation-name: bounceIn;
+  -o-animation-name: bounceIn;
+  animation-name: bounceIn;
+}
