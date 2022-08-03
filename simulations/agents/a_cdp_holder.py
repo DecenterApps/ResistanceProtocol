@@ -37,10 +37,8 @@ class CDP_Holder(ABC):
         self.opened_position = True
         collateral = self.eth_amount * self.perc_amount
         self.eth_amount -= collateral
-        self.debt_noi = price_station.get_amount_of_noi_for_rp_value(
-            collateral) / self.initial_cr
-        self.cdp_position = CDP_Position(
-            collateral, self.debt_noi, self.initial_cr, self.repay_cr, self.boost_cr)
+        self.debt_noi = price_station.get_amount_of_noi_for_rp_value(collateral) / self.initial_cr
+        self.cdp_position = CDP_Position(collateral, self.debt_noi, self.initial_cr, self.repay_cr, self.boost_cr)
 
         added_eth, added_noi = pool.put_noi_get_eth(self.debt_noi, price_station, eth_data)
         return added_eth, added_noi
@@ -75,7 +73,7 @@ def update_holder(previous_state, agents, price_station: PriceStation, pool: Poo
                 holder.repay(eth_data, price_station, pool)
     else:
         
-        if relative_gap > holder.relative_gap and price_station.rp < price_station.mp:
+        if relative_gap > holder.relative_gap and price_station.rp < price_station.mp and holder.eth_amount > 0:
             holder.open_position(eth_data, price_station, pool)
     
     agents[name] = holder
@@ -89,7 +87,7 @@ def get_holder_values(CONST):
         return CONST.M_DIFF, CONST.M_CR
     return CONST.S_DIFF, CONST.S_CR
 
-# percentage of eth amount that is used for collateral of a leverager
+# percentage of eth amount that is used for collateral of a holder
 def get_holder_perc_amount(CONST) -> float:
     p = np.random.random()
     if p < CONST.R_COLLATERAL:
@@ -99,7 +97,7 @@ def get_holder_perc_amount(CONST) -> float:
         return 0.7
     return 0.45
 
-# difference between redemption price and market price when leverager opens/closes a position
+# difference between redemption price and market price when holder opens/closes a position
 def get_holder_relative_gap(CONST):
     p = np.random.random()
     if p < CONST.RELATIVE_GAP_RISKY:

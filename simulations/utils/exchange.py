@@ -1,8 +1,5 @@
 from classes.pool import Pool
 
-#get_noi_value
-#get_noi_value_for_amount
-
 def exchange_noi_to_eth(noi_amount, pool: Pool):
     eth, noi = pool.eth, pool.noi
     noi += noi_amount

@@ -1,11 +1,8 @@
-from classes.cdp_position import CDP_Position
 from classes.price_station import PriceStation
 from classes.eth_data import ETHData
 from agents.a_cdp_holder import *
 from utils.constants import *
 from utils.exchange import *
-import numpy as np
-import random
 
 class Safe_Owner(CDP_Holder):
 

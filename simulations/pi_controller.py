@@ -1,4 +1,3 @@
-# import matplotlib.pyplot as plt
 import numpy as np
 
 TIME_STEP = 10000
