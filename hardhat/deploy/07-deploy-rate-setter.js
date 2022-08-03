@@ -7,24 +7,18 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     const { deployer } = await getNamedAccounts();
     const chainId = network.config.chainId;
 
-    let ethUsdPriceFeedAddress, cpiDataFeedAddress;
+    let cpiDataFeedAddress;
 
-    if (chainId == 31337) {
+    if (chainId == 31337 || chainId == 42) {
         // real for fork
-        // ethUsdPriceFeedAddress = networkConfig[1].ethUsdPriceFeed;
         // cpiDataFeedAddress = networkConfig[1].cpiDataFeed;
-
         // mock contracts
-        ethUsdPriceFeedAddress = (await ethers.getContract("EthPriceFeedMock", deployer)).address;
         cpiDataFeedAddress = (await ethers.getContract("CPIDataFeedMock", deployer)).address;
-    } else if (chainId == 42) {
-        // cpi for testnet doesnt exist so we mock
-        ethUsdPriceFeedAddress = networkConfig[chainId].ethUsdPriceFeed;
-        cpiDataFeedAddress = (await ethers.getContract("CPIDataFeedMock", deployer)).address;
-    } else if (chainId == 1) {
-        ethUsdPriceFeedAddress = networkConfig[chainId].ethUsdPriceFeed;
+    } else {
         cpiDataFeedAddress = networkConfig[chainId].cpiDataFeed;
     }
+
+    let ethTwapFeedAddress = (await ethers.getContract("EthTwapFeed", deployer)).address;
 
     const multiSigWalletAddress = (await ethers.getContract("MultiSigWallet", deployer)).address;
 
@@ -40,7 +34,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
             multiSigWalletAddress,
             cdpManager.address,
             absPiController.address,
-            ethUsdPriceFeedAddress,
+            ethTwapFeedAddress,
             cpiDataFeedAddress,
         ],
         log: true,
@@ -55,7 +49,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
             multiSigWalletAddress,
             cdpManager.address,
             absPiController.address,
-            ethUsdPriceFeedAddress,
+            ethTwapFeedAddress,
             cpiDataFeedAddress,
         ]);
     }
