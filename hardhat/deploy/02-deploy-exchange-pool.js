@@ -11,7 +11,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 
     log("----------------------------------------------------");
     log("Deploying ExchangePool and waiting for confirmations...");
-    const ExchangePool = await deploy("Exchange pool", {
+    const ExchangePool = await deploy("ExchangePool", {
         from: deployer,
         args: [coinAddress],
         log: true,

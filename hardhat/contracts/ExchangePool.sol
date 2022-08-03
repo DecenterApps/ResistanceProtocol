@@ -15,9 +15,9 @@ contract ExchangePool{
     uint constant MAX_UINT = 2**256 - 1;
 
     constructor(address _noiAddr){
-        poolRouterAddr  = 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D;
+        poolRouterAddr  = 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D;   //both mainnet & kovan address       
         poolFactoryAddr = IRouter02(poolRouterAddr).factory();
-        daiAddr         = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
+        daiAddr         = 0x6B175474E89094C44Da98b954EedeAC495271d0F;   //mainnet address (kovan address is different)
         noiAddr         = _noiAddr;
 
         poolAddr = IFactory(poolFactoryAddr).createPair(daiAddr, noiAddr);
