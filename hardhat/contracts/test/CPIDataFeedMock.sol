@@ -6,7 +6,7 @@ contract CPIDataFeedMock {
 
     uint256 public cpi;
 
-    constructor(uint256 _cpi) public {
+    constructor(uint256 _cpi) {
         cpi = _cpi;
     }
 
