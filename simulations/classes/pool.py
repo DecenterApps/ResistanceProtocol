@@ -11,6 +11,7 @@ class Pool:
     # returns eth and noi amount of how much the pool has been changed(absolute value)
     def put_eth_get_noi(self, eth_add, price_station, eth_data: ETHData) -> Tuple[float, float]:
         if eth_add <= 0:
+            print(eth_add)
             assert False, "eth_add must be positive"
         noi_sum = 0
         eth_val = eth_add / NUM_BATCHES
@@ -27,6 +28,7 @@ class Pool:
     # returns eth and noi amount of how much the pool has been changed(absolute value)
     def put_noi_get_eth(self, noi_add, price_station, eth_data: ETHData) -> Tuple[float, float]:
         if noi_add <= 0:
+            print(noi_add)
             assert False, "noi_add must be positive"
         eth_sum = 0
         noi_val = noi_add / NUM_BATCHES

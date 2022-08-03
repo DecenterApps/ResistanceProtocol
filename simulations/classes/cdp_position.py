@@ -11,6 +11,7 @@ class CDP_Position:
         self.stable_cr = stable_cr
         self.repay_cr = repay_cr
         self.boost_cr = boost_cr
+        # print('init position', self.collateral_eth, self.debt_noi, self.stable_cr)
 
     def calculate_cr(self, eth_data: ETHData, price_station: PriceStation):
         eth_total_val = eth_data.get_eth_value_for_amount(self.collateral_eth)
@@ -26,14 +27,21 @@ class CDP_Position:
             # print("can't boost position, because it's too low")
             return
         
-        # this amount is going to be added to both collateral and debt
-        # this is the amount in dollars
-        x = (eth_total_val - noi_total_val * self.stable_cr) / (self.stable_cr - 1)
-        noi_amount = price_station.get_amount_of_noi_for_rp_value(x)
+        a = self.stable_cr * price_station.rp
+        doll = eth_data.get_eth_value()
+        b = a*(self.debt_noi + pool.noi) - doll*(self.collateral_eth + pool.eth)
+        c = pool.noi*(a*self.debt_noi - doll*self.collateral_eth)
+        noi_amount = (-b + np.sqrt(b**2 - 4*a*c)) / (2*a)
         eth_amount, noi_amount = pool.put_noi_get_eth(noi_amount, price_station, eth_data)
-        
+        # print('initial cr', self.calculate_cr(eth_data, price_station), 'eth', self.collateral_eth, 'noi', self.debt_noi)
         self.collateral_eth += eth_amount
         self.debt_noi += noi_amount
+        # print('new cr', self.calculate_cr(eth_data, price_station), 'added_eth', eth_amount, 'added_noi', self.debt_noi)
+        # print('targetted cr', self.stable_cr)
+
+        if np.abs(self.calculate_cr(eth_data, price_station) - self.stable_cr) > 0.01:
+            assert False, "ASSERT 02, not correct boost "
+
         # print("boosted position")
         # print("targeted cr: ", self.stable_cr, "real cr: ", self.calculate_cr(eth_data, price_station))
         return
@@ -46,14 +54,24 @@ class CDP_Position:
             # print("can't repay position, because it's empty")
             return
         
-        x = (self.stable_cr * noi_total_val - eth_total_val) / (self.stable_cr - 1)
-        eth_amount = eth_data.get_eth_amount_for_value(x)
+        doll = eth_data.get_eth_value()
+        a = doll
+        b = self.stable_cr * price_station.rp * (self.debt_noi - pool.noi) + doll * (pool.eth - self.collateral_eth)
+        c = pool.eth * (self.stable_cr * price_station.rp * self.debt_noi - doll * self.collateral_eth)
+        eth_amount = (-b - np.sqrt(b**2 - 4*a*c)) / (2*a)
         eth_amount, noi_amount = pool.put_eth_get_noi(eth_amount, price_station, eth_data)
+        # print('initial cr', self.calculate_cr(eth_data, price_station), 'eth', self.collateral_eth, 'noi', self.debt_noi)
+        # print('stable cr', self.stable_cr)
 
         self.collateral_eth -= eth_amount
         self.debt_noi -= noi_amount
-        # print("repaid position")
-        # print("targeted cr: ", self.stable_cr, "real cr: ", self.calculate_cr(eth_data, price_station))
+        if self.collateral_eth < 0 or self.debt_noi < 0:
+            assert False, "values are negative"
+        if np.abs(self.calculate_cr(eth_data, price_station) - self.stable_cr) > 0.01:
+            assert False, "ASSERT 03, not correct repay"
+        
+        # print('new cr', self.calculate_cr(eth_data, price_station), 'added_eth', eth_amount, 'added_noi', noi_amount)
+        # print('targetted cr', self.stable_cr)
         return
 
     def boost_position(self, eth_data: ETHData, price_station: PriceStation, pool: Pool):

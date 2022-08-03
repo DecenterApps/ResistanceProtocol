@@ -70,4 +70,4 @@ def create_leveragers(agents):
         agents[name] = create_new_leverager(name, LEVERAGER.ETH_AMOUNT)
 
 def update_leverager(previous_state, agents, price_station: PriceStation, pool: Pool, eth_data: ETHData):
-    update_holder(previous_state, agents, price_station, pool, eth_data, 'leverager', LEVERAGER, True)
+    update_holder(previous_state, agents, price_station, pool, eth_data, 'leverager', LEVERAGER)

@@ -37,7 +37,7 @@ class CDP_Holder(ABC):
         self.opened_position = True
         collateral = self.eth_amount * self.perc_amount
         self.eth_amount -= collateral
-        self.debt_noi = price_station.get_amount_of_noi_for_rp_value(collateral) / self.initial_cr
+        self.debt_noi = price_station.get_amount_of_noi_for_rp_value(eth_data.get_eth_value_for_amount(collateral)) / self.initial_cr
         self.cdp_position = CDP_Position(collateral, self.debt_noi, self.initial_cr, self.repay_cr, self.boost_cr)
 
         added_eth, added_noi = pool.put_noi_get_eth(self.debt_noi, price_station, eth_data)
@@ -63,7 +63,7 @@ def update_holder(previous_state, agents, price_station: PriceStation, pool: Poo
     if holder.opened_position:
         current_cr = holder.cdp_position.calculate_cr(eth_data, price_station)
         if current_cr < LIQUIDATION_RATIO and leverager:
-            leverager.liquidation()
+            holder.liquidation()
         else:
             if relative_gap > holder.relative_gap and price_station.rp > price_station.mp and leverager:
                 holder.close_position(eth_data, price_station, pool)

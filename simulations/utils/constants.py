@@ -1,8 +1,11 @@
+#how much noi for one eth
+ONE_ETH = 500
+
 class PRICE_TRADER:
-    NUM = 200
+    NUM = 0
 
     ETH_AMOUNT = 1
-    NOI_AMOUNT = 1000
+    NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
 
     #percentage of traders resource when trading
     RISKY = 0.5
@@ -15,10 +18,10 @@ class PRICE_TRADER:
     BOUND_LOW = 1 - BOUND_HIGH - BOUND_MID
 
 class RATE_TRADER:
-    NUM = 0
+    NUM = 1
 
     ETH_AMOUNT = 1
-    NOI_AMOUNT = 1000
+    NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
 
     #percentage of traders resource when trading
     RISKY = 0.5
@@ -31,9 +34,9 @@ class RATE_TRADER:
     RR_LOW = 1 - RR_HIGH - RR_MID
 
 class LEVERAGER:
-    NUM = 0
+    NUM = 1000
 
-    ETH_AMOUNT = 5
+    ETH_AMOUNT = 4
 
     RISKY = 0.2
     MODERATE = 0.3
@@ -60,7 +63,7 @@ class LEVERAGER:
     RELATIVE_GAP_SAFE = 0.5
 
 class SAFE_OWNER:
-    NUM = 100
+    NUM = 0
 
     ETH_AMOUNT = 5
 
@@ -90,7 +93,7 @@ class SAFE_OWNER:
 
 class POOL:
     ETH_AMOUNT = 200
-    NOI_AMOUNT = 100000
+    NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
 
 MONTE_CARLO_SIMULATIONS = 1
 
