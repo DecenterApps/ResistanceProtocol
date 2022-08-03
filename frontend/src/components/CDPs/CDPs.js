@@ -5,6 +5,7 @@ import { Chart as ChartJS, ArcElement, Tooltip as TP, Legend } from "chart.js";
 import { Pie } from "react-chartjs-2";
 import OpenCdpModal from "../OpenCdpModal/OpenCdpModal";
 import { FcInfo } from "react-icons/fc";
+import Footer from '../Footer/Footer'
 
 ChartJS.register(ArcElement, TP, Legend);
 
@@ -245,6 +246,7 @@ export default function CDPs() {
               </Box>
             </HStack>
           </VStack>
+          <Footer></Footer>
         </Box>
       </div>
     </>

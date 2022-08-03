@@ -1,0 +1,61 @@
+.site-footer {
+  background: linear-gradient(
+    90deg,
+    rgba(2, 0, 36, 1) 0%,
+    rgb(11, 18, 38) 100%
+  );
+  box-shadow: 0 0.5em 0.5em -0.4em black;
+  font-size: 15px;
+  line-height: 24px;
+  color: whitesmoke;
+  position: relative;
+  right: 0;
+  left: 0;
+  width: 100%;
+  z-index: 101;
+}
+
+.ftr-right {
+  display: flex;
+  -webkit-box-pack: center;
+  justify-content: center;
+  flex-direction: column;
+  -webkit-box-align: center;
+  width: 90vw;
+  align-items: flex-end !important;
+  z-index: 99;
+}
+
+.ftr-left {
+  display: flex;
+  -webkit-box-pack: center;
+  justify-content: center;
+  flex-direction: column;
+  -webkit-box-align: center;
+  width: 90vw;
+  align-items: flex-start !important;
+  z-index: 99;
+}
+
+.ftr-raise:hover {
+  box-shadow: 0 0.5em 0.5em -0.4em white;
+  transform: translateY(-0.25em);
+}
+
+
+.ftr-btn {
+  color: white;
+  transition: 0.25s;
+}
+.ftr-btn:hover {
+  border-color: white;
+  color: #fff;
+}
+
+.ftr-btn {
+  background: transparent !important;
+  font: inherit;
+  line-height: 1;
+  margin: 0.5em;
+  padding: 1em 2em;
+}

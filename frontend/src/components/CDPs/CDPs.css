@@ -27,6 +27,8 @@
   overflow: scroll;
   -ms-overflow-style: none;
   scrollbar-width: none;
+  background: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgb(11, 18, 38) 100%);
+  box-shadow: 0 0.5em 0.5em -0.4em black;
 }
 
 .cdp-line2-holder::-webkit-scrollbar {
@@ -41,6 +43,7 @@
   background: rgb(5, 25, 46);
   border-radius: 3%;
   padding: 40px 50px 40px 10px;
+  box-shadow: 0 0.5em 0.5em -0.4em black;
 }
 
 .per-cdp-right {

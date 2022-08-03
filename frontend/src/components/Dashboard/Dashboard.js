@@ -32,6 +32,7 @@ import {
 } from "chart.js";
 import { Line, Bar } from "react-chartjs-2";
 import { FcInfo } from "react-icons/fc";
+import Footer from '../Footer/Footer'
 
 ChartJS.register(
   CategoryScale,
@@ -352,6 +353,8 @@ export default function Dashboard() {
           </HStack>
         </VStack>
       </Box>
+      <br></br>
+      <Footer></Footer>
     </div>
   );
 }

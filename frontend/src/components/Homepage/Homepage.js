@@ -6,6 +6,7 @@ import "./Homepage.scss";
 import { useWeb3React } from "@web3-react/core";
 import MyModal from "../MyModal/MyModal";
 import Toolbar from "../Toolbar/Toolbar";
+import Footer from "../Footer/Footer";
 
 export default function Homepage() {
   const [openModal, setOpenModal] = useState(false);

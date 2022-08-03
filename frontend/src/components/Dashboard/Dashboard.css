@@ -1,10 +1,9 @@
 .dashboard {
   top: 5%;
   left: 10%;
-  height: 90vh !important;
+  height: 88vh !important;
   width: 80vw !important;
   position: absolute;
-  overflow: hidden;
   z-index: 20;
   border-radius: 1%;
   border-color: #1f456e;
@@ -12,6 +11,7 @@
   overflow: scroll;
   -ms-overflow-style: none;
   scrollbar-width: none;
+  bottom: 100vh !important;
 }
 
 .dashboard::-webkit-scrollbar {
@@ -31,12 +31,14 @@
   -webkit-box-align: center;
   align-items: center;
   position: relative;
+  box-shadow: 0 0.5em 0.5em -0.4em black;
 }
 
 .div-line2 {
   width: 37vw;
   height: 45vh;
-  background: rgb(11, 18, 38);
+  background: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgb(11, 18, 38) 100%);
+  box-shadow: 0 0.5em 0.5em -0.4em black;
   border-radius: 3%;
   padding: 40px 10px;
   position: relative;
@@ -93,7 +95,8 @@
 .div-line3 {
   width: 80vw;
   height: 22vh;
-  background: rgb(11, 18, 38);
+  background: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgb(11, 18, 38) 100%);
+  box-shadow: 0 0.5em 0.5em -0.4em black;
   border-radius: 3%;
   padding: 40px 10px;
   position: relative;
