@@ -31,12 +31,12 @@ class Leverager(CDP_Holder):
         self.opened_position = False
         self.debt_noi = 0
 
-def update_leverager(previous_state, agents, price_station: PriceStation, pool: Pool, eth_data: ETHData):
+def update_leverager(agents, price_station: PriceStation, pool: Pool, eth_data: ETHData):
     if LEVERAGER.NUM == 0:
         return
     i = random.randint(0, LEVERAGER.NUM - 1)
     name = 'leverager' + str(i)
-    leverager: Leverager = previous_state['agents'][name]
+    leverager: Leverager = agents['agents'][name]
     relative_gap = np.abs(
         price_station.mp - price_station.rp) / price_station.rp
 
@@ -69,5 +69,5 @@ def create_leveragers(agents):
         name = 'leverager' + str(i)
         agents[name] = create_new_leverager(name, LEVERAGER.ETH_AMOUNT)
 
-def update_leverager(previous_state, agents, price_station: PriceStation, pool: Pool, eth_data: ETHData):
-    update_holder(previous_state, agents, price_station, pool, eth_data, 'leverager', LEVERAGER)
+def update_leverager(agents, price_station: PriceStation, pool: Pool, eth_data: ETHData):
+    update_holder(agents, price_station, pool, eth_data, 'leverager', LEVERAGER)

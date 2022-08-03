@@ -1,10 +1,9 @@
 from classes.eth_data import ETHData
 from classes.pool import Pool
 from pi_controller import updateRedemptionPrice, computeRate
-from classes.graph import Graph
 
 class PriceStation:
-    def __init__(self, market_price, redemption_price, redemption_rate, accumulated_leak):
+    def __init__(self, market_price, redemption_price, redemption_rate, accumulated_leak, graph):
         # market price
         self.mp = market_price
         # redemption price
@@ -13,10 +12,13 @@ class PriceStation:
         self.rr = redemption_rate
         # accumulated_leak
         self.accumulated_leak = accumulated_leak
+        self.graph = graph
     
     def update_mp(self, pool: Pool, eth_data: ETHData) -> float:
         eth_value = eth_data.get_eth_value()
         self.mp =  eth_value * pool.eth / pool.noi
+        self.graph.add_to_graph(self, pool)
+
         if pool.eth <= 0 or pool.noi <= 0:
             print("ASSERT 02, Pool not working", pool.eth, pool.noi)
     
@@ -24,7 +26,7 @@ class PriceStation:
         self.update_mp(pool, eth_data)
         return self.mp
 
-    def calculate_redemption_price(self, graph: Graph):
+    def calculate_redemption_price(self, graph):
         rr = self.calculate_redemption_rate()
         graph.redemption_rate.append(rr)
         graph.redemption_rate_up.append(1+1e-8*0.5)

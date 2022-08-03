@@ -2,7 +2,7 @@
 ONE_ETH = 500
 
 class PRICE_TRADER:
-    NUM = 0
+    NUM = 500
 
     ETH_AMOUNT = 1
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
@@ -18,7 +18,7 @@ class PRICE_TRADER:
     BOUND_LOW = 1 - BOUND_HIGH - BOUND_MID
 
 class RATE_TRADER:
-    NUM = 1
+    NUM = 500
 
     ETH_AMOUNT = 1
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
@@ -34,7 +34,7 @@ class RATE_TRADER:
     RR_LOW = 1 - RR_HIGH - RR_MID
 
 class LEVERAGER:
-    NUM = 1000
+    NUM = 100
 
     ETH_AMOUNT = 4
 
@@ -63,7 +63,7 @@ class LEVERAGER:
     RELATIVE_GAP_SAFE = 0.5
 
 class SAFE_OWNER:
-    NUM = 0
+    NUM = 100
 
     ETH_AMOUNT = 5
 
@@ -90,6 +90,17 @@ class SAFE_OWNER:
     RELATIVE_GAP_RISKY = 0.5
     RELATIVE_GAP_MODERATE = 0.25
     RELATIVE_GAP_SAFE = 0.5
+
+class WHALE_PRICE_SETTER:
+    NUM = 1
+
+    ETH_AMOUNT = 150
+    NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
+
+    # relative difference between redemption price and market price when whale is activated
+    BOUND_HIGH = 1
+    BOUND_MID = 0.2
+    BOUND_LOW = 1 - BOUND_HIGH - BOUND_MID
 
 class POOL:
     ETH_AMOUNT = 200

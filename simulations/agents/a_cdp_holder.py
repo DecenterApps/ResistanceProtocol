@@ -48,7 +48,7 @@ class CDP_Holder(ABC):
         self.debt_noi = 0
 
 
-def update_holder(previous_state, agents, price_station: PriceStation, pool: Pool, eth_data: ETHData, name_literal, CONST):
+def update_holder(agents, price_station: PriceStation, pool: Pool, eth_data: ETHData, name_literal, CONST):
     leverager: bool = False
     if name_literal == 'leverager':
         leverager = True
@@ -56,7 +56,7 @@ def update_holder(previous_state, agents, price_station: PriceStation, pool: Poo
         return
     i = random.randint(0, CONST.NUM - 1)
     name = name_literal + str(i)
-    holder: CDP_Holder = previous_state['agents'][name]
+    holder: CDP_Holder = agents[name]
     relative_gap = np.abs(
         price_station.mp - price_station.rp) / price_station.rp
 

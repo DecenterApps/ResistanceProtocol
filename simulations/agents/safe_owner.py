@@ -30,5 +30,5 @@ def create_safe_owners(agents):
         name = 'safe_owner' + str(i)
         agents[name] = create_new_safe_owner(name, SAFE_OWNER.ETH_AMOUNT)
 
-def update_safe_owner(previous_state, agents, price_station: PriceStation, pool: Pool, eth_data: ETHData):
-    update_holder(previous_state, agents, price_station, pool, eth_data, 'safe_owner', SAFE_OWNER)
+def update_safe_owner(agents, price_station: PriceStation, pool: Pool, eth_data: ETHData):
+    update_holder(agents, price_station, pool, eth_data, 'safe_owner', SAFE_OWNER)

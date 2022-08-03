@@ -15,39 +15,36 @@ class Rate_Trader:
         self.rr_low = rr_low
         self.rr_high = rr_high
 
-def update_rate_trader(previous_state, agents, price_station: PriceStation, pool: Pool, eth_data: ETHData):
+def update_rate_trader(agents, price_station: PriceStation, pool: Pool, eth_data: ETHData):
     if RATE_TRADER.NUM == 0:
         return
     i = random.randint(0, RATE_TRADER.NUM - 1)
     name = 'rate_trader' + str(i)
-    trader: Rate_Trader = previous_state['agents'][name]
-    if (price_station.rr > trader.rr_low and price_station.rr < trader.rr_high) or pool.eth < 0.1:
-        agents[name] = create_modified_rate_trader(trader, 0, 0)
+    trader: Rate_Trader = agents[name]
+    if price_station.rr > trader.rr_low and price_station.rr < trader.rr_high:
         return
     
     eth_add_trader = 0
     noi_add_trader = 0
-    if price_station.rr < trader.rr_low and price_station.mp > price_station.rp:
+    if price_station.rr < trader.rr_low and price_station.mp > price_station.rp and trader.noi > 0.0001:
+
         # sell noi, buy eth
         eth_add, noi_add = pool.put_noi_get_eth(trader.noi * trader.perc_amount, price_station, eth_data)
         eth_add_trader = eth_add
         noi_add_trader = -noi_add
     
-    elif price_station.rr > trader.rr_high and price_station.mp < price_station.rp:
+    elif price_station.rr > trader.rr_high and price_station.mp < price_station.rp and trader.eth > 0.0001:
         # sell eth, buy noi
         eth_add, noi_add = pool.put_eth_get_noi(+1*trader.eth * trader.perc_amount, price_station, eth_data)
         eth_add_trader = -eth_add
         noi_add_trader = noi_add
 
-    # TODO ako nema dovoljno para u poolu da uzme deo ili nesto tako(zbog velikih tradera)
-    agents[name] = create_modified_rate_trader(trader, eth_add_trader, noi_add_trader)
+    trader.eth += eth_add_trader
+    trader.noi += noi_add_trader
 
 def create_new_rate_trader(name, eth_amount, noi_amount):
     rr_low, rr_high = get_rate_trader_apy_bound()
     return Rate_Trader(name, eth_amount, noi_amount, get_rate_trader_perc_amount(), rr_low, rr_high)
-
-def create_modified_rate_trader(trader: Rate_Trader, eth_add, noi_add):
-    return Rate_Trader(trader.name, trader.eth + eth_add, trader.noi + noi_add, trader.perc_amount, trader.rr_low, trader.rr_high)
 
 def create_rate_traders(agents):
     for i in range(RATE_TRADER.NUM):
