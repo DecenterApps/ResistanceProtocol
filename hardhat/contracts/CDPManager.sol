@@ -15,6 +15,8 @@ error CDPManager__NotOwner();
 error CDPManager__HasDebt();
 error CDPManager__LiquidationRatioReached();
 error CDPManager__ZeroTokenMint();
+error CDPManager__UnknownParameter();
+error CDPManager__UnknownContract();
 
 contract CDPManager {
     struct CDP {
@@ -39,7 +41,7 @@ contract CDPManager {
     uint256 public cdpi; // auto increment index for CDPs
     mapping(uint256 => CDP) private cdpList; // CDPId => CDP
 
-    NOI private immutable NOI_COIN;
+    NOI private NOI_COIN;
 
     uint256 private lastUnmintedNOICalculationTimestamp;
 
@@ -115,6 +117,30 @@ contract CDPManager {
     event RepayCDP(address indexed _from, uint256 indexed _cdpId, uint _amount);
     event AddAuthorization(address _account);
     event RemoveAuthorization(address _account);
+    event ModifyParameters(bytes32 indexed _parameter, uint256 _data);
+    event ModifyContract(bytes32 indexed _contract, address _newAddress);
+
+    /*
+     * @notice Modify general uint256 params
+     * @param _parameter The name of the parameter modified
+     * @param _data New value for the parameter
+     */
+    function modifyParameters(bytes32 _parameter, uint256 _data) external isOwner {
+        if (_parameter == "cdpi") cdpi = _data;
+        else revert CDPManager__UnknownParameter();
+        emit ModifyParameters(_parameter, _data);
+    }
+
+    /*
+     * @notice Modify contract address
+     * @param _contract The name of the contract modified
+     * @param _newAddress New address for the contract
+     */
+    function modifyContracts(bytes32 _contract, address _newAddress) external isOwner {
+        if (_contract == "NOI") NOI_COIN = NOI(_newAddress);
+        else revert CDPManager__UnknownContract();
+        emit ModifyContract(_contract, _newAddress);
+    }
 
     constructor(address _owner, address _noiCoin) {
         owner = _owner;
