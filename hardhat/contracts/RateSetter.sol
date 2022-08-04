@@ -5,14 +5,15 @@ pragma solidity >=0.8.0 <0.9.0;
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 import "./CDPManager.sol";
-import "./MarketController.sol";
-import "./CPIController.sol";
 import "./AbsPiController.sol";
 import "./EthTwapFeed.sol";
 
 abstract contract CPITrackerOracle {
     function currPegPrice() external view virtual returns (uint256);
 }
+
+error RateSetter__UnknownParameter();
+error RateSetter__UnknownContract();
 
 contract RateSetter {
     address public immutable owner;
@@ -25,13 +26,50 @@ contract RateSetter {
     uint256 redemptionPriceUpdateTime;
     uint256 internal constant EIGHTEEN_DECIMAL_NUMBER = 10**18;
 
-    CDPManager private immutable CDPManager_CONTRACT;
-    CPIController private immutable CPIController_CONTRACT;
-    MarketController private immutable MarketController_CONTRACT;
-    AbsPiController private immutable AbsPiController_CONTRACT;
+    CDPManager private CDPManager_CONTARCT;
+    AbsPiController private AbsPiController_CONTRACT;
 
-    EthTwapFeed private immutable ethTwapFeed;
-    CPITrackerOracle private immutable cpiDataFeed;
+    EthTwapFeed private ethTwapFeed;
+    CPITrackerOracle private cpiDataFeed;
+
+    // EVENTS
+
+    event ModifyParameters(bytes32 indexed _parameter, uint256 _data);
+    event ModifyContract(bytes32 indexed _contract, address _newAddress);
+
+    // AUTH
+
+    modifier isOwner() {
+        if (owner != msg.sender) revert CDPManager__NotOwner();
+        _;
+    }
+
+    // --- Administration ---
+
+    /*
+     * @notice Modify general uint256 params
+     * @param _parameter The name of the parameter modified
+     * @param _data New value for the parameter
+     */
+    function modifyParameters(bytes32 _parameter, uint256 _data) external isOwner {
+        if (_parameter == "redemptionPriceUpdateTime") redemptionPriceUpdateTime = _data;
+        else revert RateSetter__UnknownParameter();
+        emit ModifyParameters(_parameter, _data);
+    }
+
+    /*
+     * @notice Modify contract address
+     * @param _contract The name of the contract modified
+     * @param _newAddress New address for the contract
+     */
+    function modifyContracts(bytes32 _contract, address _newAddress) external isOwner {
+        if (_contract == "CDPManager") CDPManager_CONTARCT = CDPManager(_newAddress);
+        else if (_contract == "AbsPiController") AbsPiController_CONTRACT = AbsPiController(_newAddress);
+        else if (_contract == "EthTwapFeed") ethTwapFeed = EthTwapFeed(_newAddress);
+        else if (_contract == "CPITrackerOracle") cpiDataFeed= CPITrackerOracle(_newAddress);
+        else revert RateSetter__UnknownContract();
+        emit ModifyContract(_contract, _newAddress);
+    }
 
     constructor(
         address _owner,
@@ -41,9 +79,7 @@ contract RateSetter {
         address _cpiDataFeed
     ) {
         owner = _owner;
-        CDPManager_CONTRACT = CDPManager(_cdpManager);
-        CPIController_CONTRACT = CPIController(address(0));
-        MarketController_CONTRACT = MarketController(address(0));
+        CDPManager_CONTARCT = CDPManager(_cdpManager);
         AbsPiController_CONTRACT = AbsPiController(_AbsPiController);
         redemptionPrice = (314 * RAY) / 100;
         redemptionRate = RAY;
@@ -85,7 +121,7 @@ contract RateSetter {
         redemptionPriceUpdateTime = block.timestamp;
 
         // set Eth/Redemption Rate
-        CDPManager_CONTRACT.setEthRp(ethPrice / redemptionPrice);
+        CDPManager_CONTARCT.setEthRp(ethPrice / redemptionPrice);
     }
 
     function updateRatesInternal() public {}
