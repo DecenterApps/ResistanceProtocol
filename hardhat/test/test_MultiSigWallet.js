@@ -1,26 +1,33 @@
-const hre = require("hardhat");
+const { getNamedAccounts, network, deployments, ethers } = require("hardhat");
 const { assert, expect } = require("chai");
-const { BigNumber } = require("@ethersproject/bignumber");
+const { takeSnapshot, revertToSnapshot } = require("../utils/snapshot");
 
 describe("MultiSigWallet", function () {
-    this.timeout(80000);
 
     const senderAccounts = [];
     let owner;
     let multiSigWallet;
+    let deployer;
+
+    beforeEach(async () => {
+        snapshot = await takeSnapshot();
+    });
+
+    afterEach(async () => {
+        await revertToSnapshot(snapshot);
+    });
 
     before(async () => {
+        deployer = (await getNamedAccounts()).deployer;
+
+        multiSigWallet = await ethers.getContract("MultiSigWallet", deployer);
+
         owner = (await hre.ethers.getSigners())[0];
 
         senderAccounts.push((await hre.ethers.getSigners())[1]);
         senderAccounts.push((await hre.ethers.getSigners())[2]);
         senderAccounts.push((await hre.ethers.getSigners())[3]);
         senderAccounts.push((await hre.ethers.getSigners())[4]);
-
-        const multiSigWalletContract = await hre.ethers.getContractFactory("MultiSigWallet");
-        multiSigWallet = await multiSigWalletContract.deploy([senderAccounts[0].address, senderAccounts[1].address, senderAccounts[2].address]);
-        await multiSigWallet.deployed();
-        console.log("Contract deployed to: ", multiSigWallet.address);
     });
 
     it("... submit new tx from valid owner", async () => {

@@ -4,8 +4,13 @@ coverage
 coverage.json
 typechain
 typechain-types
+deployments
 
 #Hardhat files
 cache
 artifacts
 
+/deployments
+
+yarn-error.log
+yarn.lock
