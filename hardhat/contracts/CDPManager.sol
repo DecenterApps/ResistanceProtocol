@@ -66,16 +66,7 @@ contract CDPManager {
         _;
     }
 
-    // EVENTS
 
-    event CDPOpen(address indexed _user,uint256 indexed _cdpIndex, uint _value);
-    event TransferCollateral(address indexed _user,uint256 indexed _cdpIndex, uint _value);
-    event CDPClose(address indexed _user,uint256 indexed _cdpIndex);
-    event OwnershipTransfer(address indexed _from,address indexed _to,uint256 indexed _cdpIndex);
-    event MintCDP(address indexed _from,uint256 indexed _cdpIndex, uint _amount);
-    event RepayCDP(address indexed _from,uint256 indexed _cdpIndex, uint _amount);
-    event AddAuthorization(address _account);
-    event RemoveAuthorization(address _account);
 
     // --- Auth ---
     mapping(address => bool) public authorizedAccounts;
@@ -88,6 +79,8 @@ contract CDPManager {
     function removeAuthorization(address account) external isOwner {
         authorizedAccounts[account] = false;
         emit RemoveAuthorization(account);
+    }
+
     modifier CDPExists(uint256 _cdpIndx) {
         if (cdpList[_cdpIndx].owner == address(0))
             revert CDPManager__InvalidCDPIndex();
@@ -191,7 +184,7 @@ contract CDPManager {
      function closeCDP(uint256 _cdpIndex)
         public
         CDPExists(_cdpIndex)
-        HasAccess(cdpList[_cdpIndex].owner)
+        HasAccess(cdpList[_cdpIndex].owner){
     
         if (getDebtWithSF(_cdpIndex) != 0) {
             revert CDPManager__HasDebt();
