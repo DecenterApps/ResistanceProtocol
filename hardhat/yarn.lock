@@ -2376,7 +2376,12 @@ chai-as-promised@^7.1.1:
   dependencies:
     check-error "^1.0.2"
 
-chai@^4.3.4:
+chai-bn@^0.3.1:
+  version "0.3.1"
+  resolved "https://registry.yarnpkg.com/chai-bn/-/chai-bn-0.3.1.tgz#677cd3c0b58bae83ffe51604a811d0b3c6f41544"
+  integrity sha512-vuzEy0Cb+k8zqi2SHOmvZdRSbKcSOJfS1Nv8+6YDJIyCzfxkTCHLNRyjRIoRJ3WJtYb/c7OHjrvLoGeyO4A/gA==
+
+chai@^4.3.6:
   version "4.3.6"
   resolved "https://registry.yarnpkg.com/chai/-/chai-4.3.6.tgz#ffe4ba2d9fa9d6680cc0b370adae709ec9011e9c"
   integrity sha512-bbcp3YfHCUzMOvKqsztczerVgBKSsEijCySNlHHbX3VG1nskvqjz5Rfso1gGwD6w6oOV3eI60pKuMOV5MV7p3Q==

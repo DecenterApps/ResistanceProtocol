@@ -20,13 +20,12 @@ contract RateSetter {
     uint256 marketPrice;
     uint256 CPI;
     uint256 redemptionRate;
-    uint256 ethPrice;
 
     uint256 public constant RAY = 10**27;
     uint256 redemptionPriceUpdateTime;
     uint256 internal constant EIGHTEEN_DECIMAL_NUMBER = 10**18;
 
-    CDPManager private immutable CDPManager_CONTARCT;
+    CDPManager private immutable CDPManager_CONTRACT;
     CPIController private immutable CPIController_CONTRACT;
     MarketController private immutable MarketController_CONTRACT;
     AbsPiController private immutable AbsPiController_CONTRACT;
@@ -42,13 +41,12 @@ contract RateSetter {
         address _cpiDataFeed
     ) {
         owner = _owner;
-        CDPManager_CONTARCT = CDPManager(_cdpManager);
+        CDPManager_CONTRACT = CDPManager(_cdpManager);
         CPIController_CONTRACT = CPIController(address(0));
         MarketController_CONTRACT = MarketController(address(0));
         AbsPiController_CONTRACT = AbsPiController(_AbsPiController);
         redemptionPrice = (314 * RAY) / 100;
         redemptionRate = RAY;
-        ethPrice = 1000 * RAY;
 
         ethTwapFeed = EthTwapFeed(_ethTwapFeed);
         cpiDataFeed = CPITrackerOracle(_cpiDataFeed);
@@ -59,9 +57,12 @@ contract RateSetter {
     /*
      * @notice updates rates with values gathered from PI controllers
      */
-    function updateCDPManagerData() public {
+    function updatePrices() public {
         // gather rate from market/redemption controller
         marketPrice = 5 * 10**18; // should get it from oracle
+
+        uint256 ethPrice = ethTwapFeed.getTwap();
+
         // reward caller
         uint256 tlv = AbsPiController_CONTRACT.tlv();
         uint256 iapcr = rpower(AbsPiController_CONTRACT.pscl(), tlv, RAY);
@@ -82,14 +83,12 @@ contract RateSetter {
             redemptionPrice
         );
         redemptionPriceUpdateTime = block.timestamp;
-        // gather rate from CPI controller
-        CDPManager_CONTARCT.updateValue(
-            (ethPrice * EIGHTEEN_DECIMAL_NUMBER) / redemptionPrice
-        );
+
+        // set Eth/Redemption Rate
+        CDPManager_CONTRACT.setEthRp(ethPrice / redemptionPrice);
     }
 
     function updateRatesInternal() public {}
-
 
     function getCpiData() public view returns (uint256) {
         uint256 data = cpiDataFeed.currPegPrice();

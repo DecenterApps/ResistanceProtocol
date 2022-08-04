@@ -4,9 +4,11 @@ pragma solidity >=0.8.0 <0.9.0;
 
 error Parameters_NotAuthorized();
 
-contract Parameters {
-    uint8 public LR = 120; // Liquidation Ratio percentage
-    uint8 public SF; // Stability Fee percentage
+contract Parameters{
+
+    uint8 public LR=120; // Liquidation Ratio percentage
+    uint8 public SF=2; // Stability Fee percentage
+
     address public immutable owner;
 
     modifier onlyOwner() {

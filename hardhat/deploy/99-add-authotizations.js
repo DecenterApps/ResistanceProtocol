@@ -10,7 +10,7 @@ module.exports = async ({ getNamedAccounts }) => {
 
     const msw = await ethers.getContract("MultiSigWallet", deployer);
     const noiContract = await ethers.getContract("NOI", deployer);
-    const cdpManagerContract = await ethers.getContract("CDPManager", deployer);
+    const cdpManagerContractObj = await ethers.getContract("CDPManager", deployer);
     const LiquidatorContractObj = await ethers.getContract("Liquidator", deployer);
     const TreasuryContractObj = await ethers.getContract("Treasury", deployer);
     const ParametersContractObj = await ethers.getContract("Parameters", deployer);
@@ -23,7 +23,7 @@ module.exports = async ({ getNamedAccounts }) => {
         noiContract.address,
         "addAuthorization",
         ["address"],
-        [cdpManagerContract.address]
+        [cdpManagerContractObj.address]
     );
 
     await executeActionFromMSW(
@@ -32,7 +32,7 @@ module.exports = async ({ getNamedAccounts }) => {
         LiquidatorContractObj.address,
         "setCdpManagerContractAddress",
         ["address"],
-        [cdpManagerContract.address]
+        [cdpManagerContractObj.address]
     );
 
     await executeActionFromMSW(
@@ -65,7 +65,7 @@ module.exports = async ({ getNamedAccounts }) => {
     await executeActionFromMSW(
         msw,
         0,
-        cdpManagerContract.address,
+        cdpManagerContractObj.address,
         "setLiquidatorContractAddress",
         ["address"],
         [LiquidatorContractObj.address]
@@ -74,7 +74,7 @@ module.exports = async ({ getNamedAccounts }) => {
     await executeActionFromMSW(
         msw,
         0,
-        cdpManagerContract.address,
+        cdpManagerContractObj.address,
         "setParametersContractAddress",
         ["address"],
         [ParametersContractObj.address]
@@ -83,7 +83,25 @@ module.exports = async ({ getNamedAccounts }) => {
     await executeActionFromMSW(
         msw,
         0,
-        cdpManagerContract.address,
+        cdpManagerContractObj.address,
+        "setTreasuryContractAddress",
+        ["address"],
+        [TreasuryContractObj.address]
+    );
+
+    await executeActionFromMSW(
+        msw,
+        0,
+        TreasuryContractObj.address,
+        "setCDPManagerContractAddress",
+        ["address"],
+        [cdpManagerContractObj.address]
+    );
+
+    await executeActionFromMSW(
+        msw,
+        0,
+        cdpManagerContractObj.address,
         "addAuthorization",
         ["address"],
         [RateSetterContractObj.address]
