@@ -20,7 +20,6 @@ contract RateSetter {
     uint256 marketPrice;
     uint256 CPI;
     uint256 redemptionRate;
-    uint256 ethPrice;
 
     uint256 public constant RAY = 10**27;
     uint256 redemptionPriceUpdateTime;
@@ -48,7 +47,6 @@ contract RateSetter {
         AbsPiController_CONTRACT = AbsPiController(_AbsPiController);
         redemptionPrice = (314 * RAY) / 100;
         redemptionRate = RAY;
-        ethPrice = 1000 * RAY;
 
         ethTwapFeed = EthTwapFeed(_ethTwapFeed);
         cpiDataFeed = CPITrackerOracle(_cpiDataFeed);
@@ -62,6 +60,9 @@ contract RateSetter {
     function updatePrices() public {
         // gather rate from market/redemption controller
         marketPrice = 5 * 10**18; // should get it from oracle
+
+        uint256 ethPrice = ethTwapFeed.getTwap();
+
         // reward caller
         uint256 tlv = AbsPiController_CONTRACT.tlv();
         uint256 iapcr = rpower(AbsPiController_CONTRACT.pscl(), tlv, RAY);
@@ -82,11 +83,12 @@ contract RateSetter {
             redemptionPrice
         );
         redemptionPriceUpdateTime = block.timestamp;
-        
+
+        // set Eth/Redemption Rate
+        CDPManager_CONTRACT.setEthRp(ethPrice / redemptionPrice);
     }
 
     function updateRatesInternal() public {}
-
 
     function getCpiData() public view returns (uint256) {
         uint256 data = cpiDataFeed.currPegPrice();
