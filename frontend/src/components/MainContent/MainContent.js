@@ -31,12 +31,12 @@ export default function MainContent({ onJoin, show }) {
       <div className="test-center">
         <div className={join ? "container2" : "container1"}>
           <div className="subcontainer animated bounceIn">
-            <div className="content">
+            {bAnimation &&<div className="content">
               <div className="top-left"></div>
               <div className="left-bot"></div>
               <div className="bot-right"></div>
               <div className="right-top"></div>
-            </div>
+            </div>}
             <div className="block  style-11">
               {!join && (
                 <>

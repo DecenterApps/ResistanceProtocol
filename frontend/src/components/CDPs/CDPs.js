@@ -167,7 +167,7 @@ export default function CDPs({bAnimation,setBAnimation}) {
             </HStack>
             <HStack>
               <Box className="cdp-line2">
-                <h2 className="h-cdp">Your CDPs</h2>
+                <h2 className="h-cdp">My CDPs</h2>
                 <Button
                   className="selected-tlbr-btn raise open-btn"
                   onClick={() => {
