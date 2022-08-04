@@ -11,10 +11,9 @@ from classes.graph.a_graph import *
 from classes.price_station import *
 from classes.pool import *
 from agents.leverager import *
-from agents.rate_trader import *
-from agents.price_trader import *
+from agents.trader.rate_trader import *
+from agents.trader.price_trader import *
 from agents.safe_owner import *
-from agents.whale_price_setter import *
 from classes.graph.timestamp_graph import Timestamp_Graph
 from classes.graph.full_graph import Full_Graph
 from utils.constants import *
@@ -30,9 +29,6 @@ agent_utils: Agent_Utils = Agent_Utils()
 timestamp_graph = Timestamp_Graph(agent_utils)
 full_graph = Full_Graph()
 
-full_graph.eth = [pool.eth]
-full_graph.noi = [pool.noi]
-
 price_station = PriceStation(2, 2, 1, 0, full_graph)
 eth_data = ETHData()
 agents = dict()
@@ -41,24 +37,21 @@ agent_utils.create_agents(agents)
 
 genesis_states = {'agents': agents}
 
-
 with open('dataset/eth_dollar.csv', 'r') as csvfile:
     eth_dollar = list(csv.reader(csvfile))[0]
     eth_data.eth_dollar = [float(i) for i in eth_dollar]
 
-br = [0,0,0,0,0]
-print('aaa')
+br = [0,0,0,0,0,0]
 
 def update_agents(params, substep, state_history, previous_state, policy_input):
-    global br
-    global agents
+    global br, agents
     ret = agents
     
     # print(previous_state['timestep'])
 
     eth_data.set_parameters(substep, previous_state)
     price_station.get_fresh_mp(pool, eth_data)
-    price_station.calculate_redemption_price(timestamp_graph)
+    price_station.calculate_redemption_price()
     timestamp_graph.add_to_graph(previous_state, price_station, pool)
 
     names = agent_utils.names

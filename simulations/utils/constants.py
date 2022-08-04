@@ -2,13 +2,13 @@
 ONE_ETH = 500
 
 class PRICE_TRADER:
-    NUM = 500
+    NUM = 100
 
     ETH_AMOUNT = 1
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
 
     #percentage of traders resource when trading
-    RISKY = 0.5
+    RISKY = 1
     MODERATE = 0.3
     SAFE = 1 - MODERATE - RISKY
 
@@ -18,7 +18,7 @@ class PRICE_TRADER:
     BOUND_LOW = 1 - BOUND_HIGH - BOUND_MID
 
 class RATE_TRADER:
-    NUM = 500
+    NUM = 0
 
     ETH_AMOUNT = 1
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
@@ -29,6 +29,8 @@ class RATE_TRADER:
     SAFE = 1 - MODERATE - RISKY
 
     # redemption rate when trader is activated
+    # high - high activity
+    # low - low activity
     RR_HIGH = 0.4
     RR_MID = 0.25
     RR_LOW = 1 - RR_HIGH - RR_MID
@@ -63,7 +65,7 @@ class LEVERAGER:
     RELATIVE_GAP_SAFE = 0.5
 
 class SAFE_OWNER:
-    NUM = 100
+    NUM = 0
 
     ETH_AMOUNT = 5
 
@@ -91,10 +93,21 @@ class SAFE_OWNER:
     RELATIVE_GAP_MODERATE = 0.25
     RELATIVE_GAP_SAFE = 0.5
 
-class WHALE_PRICE_SETTER:
+class WHALE_INSTANT_PRICE_SETTER:
     NUM = 1
 
-    ETH_AMOUNT = 150
+    ETH_AMOUNT = 75
+    NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
+
+    # relative difference between redemption price and market price when whale is activated
+    BOUND_HIGH = 1
+    BOUND_MID = 0.2
+    BOUND_LOW = 1 - BOUND_HIGH - BOUND_MID
+
+class WHALE_INSTANT_RATE_SETTER:
+    NUM = 1
+
+    ETH_AMOUNT = 75
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
 
     # relative difference between redemption price and market price when whale is activated
@@ -105,6 +118,11 @@ class WHALE_PRICE_SETTER:
 class POOL:
     ETH_AMOUNT = 200
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
+
+class REDEMPTION_RATES:
+    LOW_RR = (1 + 1e-8*(-0.2), 1 + 1e-8*0.2)
+    MID_RR = (1 + 1e-8*(-0.5), 1 + 1e-8*0.5)
+    HIGH_RR = (1 + 1e-8*(-0.9), 1 + 1e-8*0.9)
 
 MONTE_CARLO_SIMULATIONS = 1
 

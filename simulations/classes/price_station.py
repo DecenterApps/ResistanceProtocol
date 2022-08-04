@@ -20,19 +20,15 @@ class PriceStation:
         self.graph.add_to_graph(self, pool)
 
         if pool.eth <= 0 or pool.noi <= 0:
-            print("ASSERT 02, Pool not working", pool.eth, pool.noi)
+            assert False, "ASSERT 05, pool values negative"
     
     def get_fresh_mp(self, pool: Pool, eth_data: ETHData):
         self.update_mp(pool, eth_data)
         return self.mp
 
-    def calculate_redemption_price(self, graph):
+    def calculate_redemption_price(self):
         rr = self.calculate_redemption_rate()
-        graph.redemption_rate.append(rr)
-        graph.redemption_rate_up.append(1+1e-8*0.5)
-        graph.redemption_rate_down.append(1+1e-8*-0.5)
 
-        # print('redemption rate', rr)
         self.rp = updateRedemptionPrice(self.rp, rr)
         self.rr = rr
 

@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from agents.price_trader import *
+from agents.trader.price_trader import *
 from classes.graph.a_graph import Graph
 from agents.agent_utlis import *
 

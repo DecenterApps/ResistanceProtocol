@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from agents.price_trader import *
+from utils.constants import REDEMPTION_RATES
 
 class Graph:
     def __init__(self):
@@ -21,6 +21,9 @@ class Graph:
         self.noi.append(pool.noi)
         self.pool_ratio.append(pool.eth / (pool.eth + pool.noi))
         self.relative_gap_mp_rp.append((price_station.mp - price_station.rp) / price_station.rp)
+        self.redemption_rate.append(price_station.rr)
+        self.redemption_rate_down.append(REDEMPTION_RATES.LOW_RR[0])
+        self.redemption_rate_up.append(REDEMPTION_RATES.LOW_RR[1])
     
     def plot(self):
         self.plotGraph1()
