@@ -7,6 +7,7 @@ import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import "./CDPManager.sol";
 import "./AbsPiController.sol";
 import "./EthTwapFeed.sol";
+import "./MarketTwapFeed.sol";
 
 abstract contract CPITrackerOracle {
     function currPegPrice() external view virtual returns (uint256);
@@ -18,7 +19,6 @@ error RateSetter__UnknownContract();
 contract RateSetter {
     address public immutable owner;
     uint256 redemptionPrice;
-    uint256 marketPrice;
     uint256 CPI;
     uint256 redemptionRate;
 
@@ -30,6 +30,7 @@ contract RateSetter {
     AbsPiController private AbsPiController_CONTRACT;
 
     EthTwapFeed private ethTwapFeed;
+    MarketTwapFeed private marketTwapFeed;
     CPITrackerOracle private cpiDataFeed;
 
     // EVENTS
@@ -76,6 +77,7 @@ contract RateSetter {
         address _cdpManager,
         address _AbsPiController,
         address _ethTwapFeed,
+        address _marketTwapFeed,
         address _cpiDataFeed
     ) {
         owner = _owner;
@@ -85,6 +87,8 @@ contract RateSetter {
         redemptionRate = RAY;
 
         ethTwapFeed = EthTwapFeed(_ethTwapFeed);
+        marketTwapFeed = MarketTwapFeed(_marketTwapFeed);
+
         cpiDataFeed = CPITrackerOracle(_cpiDataFeed);
 
         redemptionPriceUpdateTime = block.timestamp;
@@ -95,7 +99,9 @@ contract RateSetter {
      */
     function updatePrices() public {
         // gather rate from market/redemption controller
-        marketPrice = 5 * 10**18; // should get it from oracle
+        //uint256 noiMarketPrice = 5 * 10**18; // should get it from oracle
+
+        uint256 noiMarketPrice = marketTwapFeed.getMarketTwap();
 
         uint256 ethPrice = ethTwapFeed.getTwap();
 
@@ -103,7 +109,7 @@ contract RateSetter {
         uint256 tlv = AbsPiController_CONTRACT.tlv();
         uint256 iapcr = rpower(AbsPiController_CONTRACT.pscl(), tlv, RAY);
         uint256 validated = AbsPiController_CONTRACT.computeRate(
-            marketPrice,
+            noiMarketPrice,
             redemptionPrice,
             iapcr
         );
