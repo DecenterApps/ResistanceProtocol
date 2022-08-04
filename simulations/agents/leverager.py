@@ -19,12 +19,12 @@ class Leverager(CDP_Holder):
 
     def close_position(self, eth_data: ETHData, price_station: PriceStation, pool: Pool):
         self.opened_position = False
-        self.eth_amount += self.cdp_position.close_position(self.debt_noi, eth_data, price_station, pool)
+        self.eth += self.cdp_position.close_position(self.debt_noi, eth_data, price_station, pool)
         self.debt_noi = 0
 
     def open_position(self, eth_data:ETHData, price_station: PriceStation, pool: Pool):
         added_eth, added_noi = CDP_Holder.open_position(self, eth_data, price_station, pool)
-        self.eth_amount += added_eth
+        self.eth += added_eth
         self.debt_noi = self.debt_noi - added_noi
 
     def liquidation(self):

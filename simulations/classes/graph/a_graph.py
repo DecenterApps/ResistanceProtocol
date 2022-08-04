@@ -21,9 +21,6 @@ class Graph:
         self.noi.append(pool.noi)
         self.pool_ratio.append(pool.eth / (pool.eth + pool.noi))
         self.relative_gap_mp_rp.append((price_station.mp - price_station.rp) / price_station.rp)
-
-        # eth_amount, noi_amount = calculate_traders_amount(previous_state)
-        # self.trader_money_ratio.append(eth_amount / (noi_amount+1e-10))
     
     def plot(self):
         self.plotGraph1()

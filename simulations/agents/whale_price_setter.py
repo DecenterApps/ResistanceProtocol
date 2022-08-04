@@ -44,16 +44,6 @@ def update_whale_price_setter(agents, price_station: PriceStation, pool: Pool, e
     trader.eth += eth_add_trader
     trader.noi += noi_add_trader
 
-def calculate_traders_amount(previous_state):
-    noi_sum = 0
-    eth_sum = 0
-    for i in range(WHALE_PRICE_SETTER.NUM):
-        name = 'whale_price_setter' + str(i)
-        trader: Whale_Price_Setter = previous_state['agents'][name]
-        eth_sum += trader.eth
-        noi_sum += trader.noi
-    return eth_sum, noi_sum
-
 def create_new_whale_price_setter(name, eth_amount, noi_amount):
     return Whale_Price_Setter(name, eth_amount, noi_amount, get_whale_price_setter_relative_gap())
 

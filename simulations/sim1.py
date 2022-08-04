@@ -19,12 +19,15 @@ from classes.graph.timestamp_graph import Timestamp_Graph
 from classes.graph.full_graph import Full_Graph
 from utils.constants import *
 from utils.exchange import *
+from agents.agent_utlis import *
 
 exp = Experiment()
 
 pool = Pool(POOL.ETH_AMOUNT, POOL.NOI_AMOUNT)
 
-timestamp_graph = Timestamp_Graph()
+agent_utils: Agent_Utils = Agent_Utils()
+
+timestamp_graph = Timestamp_Graph(agent_utils)
 full_graph = Full_Graph()
 
 full_graph.eth = [pool.eth]
@@ -34,11 +37,7 @@ price_station = PriceStation(2, 2, 1, 0, full_graph)
 eth_data = ETHData()
 agents = dict()
 
-create_price_traders(agents)
-create_rate_traders(agents)
-create_leveragers(agents)
-create_safe_owners(agents)
-create_whale_price_setters(agents)
+agent_utils.create_agents(agents)
 
 genesis_states = {'agents': agents}
 
@@ -47,8 +46,11 @@ with open('dataset/eth_dollar.csv', 'r') as csvfile:
     eth_dollar = list(csv.reader(csvfile))[0]
     eth_data.eth_dollar = [float(i) for i in eth_dollar]
 
+br = [0,0,0,0,0]
+print('aaa')
 
 def update_agents(params, substep, state_history, previous_state, policy_input):
+    global br
     global agents
     ret = agents
     
@@ -59,9 +61,11 @@ def update_agents(params, substep, state_history, previous_state, policy_input):
     price_station.calculate_redemption_price(timestamp_graph)
     timestamp_graph.add_to_graph(previous_state, price_station, pool)
 
-    total_sum = LEVERAGER.NUM + PRICE_TRADER.NUM + RATE_TRADER.NUM + SAFE_OWNER.NUM + WHALE_PRICE_SETTER.NUM
-    
-    for i in range(total_sum // 2):
+    names = agent_utils.names
+    nums = agent_utils.nums
+    total_sum = agent_utils.total_sum
+
+    for i in range(agent_utils.total_sum // 2):
         p = np.random.random()
         if i % 2 == 0:
             if RATE_TRADER.NUM + PRICE_TRADER.NUM > 0 and p < RATE_TRADER.NUM / (RATE_TRADER.NUM + PRICE_TRADER.NUM):
@@ -69,31 +73,20 @@ def update_agents(params, substep, state_history, previous_state, policy_input):
             else:
                 update_price_trader(agents, price_station, pool, eth_data)
             continue
-
-        if p < LEVERAGER.NUM / (total_sum):
-            update_leverager(agents, price_station, pool, eth_data)
-            continue
-        p -= LEVERAGER.NUM / (total_sum)
-        if p < RATE_TRADER.NUM / (total_sum):
-            update_rate_trader(agents, price_station, pool, eth_data)
-            continue
-        p -= RATE_TRADER.NUM / (total_sum)
-        if p < PRICE_TRADER.NUM / (total_sum):
-            update_price_trader(agents, price_station, pool, eth_data)
-            continue
-        p -= PRICE_TRADER.NUM / (total_sum)
-        if p < SAFE_OWNER.NUM / (total_sum):
-            update_safe_owner(agents, price_station, pool, eth_data)
-            continue
-        update_whale_price_setter(agents, price_station, pool, eth_data)
+        for i in range(len(nums)):
+            if p < nums[i] / total_sum:
+                agent_utils.agents_dict[names[i]]['update'](agents, price_station, pool, eth_data)
+                br[i] += 1
+                break
+            p -= nums[i] / total_sum
     return ('agents', ret)
 
 partial_state_update_blocks = [
     { 
         'label': 'Market Simulation',
-        'policies': { # We'll ignore policies for now
+        'policies': {
         },
-        'variables': { # The following state variables will be updated simultaneously
+        'variables': {
             'agents': update_agents,
         }
     }
@@ -106,21 +99,17 @@ sim_config_dict = {
 }
 
 c = config_sim(sim_config_dict)
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# The configurations above are then packaged into a `Configuration` object
 del configs[:]
-exp.append_configs(initial_state=genesis_states,  # dict containing variable names and initial values
-                   # dict containing state update functions
+exp.append_configs(initial_state=genesis_states,
                    partial_state_update_blocks=partial_state_update_blocks,
-                   sim_configs=c  # preprocessed dictionaries containing simulation parameters
+                   sim_configs=c
                    )
 
 exec_mode = ExecutionMode()
 local_mode_ctx = ExecutionContext(exec_mode.multi_proc)
 
-# Pass the configuration object inside an array
 simulation = Executor(exec_context=local_mode_ctx, configs=exp.configs)
-# The `execute()` method returns a tuple; its first elements contains the raw results
+
 raw_system_events, tensor_field, sessions = simulation.execute()
 
 simulation_result = pd.DataFrame(raw_system_events)
@@ -128,3 +117,5 @@ simulation_result.set_index(['subset', 'run', 'timestep', 'substep'])
 
 full_graph.plot()
 timestamp_graph.plot()
+
+print(br)

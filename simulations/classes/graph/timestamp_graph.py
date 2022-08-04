@@ -1,30 +1,32 @@
 import matplotlib.pyplot as plt
 from agents.price_trader import *
 from classes.graph.a_graph import Graph
+from agents.agent_utlis import *
 
 class Timestamp_Graph(Graph):
 
+    def __init__(self, agent_utils: Agent_Utils):
+        Graph.__init__(self)
+        self.agent_utils = agent_utils
+        self.agent_balances = dict()
+        for i in range(len(agent_utils.names)):
+            self.agent_balances[agent_utils.names[i]] = agent_utils.agents_dict[agent_utils.names[i]]['graph']
+
     def add_to_graph(self, previous_state, price_station, pool):
-        # self.m_prices.append(price_station.mp)
-        # self.r_prices.append(price_station.rp)
-        # self.eth.append(pool.eth)
-        # self.noi.append(pool.noi)
-        # self.pool_ratio.append(pool.eth / (pool.eth + pool.noi))
-        # self.relative_gap_mp_rp.append((price_station.mp - price_station.rp) / price_station.rp)
         Graph.add_to_graph(self, price_station, pool)
-        eth_amount, noi_amount = calculate_traders_amount(previous_state)
-        self.trader_money_ratio.append(eth_amount / (noi_amount+1e-10))
+
+        self.agent_utils.calculate_all_amounts(previous_state)
     
     def plot(self):
         Graph.plotGraph1(self, 'images/timestamp_graph.png')
-    
+        self.plotGraph2()
 
     def plotGraph2(self):
-        return
-        figure, axis = plt.subplots(2, 2, figsize=(15,8))
-        axis[1, 0].plot(self.trader_money_ratio)
-        axis[1, 0].set_title("Trader money ratio")
-
+        cnt = len(self.agent_utils.names)
+        figure, axis = plt.subplots(cnt, 1, figsize=(8,12))
+        for i in range(cnt):
+            axis[i].plot(self.agent_balances[self.agent_utils.names[i]])
+            axis[i].set_title(self.agent_utils.names[i])
         plt.tight_layout()
 
-        plt.savefig('images/graph2.png')
+        plt.savefig('images/agents.png')

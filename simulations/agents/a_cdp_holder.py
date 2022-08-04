@@ -6,10 +6,11 @@ import random
  
 class CDP_Holder(ABC):
 
-    def __init__(self, name, eth_amount, perc_amount, initial_cr, repay_cr, boost_cr, relative_gap):
+    def __init__(self, name, eth, perc_amount, initial_cr, repay_cr, boost_cr, relative_gap):
         self.name = name
         self.relative_gap = relative_gap
-        self.eth_amount = eth_amount
+        self.eth = eth
+        self.noi = 0
         self.perc_amount = perc_amount
         self.initial_cr = initial_cr
         self.repay_cr = repay_cr
@@ -30,13 +31,13 @@ class CDP_Holder(ABC):
 
     def close_position(self, eth_data: ETHData, price_station: PriceStation, pool: Pool):
         self.opened_position = False
-        self.eth_amount += self.cdp_position.close_position(self.debt_noi, eth_data, price_station, pool)
+        self.eth += self.cdp_position.close_position(self.debt_noi, eth_data, price_station, pool)
         self.debt_noi = 0
 
     def open_position(self, eth_data:ETHData, price_station: PriceStation, pool: Pool):
         self.opened_position = True
-        collateral = self.eth_amount * self.perc_amount
-        self.eth_amount -= collateral
+        collateral = self.eth * self.perc_amount
+        self.eth -= collateral
         self.debt_noi = price_station.get_amount_of_noi_for_rp_value(eth_data.get_eth_value_for_amount(collateral)) / self.initial_cr
         self.cdp_position = CDP_Position(collateral, self.debt_noi, self.initial_cr, self.repay_cr, self.boost_cr)
 
@@ -73,7 +74,7 @@ def update_holder(agents, price_station: PriceStation, pool: Pool, eth_data: ETH
                 holder.repay(eth_data, price_station, pool)
     else:
         
-        if relative_gap > holder.relative_gap and price_station.rp < price_station.mp and holder.eth_amount > 0:
+        if relative_gap > holder.relative_gap and price_station.rp < price_station.mp and holder.eth > 0:
             holder.open_position(eth_data, price_station, pool)
     
     agents[name] = holder

@@ -44,16 +44,6 @@ def update_price_trader(agents, price_station: PriceStation, pool: Pool, eth_dat
     trader.eth += eth_add_trader
     trader.noi += noi_add_trader
 
-def calculate_traders_amount(previous_state):
-    noi_sum = 0
-    eth_sum = 0
-    for i in range(PRICE_TRADER.NUM):
-        name = 'price_trader' + str(i)
-        trader: Price_Trader = previous_state['agents'][name]
-        eth_sum += trader.eth
-        noi_sum += trader.noi
-    return eth_sum, noi_sum
-
 def create_new_price_trader(name, eth_amount, noi_amount):
     return Price_Trader(name, eth_amount, noi_amount, get_price_trader_perc_amount(), get_price_trader_relative_gap())
 
