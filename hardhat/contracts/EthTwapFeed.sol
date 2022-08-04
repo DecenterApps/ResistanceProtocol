@@ -30,6 +30,13 @@ contract EthTwapFeed {
         _;
     }
 
+    event UpdateValues(
+        address indexed from,
+        uint256 indexed timestamp,
+        uint256 indexed ethCurrentPrice,
+        uint256 ethTwapPrice
+    );
+
     /*
      * @param _updateTimeInterval sets the minimum time interval for update
      * @param _twapWindowSize sets the number of updates needed for twap to change
@@ -78,15 +85,23 @@ contract EthTwapFeed {
             );
         }
 
-        ethTwapPrice =
-            (nextCumulativeValue - snap.cumulativeValue) /
+        uint256 tmpEthTwapPrice = (nextCumulativeValue - snap.cumulativeValue) /
             (block.timestamp - snap.timestamp);
+
+        ethTwapPrice = tmpEthTwapPrice;
 
         // prepare for next iteration
         historyIndx = (historyIndx + 1) % (twapWindowSize - 1);
         prevCumulativeValue = nextCumulativeValue;
-        prevEthPrice = getEthPrice();
+        uint256 currentEthPrice = getEthPrice();
+        prevEthPrice = currentEthPrice;
         lastUpdateTimestamp = block.timestamp;
+        emit UpdateValues(
+            msg.sender,
+            block.timestamp,
+            currentEthPrice,
+            tmpEthTwapPrice
+        );
     }
 
     /*
