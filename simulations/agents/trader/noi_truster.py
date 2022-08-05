@@ -42,8 +42,8 @@ def get_noi_truster_perc_amount() -> float:
 def get_noi_truster_relative_gap():
     p = np.random.random()
     if p < NOI_TRUSTER.BOUND_HIGH:
-        return 0.03
+        return 0
     p -= NOI_TRUSTER.BOUND_HIGH
     if p < NOI_TRUSTER.BOUND_MID:
-        return 0.05
-    return 0.1
+        return 0.03
+    return 0.6

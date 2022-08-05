@@ -5,7 +5,7 @@ from agents.trader.rate_trader import *
 from agents.trader.whale_instant_price_setter import *
 from agents.trader.whale_instant_rate_setter import *
 from agents.trader.noi_truster import *
-from utils.constants import *
+from agents.trader.random_trader import *
 
 def get_agents_dict():
     return {
@@ -51,13 +51,19 @@ def get_agents_dict():
             'update': update_noi_truster,
             'graph': [],
         },
+        'random_trader': {
+            'num': RANDOM_TRADER.NUM,
+            'create': create_random_traders,
+            'update': update_random_trader,
+            'graph': [],
+        },
     }
 
 nums = [RATE_TRADER.NUM, PRICE_TRADER.NUM, LEVERAGER.NUM, SAFE_OWNER.NUM, WHALE_INSTANT_PRICE_SETTER.NUM, 
-        WHALE_INSTANT_RATE_SETTER.NUM, NOI_TRUSTER.NUM]
+        WHALE_INSTANT_RATE_SETTER.NUM, NOI_TRUSTER.NUM, RANDOM_TRADER.NUM]
 total_sum = np.sum(nums)
 names = ['rate_trader', 'price_trader', 'leverager', 'safe_owner', 'whale_instant_price_setter',
-         'whale_instant_rate_setter', 'noi_truster']
+         'whale_instant_rate_setter', 'noi_truster', 'random_trader']
 
 class Agent_Utils:
     def __init__(self):
@@ -85,4 +91,3 @@ def calculate_agents_amount(previous_state, agent_name, num):
             eth_sum += agent.cdp_position.collateral_eth
 
     return eth_sum
-
