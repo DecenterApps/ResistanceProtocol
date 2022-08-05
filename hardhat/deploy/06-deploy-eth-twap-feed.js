@@ -42,4 +42,4 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     }
 };
 
-module.exports.tags = ["all", "parameters"];
+module.exports.tags = ["all", "ethtwapfeed"];

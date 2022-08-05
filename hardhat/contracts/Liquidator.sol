@@ -20,6 +20,9 @@ contract Liquidator{
 
     address public owner;
 
+    uint256 internal constant EIGHTEEN_DECIMAL_NUMBER = 10**18;
+
+
     constructor(address _owner){
         owner = _owner;
     }
@@ -36,11 +39,10 @@ contract Liquidator{
 
     function isEligibleForLiquidation(CDPManager.CDP memory _cdp) private view returns(bool){
 
-        uint8 LR = Parameters(parametersContractAddress).getLR();
+        uint256 LR = Parameters(parametersContractAddress).getLR() * EIGHTEEN_DECIMAL_NUMBER;
 
-        uint256 redemptionPrice=1; // should get it from RateSetter contract
-        uint256 ethPrice = 1000;     // should get it from RateSetter contract
-        uint256 CR = _cdp.lockedCollateral*ethPrice*100/(_cdp.generatedDebt*redemptionPrice);
+        uint256 ethRp = CDPManager(cdpManagerContractAddress).ethRp();
+        uint256 CR = _cdp.lockedCollateral*ethRp*100/(_cdp.generatedDebt);
 
         return CR <= LR;
     }

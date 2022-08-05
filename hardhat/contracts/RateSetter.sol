@@ -7,6 +7,7 @@ import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import "./CDPManager.sol";
 import "./AbsPiController.sol";
 import "./EthTwapFeed.sol";
+import "./MarketTwapFeed.sol";
 
 abstract contract CPITrackerOracle {
     function currPegPrice() external view virtual returns (uint256);
@@ -18,7 +19,6 @@ error RateSetter__UnknownContract();
 contract RateSetter {
     address public immutable owner;
     uint256 redemptionPrice;
-    uint256 marketPrice;
     uint256 CPI;
     uint256 redemptionRate;
 
@@ -26,10 +26,11 @@ contract RateSetter {
     uint256 redemptionPriceUpdateTime;
     uint256 internal constant EIGHTEEN_DECIMAL_NUMBER = 10**18;
 
-    CDPManager private CDPManager_CONTARCT;
+    CDPManager private CDPManager_CONTRACT;
     AbsPiController private AbsPiController_CONTRACT;
 
     EthTwapFeed private ethTwapFeed;
+    MarketTwapFeed private marketTwapFeed;
     CPITrackerOracle private cpiDataFeed;
 
     // EVENTS
@@ -63,7 +64,7 @@ contract RateSetter {
      * @param _newAddress New address for the contract
      */
     function modifyContracts(bytes32 _contract, address _newAddress) external isOwner {
-        if (_contract == "CDPManager") CDPManager_CONTARCT = CDPManager(_newAddress);
+        if (_contract == "CDPManager") CDPManager_CONTRACT = CDPManager(_newAddress);
         else if (_contract == "AbsPiController") AbsPiController_CONTRACT = AbsPiController(_newAddress);
         else if (_contract == "EthTwapFeed") ethTwapFeed = EthTwapFeed(_newAddress);
         else if (_contract == "CPITrackerOracle") cpiDataFeed= CPITrackerOracle(_newAddress);
@@ -76,15 +77,18 @@ contract RateSetter {
         address _cdpManager,
         address _AbsPiController,
         address _ethTwapFeed,
+        address _marketTwapFeed,
         address _cpiDataFeed
     ) {
         owner = _owner;
-        CDPManager_CONTARCT = CDPManager(_cdpManager);
+        CDPManager_CONTRACT = CDPManager(_cdpManager);
         AbsPiController_CONTRACT = AbsPiController(_AbsPiController);
         redemptionPrice = (314 * RAY) / 100;
         redemptionRate = RAY;
 
         ethTwapFeed = EthTwapFeed(_ethTwapFeed);
+        marketTwapFeed = MarketTwapFeed(_marketTwapFeed);
+
         cpiDataFeed = CPITrackerOracle(_cpiDataFeed);
 
         redemptionPriceUpdateTime = block.timestamp;
@@ -95,7 +99,9 @@ contract RateSetter {
      */
     function updatePrices() public {
         // gather rate from market/redemption controller
-        marketPrice = 5 * 10**18; // should get it from oracle
+        //uint256 noiMarketPrice = 5 * 10**18; // should get it from oracle
+
+        uint256 noiMarketPrice = marketTwapFeed.getTwap();
 
         uint256 ethPrice = ethTwapFeed.getTwap();
 
@@ -103,7 +109,7 @@ contract RateSetter {
         uint256 tlv = AbsPiController_CONTRACT.tlv();
         uint256 iapcr = rpower(AbsPiController_CONTRACT.pscl(), tlv, RAY);
         uint256 validated = AbsPiController_CONTRACT.computeRate(
-            marketPrice,
+            noiMarketPrice,
             redemptionPrice,
             iapcr
         );
@@ -121,7 +127,7 @@ contract RateSetter {
         redemptionPriceUpdateTime = block.timestamp;
 
         // set Eth/Redemption Rate
-        CDPManager_CONTARCT.setEthRp(ethPrice / redemptionPrice);
+        CDPManager_CONTRACT.setEthRp(ethPrice * EIGHTEEN_DECIMAL_NUMBER / redemptionPrice);
     }
 
     function updateRatesInternal() public {}
