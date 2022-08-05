@@ -66,7 +66,7 @@ contract MarketTwapFeed {
 
         // set initial stuff
         snapshotHistory.push(Snapshot(0, block.timestamp));
-        //prevPrice = getMarketPrice();
+        prevPrice = getMarketPrice();
     }
 
     /*
@@ -110,7 +110,7 @@ contract MarketTwapFeed {
     /*
      * @notice fetch the most recent market twap
      */
-    function getMarketTwap() public view returns (uint256) {
+    function getTwap() public view returns (uint256) {
         return marketTwapPrice;
     }
 

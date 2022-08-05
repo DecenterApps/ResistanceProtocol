@@ -101,7 +101,7 @@ contract RateSetter {
         // gather rate from market/redemption controller
         //uint256 noiMarketPrice = 5 * 10**18; // should get it from oracle
 
-        uint256 noiMarketPrice = marketTwapFeed.getMarketTwap();
+        uint256 noiMarketPrice = marketTwapFeed.getTwap();
 
         uint256 ethPrice = ethTwapFeed.getTwap();
 

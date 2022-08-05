@@ -10,7 +10,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     const PriceRefreshInterval = 3600; // 60 min
     const TwapInterval = 24; // twap window 24h
 
-    let lendingPoolAddress = ethers.constants.AddressZero;
+    let lendingPoolAddress = (await ethers.getContract("LendingPoolMock", deployer)).address;
 
     log("----------------------------------------------------");
     log("Deploying MarketTwapFeed and waiting for confirmations...");
