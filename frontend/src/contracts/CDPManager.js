@@ -1,4 +1,4 @@
-const ABI= [
+export const ABI= [
   {
     "inputs": [
       {
@@ -683,5 +683,4 @@ const ABI= [
     "type": "function"
   }
 ]
-const address= "0x95775fD3Afb1F4072794CA4ddA27F2444BCf8Ac3"
-export default {ABI,address}
+export const address= "0x95775fD3Afb1F4072794CA4ddA27F2444BCf8Ac3"

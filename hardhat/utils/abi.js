@@ -40,7 +40,7 @@ const writeAbiAndAddress = (contractName,address) => {
       "../../frontend/src/contracts/"+contractName+".js"
     );
 
-    fs.writeFile(dirWrite, "const ABI= "+JSON.stringify(abi,null,2)+"\nconst address= \""+address+"\"\nexport default {ABI,address}", (err) => {
+    fs.writeFile(dirWrite, "export const ABI= "+JSON.stringify(abi,null,2)+"\nexport const address= \""+address+"\"", (err) => {
       if (err) {
         console.log(err);
       }

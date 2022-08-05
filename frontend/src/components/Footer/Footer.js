@@ -10,7 +10,7 @@ export default function Footer({bAnimation,setBAnimation}) {
   };
 
   return (
-    <footer class="site-footer">
+    <footer className="site-footer">
       <HStack>
         <div className="ftr-left">
           <p className="copyright-text">Copyright &copy; 2022</p>

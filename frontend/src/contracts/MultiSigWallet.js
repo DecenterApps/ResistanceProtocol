@@ -1,4 +1,4 @@
-const ABI= [
+export const ABI= [
   {
     "inputs": [
       {
@@ -419,5 +419,4 @@ const ABI= [
     "type": "receive"
   }
 ]
-const address= "0x79E8AB29Ff79805025c9462a2f2F12e9A496f81d"
-export default {ABI,address}
+export const address= "0x79E8AB29Ff79805025c9462a2f2F12e9A496f81d"

@@ -2,8 +2,18 @@ export const ABI= [
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "_updateTimeInterval",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_twapWindowSize",
+        "type": "uint256"
+      },
+      {
         "internalType": "address",
-        "name": "_owner",
+        "name": "_ethPriceFeed",
         "type": "address"
       }
     ],
@@ -12,17 +22,17 @@ export const ABI= [
   },
   {
     "inputs": [],
-    "name": "Parameters_NotAuthorized",
+    "name": "EthTwapFeed__TimeIntervalDidNotPass",
     "type": "error"
   },
   {
     "inputs": [],
-    "name": "LR",
+    "name": "ethTwapPrice",
     "outputs": [
       {
-        "internalType": "uint8",
+        "internalType": "uint256",
         "name": "",
-        "type": "uint8"
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -30,12 +40,12 @@ export const ABI= [
   },
   {
     "inputs": [],
-    "name": "SF",
+    "name": "getEthPrice",
     "outputs": [
       {
-        "internalType": "uint8",
+        "internalType": "uint256",
         "name": "",
-        "type": "uint8"
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -43,12 +53,12 @@ export const ABI= [
   },
   {
     "inputs": [],
-    "name": "getLR",
+    "name": "getTwap",
     "outputs": [
       {
-        "internalType": "uint8",
+        "internalType": "uint256",
         "name": "",
-        "type": "uint8"
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -56,12 +66,12 @@ export const ABI= [
   },
   {
     "inputs": [],
-    "name": "getSF",
+    "name": "twapWindowSize",
     "outputs": [
       {
-        "internalType": "uint8",
+        "internalType": "uint256",
         "name": "",
-        "type": "uint8"
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -69,42 +79,23 @@ export const ABI= [
   },
   {
     "inputs": [],
-    "name": "owner",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint8",
-        "name": "_LR",
-        "type": "uint8"
-      }
-    ],
-    "name": "setLR",
+    "name": "update",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
-    "inputs": [
+    "inputs": [],
+    "name": "updateTimeInterval",
+    "outputs": [
       {
-        "internalType": "uint8",
-        "name": "_SF",
-        "type": "uint8"
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
       }
     ],
-    "name": "setSF",
-    "outputs": [],
-    "stateMutability": "nonpayable",
+    "stateMutability": "view",
     "type": "function"
   }
 ]
-export const address= "0x9fD16eA9E31233279975D99D5e8Fc91dd214c7Da"
+export const address= "0x512F7469BcC83089497506b5df64c6E246B39925"

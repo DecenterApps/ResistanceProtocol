@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "./Dashboard.css";
 import {
   Flex,
@@ -32,7 +32,10 @@ import {
 } from "chart.js";
 import { Line, Bar } from "react-chartjs-2";
 import { FcInfo } from "react-icons/fc";
-import Footer from '../Footer/Footer'
+import Footer from "../Footer/Footer";
+import { useWeb3React } from "@web3-react/core";
+import { ABI, address } from "../../contracts/EthTwapFeed";
+import {ethers} from 'ethers'
 
 ChartJS.register(
   CategoryScale,
@@ -101,7 +104,45 @@ export const data3 = {
   ],
 };
 
-export default function Dashboard({bAnimation,setBAnimation}) {
+export default function Dashboard({ bAnimation, setBAnimation }) {
+  const { library, chainId, account, activate, deactivate, active } =
+    useWeb3React();
+  const [ethTwapFeedContract, setEthTwapFeedContract] = useState();
+  const [ethPrice, setEthPrice] = useState(0);
+
+  const getEthPrice=async ()=>{
+    if (ethTwapFeedContract) {
+      console.log(library.getSigner());
+      const ethResponse = await ethTwapFeedContract
+        .connect(library.getSigner())
+        .getEthPrice();
+      setEthPrice(ethResponse.div(10**8).toString());
+    }
+  }
+
+  useEffect(() => {
+    if (library) {
+      console.log(library);
+      const contract1 = new ethers.Contract(address, ABI);
+      setEthTwapFeedContract(contract1);
+    }
+  }, [library]);
+
+  useEffect(() => {
+    if (library) {
+      console.log(library);
+      const contract1 = new ethers.Contract(address, ABI);
+      setEthTwapFeedContract(contract1);
+    }
+  }, []);
+
+  useEffect(() => {
+    getEthPrice()
+    setInterval(async () => {
+      await getEthPrice()
+    }, 5000*60);
+  }, [ethTwapFeedContract]);
+
   return (
     <div className="dashboard animated bounceIn">
       <Box>
@@ -319,17 +360,7 @@ export default function Dashboard({bAnimation,setBAnimation}) {
                   </div>
                   <VStack>
                     <div>ETH Price</div>
-                    <StatGroup>
-                      <Stat>
-                        <HStack>
-                          <StatNumber>1,750$</StatNumber>
-                          <StatHelpText>
-                            <StatArrow type="increase" />
-                            7.36%
-                          </StatHelpText>
-                        </HStack>
-                      </Stat>
-                    </StatGroup>
+                    <div className="bold-text">{ethPrice} USD</div>
                   </VStack>
                 </Box>
               </HStack>
