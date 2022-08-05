@@ -38,6 +38,13 @@ contract MarketTwapFeed {
     Snapshot[] private snapshotHistory;
     uint256 private historyIndx = 0;
 
+    event UpdateValues(
+        address indexed from,
+        uint256 indexed currentPrice,
+        uint256 indexed twapPrice,
+        uint256 timestamp
+    );
+
     modifier IntervalPassed() {
         if (block.timestamp - lastUpdateTimestamp < updateTimeInterval)
             revert MarketTwapFeed__TimeIntervalDidNotPass();
@@ -98,15 +105,23 @@ contract MarketTwapFeed {
             );
         }
 
-        marketTwapPrice =
-            (nextCumulativeValue - snap.cumulativeValue) /
-            (block.timestamp - snap.timestamp);
+        uint256 tmpMarketTwapPrice = (nextCumulativeValue -
+            snap.cumulativeValue) / (block.timestamp - snap.timestamp);
+
+        marketTwapPrice = tmpMarketTwapPrice;
 
         // prepare for next iteration
         historyIndx = (historyIndx + 1) % (twapWindowSize - 1);
         prevCumulativeValue = nextCumulativeValue;
-        prevPrice = getMarketPrice();
+        uint256 marketPrice = getMarketPrice();
+        prevPrice = marketPrice;
         lastUpdateTimestamp = block.timestamp;
+        emit UpdateValues(
+            msg.sender,
+            marketPrice,
+            tmpMarketTwapPrice,
+            block.timestamp
+        );
     }
 
     /*
