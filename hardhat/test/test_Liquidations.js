@@ -10,7 +10,7 @@ describe("Liquidations", function () {
   this.timeout(80000);
   let senderAcc;
   let multiSigWallet;
-  let CDPManagerContractObj, noiContractObj, LiquidatorContractObj, ParametersContractObj, TreasuryContractObj;
+  let CDPManagerContractObj, noiContractObj, LiquidatorContractObj, ParametersContractObj, RateSetterContractObj;
   let owner;
   let deployer;
   const wei = new BigNumber(10).pow(18);
@@ -32,7 +32,7 @@ describe("Liquidations", function () {
     CDPManagerContractObj = await ethers.getContract("CDPManager", deployer);
     LiquidatorContractObj = await ethers.getContract("Liquidator", deployer);
     ParametersContractObj = await ethers.getContract("Parameters", deployer);
-    TreasuryContractObj = await ethers.getContract("Treasury", deployer);
+    RateSetterContractObj = await ethers.getContract("RateSetter", deployer);
     multiSigWallet = await ethers.getContract("MultiSigWallet", deployer);
 
     senderAcc = await hre.ethers.getSigners();
@@ -43,7 +43,8 @@ describe("Liquidations", function () {
 
   it("... should liquidate CDP", async () => {
 
-    let cdpIndex = await openAndMintFromCDP(CDPManagerContractObj, senderAcc[1],"13",10000);
+
+    let cdpIndex = await openAndMintFromCDP(CDPManagerContractObj, senderAcc[1],13,10000);
 
     // should be set by the multi sig
     await executeActionFromMSW(
@@ -55,7 +56,7 @@ describe("Liquidations", function () {
         [150]
     );
 
-    await openAndMintFromCDP(CDPManagerContractObj, senderAcc[2],"20",10001);
+    await openAndMintFromCDP(CDPManagerContractObj, senderAcc[2],20,10001);
 
     const approveCDPManager = await noiContractObj.connect(senderAcc[2]).approve(CDPManagerContractObj.address, BigNumber(10).pow(18).mult(10001).toString());
     await approveCDPManager.wait();
@@ -66,13 +67,7 @@ describe("Liquidations", function () {
 
   it("... should fail Liquidation", async () => {
 
-    const txOpenCDP = await CDPManagerContractObj.connect(senderAcc[1]).openCDP(senderAcc[1].address, {value: ethers.utils.parseEther("13")});
-    await txOpenCDP.wait();
-    const getCDPIndex = await CDPManagerContractObj.connect(senderAcc[1]).cdpi();
-    const cdpIndex = getCDPIndex.toString();
-
-    const txmintFromCDPManager = await CDPManagerContractObj.connect(senderAcc[1]).mintFromCDP(cdpIndex, BigNumber(10).pow(18).mult(1000).toString());
-    await txmintFromCDPManager.wait();
+    const cdpIndex = await openAndMintFromCDP(CDPManagerContractObj, senderAcc[1],13,1000);
 
     expectToFailWithError(
       LiquidatorContractObj.connect(owner).liquidateCDP(cdpIndex),
@@ -80,4 +75,5 @@ describe("Liquidations", function () {
     );
 
   });
+  
 });

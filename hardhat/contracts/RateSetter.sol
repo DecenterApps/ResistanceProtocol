@@ -21,6 +21,7 @@ contract RateSetter {
     uint256 redemptionPrice;
     uint256 CPI;
     uint256 redemptionRate;
+    uint256 ethPrice;
 
     uint256 public constant RAY = 10**27;
     uint256 redemptionPriceUpdateTime;
@@ -103,7 +104,7 @@ contract RateSetter {
 
         uint256 noiMarketPrice = marketTwapFeed.getTwap();
 
-        uint256 ethPrice = ethTwapFeed.getTwap();
+        ethPrice = ethTwapFeed.getTwap();
 
         // reward caller
         uint256 tlv = AbsPiController_CONTRACT.tlv();
