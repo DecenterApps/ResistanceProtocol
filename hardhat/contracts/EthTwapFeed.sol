@@ -55,7 +55,9 @@ contract EthTwapFeed {
 
         // set initial stuff
         snapshotHistory.push(Snapshot(0, block.timestamp));
-        prevEthPrice = getEthPrice();
+        uint256 price = getEthPrice();
+        prevEthPrice = price;
+        ethTwapPrice = price;
     }
 
     /*

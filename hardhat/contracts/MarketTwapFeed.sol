@@ -66,7 +66,9 @@ contract MarketTwapFeed {
 
         // set initial stuff
         snapshotHistory.push(Snapshot(0, block.timestamp));
-        prevPrice = getMarketPrice();
+        uint256 price = getMarketPrice();
+        prevPrice = price;
+        marketTwapPrice = price;
     }
 
     /*
