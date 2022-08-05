@@ -4,3 +4,5 @@ images/
 __pycache__/
 
 utils/__pycache__
+
+classes/__pycache__

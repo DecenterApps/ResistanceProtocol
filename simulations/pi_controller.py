@@ -1,4 +1,3 @@
-# import matplotlib.pyplot as plt
 import numpy as np
 
 TIME_STEP = 10000
@@ -105,21 +104,9 @@ def updateDeviationHistory(proportionalTerm: float, accumulatedLeak: float) -> N
     historicalCumulativeDeviations.append(priceDeviationCumulative)
     deviationObservations.append(DeviationObservation(lastUpdateTime + TIME_STEP, proportionalTerm, priceDeviationCumulative))
 
-# def getNextRedemptionRate(marketPrice: float, redemptionPrice: float, accumulatedLeak: float) -> tuple:
-#     global defaultGlobalTimeline
-#     scaledMarketPrice = marketPrice
-    
-#     proportionalTerm = (redemptionPrice - scaledMarketPrice) / redemptionPrice
-#     (cumulativeDeviation, _) = getNextPriceDeviationCumulative(proportionalTerm, accumulatedLeak)
-#     piOutput = getGainAdjustedPIOutput(proportionalTerm, cumulativeDeviation)
-#     if breaksNoiseBarrier(absolute(piOutput), redemptionPrice) and piOutput != 0:
-#         newRedemptionRate = getBoundedRedemptionRate(piOutput)
-#         return (newRedemptionRate, proportionalTerm, cumulativeDeviation, rateTimeline)
-#     else:
-#         return (1, proportionalTerm, cumulativeDeviation, defaultGlobalTimeline)
-
 def updateRedemptionPrice(redemptionPrice:float, redemptionRate: float) -> float:
     # Update redemption price
+    # print(redemptionRate)
     redemptionPrice = (redemptionRate ** TIME_STEP) * redemptionPrice
     if redemptionPrice == 0:
         redemptionPrice = 1
