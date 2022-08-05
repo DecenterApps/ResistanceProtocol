@@ -380,6 +380,7 @@ contract CDPManager {
         public
         payable
         onlyLiquidatorContract
+        CDPExists(_cdpIndex)
     {
         (bool sent, ) = payable(msg.sender).call{
             value: cdpList[_cdpIndex].lockedCollateral
