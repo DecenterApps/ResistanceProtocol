@@ -125,7 +125,10 @@ contract CDPManager {
      * @param _parameter The name of the parameter modified
      * @param _data New value for the parameter
      */
-    function modifyParameters(bytes32 _parameter, uint256 _data) external isOwner {
+    function modifyParameters(bytes32 _parameter, uint256 _data)
+        external
+        isOwner
+    {
         if (_parameter == "cdpi") cdpi = _data;
         else revert CDPManager__UnknownParameter();
         emit ModifyParameters(_parameter, _data);
@@ -136,7 +139,10 @@ contract CDPManager {
      * @param _contract The name of the contract modified
      * @param _newAddress New address for the contract
      */
-    function modifyContracts(bytes32 _contract, address _newAddress) external isOwner {
+    function modifyContracts(bytes32 _contract, address _newAddress)
+        external
+        isOwner
+    {
         if (_contract == "NOI") NOI_COIN = NOI(_newAddress);
         else revert CDPManager__UnknownContract();
         emit ModifyContract(_contract, _newAddress);
@@ -300,11 +306,13 @@ contract CDPManager {
         if (_amount == 0) revert CDPManager__ZeroTokenMint();
         CDP memory user_cdp = cdpList[_cdpIndex];
 
-        uint256 LR = Parameters(parametersContractAddress).getLR() * EIGHTEEN_DECIMAL_NUMBER;
+        uint256 LR = Parameters(parametersContractAddress).getLR() *
+            EIGHTEEN_DECIMAL_NUMBER;
 
         // check if the new minted coins will be under liquidation ratio
         uint256 newTotalUserDebt = (getDebtWithSF(_cdpIndex) + _amount);
-        uint256 CR = (user_cdp.lockedCollateral * ethRp * 100) / (newTotalUserDebt);
+        uint256 CR = (user_cdp.lockedCollateral * ethRp * 100) /
+            (newTotalUserDebt);
 
         if (CR < LR) revert CDPManager__LiquidationRatioReached();
 
@@ -339,7 +347,10 @@ contract CDPManager {
      * @param _cdpIndex index of cdp
      * @param _liquidatorUsr address that initiated liquidation
      */
-    function repayToCDP(uint256 _cdpIndex, uint256 _amount) public {
+    function repayToCDP(uint256 _cdpIndex, uint256 _amount)
+        public
+        CDPExists(_cdpIndex)
+    {
         uint256 amount = _amount;
         recalculateSF(_cdpIndex);
         uint totalUserDebt = cdpList[_cdpIndex].generatedDebt +
