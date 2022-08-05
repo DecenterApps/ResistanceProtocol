@@ -13,6 +13,10 @@ describe('ExchangePool', function () {    //former RateSetter
     let deployer;
     let daiAddr;
     let RouterContractObj;
+    let pairAddress;
+    let factoryContractAddr;
+    let factoryContractObj;
+    let wethAddr;
     //let AbsPiControllerContractObj;
     //let RateSetterContractObj; 
     //let multiSigWallet;
@@ -36,11 +40,19 @@ describe('ExchangePool', function () {    //former RateSetter
         //RateSetterContractObj = await ethers.getContract("RateSetter", deployer);
         ExchangePoolContractObj = await ethers.getContract("ExchangePool", deployer);
         //AbsPiControllerContractObj = await ethers.getContract("AbsPiController", deployer);
-
+        
         senderAccounts.push((await hre.ethers.getSigners())[1]);
         senderAccounts.push((await hre.ethers.getSigners())[2]);
         senderAccounts.push((await hre.ethers.getSigners())[3]);
         senderAccounts.push((await hre.ethers.getSigners())[4]);
+
+        wethAddr = await RouterContractObj.connect(senderAccounts[1]).WETH();
+
+        factoryContractAddr = await RouterContractObj.connect(senderAccounts[1]).factory();
+        console.log("Adresa factoryija: " + factoryContractAddr);
+        factoryContractObj = await hre.ethers.getContractAt("IFactory", factoryContractAddr); 
+        console.log(factoryContractObj.address);
+        pairAddress = await factoryContractObj.connect(senderAccounts[1]).getPair(noiContractObj.address, wethAddr);
     });
 
     it('... mint tokens without changing the rate', async () => {        
@@ -52,26 +64,24 @@ describe('ExchangePool', function () {    //former RateSetter
 
         const txmintFromCDPManager = await CDPManagerContractObj.connect(senderAccounts[1]).mintFromCDP(cdpIndex, "1000000");
         await txmintFromCDPManager.wait();
-        console.log("Mintovao kako treba\n");
 
-        console.log("Autorizovanje rutera:");
         const txAuthorizeRouter = await daiContractObj.connect(senderAccounts[1]).approve(RouterContractObj.address, 1000000);
         await txAuthorizeRouter.wait();
-
-        console.log("COCK");
-        const txTrialNigger = await ExchangePoolContractObj.connect(senderAccounts[1]).getRouterAddress();
-        console.log(txTrialNigger.toString());
         
-        console.log("Uzimanje DAIja: ");
-        //const txGetDaiFromUniPool = await ExchangePoolContractObj.connect(senderAccounts[1]).getDAI(1000,{value: ethers.utils.parseEther("12")});
-        let wethAddr = await RouterContractObj.connect(senderAccounts[1]).WETH();
-        const txGetDaiFromUniPool = await RouterContractObj.connect(senderAccounts[1]).swapETHForExactTokens(100000,[wethAddr,daiAddr], senderAccounts[1].address,2**256-1,{value: ethers.utils.parseEther("1200")});
-        console.log(txGetDaiFromUniPool.toString());
+        const txGetDaiFromUniPool = await ExchangePoolContractObj.connect(senderAccounts[1]).getDAI(1000000,{value: ethers.utils.parseEther("12")});
         await txGetDaiFromUniPool.wait();
 
-        console.log("Davanje likvidnosti:");
-        const txProvideLiq = await ExchangePoolContractObj.connect(senderAccounts[1]).provideLiquidity(1000000, 1000000);
+        const txApproveDai = await daiContractObj.connect(senderAccounts[1]).approve(daiAddr, 1000000);
+        await txApproveDai.wait();
+        const txApproveNoi = await noiContractObj.connect(senderAccounts[1]).approve(noiContractObj.address, 1000000);
+        await txApproveNoi.wait();
+
+        console.log("doso")
+
+        const txProvideLiq = await ExchangePoolContractObj.connect(senderAccounts[1]).provideLiquidity(100000, 100000);
         await txProvideLiq.wait();
+
+
 
         const getPoolVals = ExchangePoolContractObj.connect(senderAccounts[1]).getReserves();
         await getPoolVals.wait();
