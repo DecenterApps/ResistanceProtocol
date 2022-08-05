@@ -32,9 +32,9 @@ contract EthTwapFeed {
 
     event UpdateValues(
         address indexed from,
-        uint256 indexed timestamp,
         uint256 indexed ethCurrentPrice,
-        uint256 ethTwapPrice
+        uint256 indexed ethTwapPrice,
+        uint256 timestamp
     );
 
     /*
@@ -100,9 +100,9 @@ contract EthTwapFeed {
         lastUpdateTimestamp = block.timestamp;
         emit UpdateValues(
             msg.sender,
-            block.timestamp,
             currentEthPrice,
-            tmpEthTwapPrice
+            tmpEthTwapPrice,
+            block.timestamp
         );
     }
 
