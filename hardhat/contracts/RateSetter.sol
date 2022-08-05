@@ -26,7 +26,7 @@ contract RateSetter {
     uint256 redemptionPriceUpdateTime;
     uint256 internal constant EIGHTEEN_DECIMAL_NUMBER = 10**18;
 
-    CDPManager private CDPManager_CONTARCT;
+    CDPManager private CDPManager_CONTRACT;
     AbsPiController private AbsPiController_CONTRACT;
 
     EthTwapFeed private ethTwapFeed;
@@ -64,7 +64,7 @@ contract RateSetter {
      * @param _newAddress New address for the contract
      */
     function modifyContracts(bytes32 _contract, address _newAddress) external isOwner {
-        if (_contract == "CDPManager") CDPManager_CONTARCT = CDPManager(_newAddress);
+        if (_contract == "CDPManager") CDPManager_CONTRACT = CDPManager(_newAddress);
         else if (_contract == "AbsPiController") AbsPiController_CONTRACT = AbsPiController(_newAddress);
         else if (_contract == "EthTwapFeed") ethTwapFeed = EthTwapFeed(_newAddress);
         else if (_contract == "CPITrackerOracle") cpiDataFeed= CPITrackerOracle(_newAddress);
@@ -81,7 +81,7 @@ contract RateSetter {
         address _cpiDataFeed
     ) {
         owner = _owner;
-        CDPManager_CONTARCT = CDPManager(_cdpManager);
+        CDPManager_CONTRACT = CDPManager(_cdpManager);
         AbsPiController_CONTRACT = AbsPiController(_AbsPiController);
         redemptionPrice = (314 * RAY) / 100;
         redemptionRate = RAY;
@@ -127,7 +127,7 @@ contract RateSetter {
         redemptionPriceUpdateTime = block.timestamp;
 
         // set Eth/Redemption Rate
-        CDPManager_CONTARCT.setEthRp(ethPrice / redemptionPrice);
+        CDPManager_CONTRACT.setEthRp(ethPrice * EIGHTEEN_DECIMAL_NUMBER / redemptionPrice);
     }
 
     function updateRatesInternal() public {}

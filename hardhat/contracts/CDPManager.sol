@@ -147,6 +147,7 @@ contract CDPManager {
         authorizedAccounts[msg.sender] = true;
         totalSupply = 0;
         cdpi = 0;
+        ethRp = 1000 * EIGHTEEN_DECIMAL_NUMBER;
         lastUnmintedNOICalculationTimestamp = block.timestamp;
         NOI_COIN = NOI(_noiCoin);
     }
@@ -299,14 +300,11 @@ contract CDPManager {
         if (_amount == 0) revert CDPManager__ZeroTokenMint();
         CDP memory user_cdp = cdpList[_cdpIndex];
 
-        uint8 LR = Parameters(parametersContractAddress).getLR();
+        uint256 LR = Parameters(parametersContractAddress).getLR() * EIGHTEEN_DECIMAL_NUMBER;
 
         // check if the new minted coins will be under liquidation ratio
         uint256 newTotalUserDebt = (getDebtWithSF(_cdpIndex) + _amount);
-        uint256 redemptionPrice = 1; // should get it from RateSetter contract
-        uint256 ethPrice = 1000; // should get it from RateSetter contract
-        uint256 CR = (user_cdp.lockedCollateral * ethPrice * 100) /
-            (newTotalUserDebt * redemptionPrice);
+        uint256 CR = (user_cdp.lockedCollateral * ethRp * 100) / (newTotalUserDebt);
 
         if (CR < LR) revert CDPManager__LiquidationRatioReached();
 
