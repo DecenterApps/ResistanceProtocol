@@ -26,6 +26,37 @@ export const ABI= [
     "type": "error"
   },
   {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "from",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "ethCurrentPrice",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "ethTwapPrice",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "timestamp",
+        "type": "uint256"
+      }
+    ],
+    "name": "UpdateValues",
+    "type": "event"
+  },
+  {
     "inputs": [],
     "name": "ethTwapPrice",
     "outputs": [
@@ -98,4 +129,4 @@ export const ABI= [
     "type": "function"
   }
 ]
-export const address= "0x512F7469BcC83089497506b5df64c6E246B39925"
+export const address= "0x9fD16eA9E31233279975D99D5e8Fc91dd214c7Da"

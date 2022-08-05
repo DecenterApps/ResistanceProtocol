@@ -23,6 +23,11 @@ export const ABI= [
       },
       {
         "internalType": "address",
+        "name": "_marketTwapFeed",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
         "name": "_cpiDataFeed",
         "type": "address"
       }
@@ -226,4 +231,4 @@ export const ABI= [
     "type": "function"
   }
 ]
-export const address= "0xCBBe2A5c3A22BE749D5DDF24e9534f98951983e2"
+export const address= "0xb932C8342106776E73E39D695F3FFC3A9624eCE0"

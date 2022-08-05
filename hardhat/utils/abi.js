@@ -46,6 +46,21 @@ const writeAbiAndAddress = (contractName,address) => {
       }
     });
 
+    const dirWriteBackend = path.resolve(
+      __dirname,
+      "../../backend/"+contractName+".py"
+    );
+
+    let abi_string=JSON.stringify(abi)
+    abi_string=abi_string.replaceAll('false', 'False')
+    abi_string=abi_string.replaceAll('true', 'True')
+
+    fs.writeFile(dirWriteBackend, "ABI_"+contractName.toUpperCase()+"= "+abi_string+"\nADDRESS_"+contractName.toUpperCase()+"= \""+address+"\"", (err) => {
+      if (err) {
+        console.log(err);
+      }
+    });
+
     return abi;
   } catch (e) {
     console.log(`e`, e);

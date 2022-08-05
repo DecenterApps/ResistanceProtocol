@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./OpenCdpModal.css";
 import {
   VStack,
@@ -11,15 +11,26 @@ import {
   Button,
   Input,
   InputGroup,
-  InputLeftElement
+  InputLeftElement,
 } from "@chakra-ui/react";
+import { ethers } from "ethers";
+import { useWeb3React } from "@web3-react/core";
+import { ABI, address } from "../../contracts/CDPManager";
 
 export default function OpenCdpModal({ open, handleClose }) {
   const [col, setCol] = useState(0);
+  const { library, chainId, account, activate, deactivate, active } =
+    useWeb3React();
 
-  const onConfirm=()=>{
-    handleClose()
-  }
+  const onConfirm = () => {
+    const contractCDPManager = new ethers.Contract(address, ABI);
+    contractCDPManager
+      .connect(library.getSigner())
+      .openCDP(account, {
+        value: ethers.utils.parseEther("12"),
+      });
+    handleClose();
+  };
 
   return (
     <Modal isOpen={open} onClose={handleClose} isCentered>
@@ -49,7 +60,12 @@ export default function OpenCdpModal({ open, handleClose }) {
                 }}
               />
             </InputGroup>
-            <Button className="selected-tlbr-btn raise confirm" onClick={onConfirm}>Confirm</Button>
+            <Button
+              className="selected-tlbr-btn raise confirm"
+              onClick={onConfirm}
+            >
+              Confirm
+            </Button>
           </VStack>
         </ModalBody>
       </ModalContent>
