@@ -27,7 +27,8 @@
     "react-scripts": "^4.0.3",
     "react-switch": "^7.0.0",
     "sass": "^1.54.0",
-    "styled-components": "^5.3.5"
+    "styled-components": "^5.3.5",
+    "firebase": "^9.9.0"
   },
   "scripts": {
     "start": "react-scripts start",

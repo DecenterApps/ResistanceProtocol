@@ -18,17 +18,12 @@
   height: 58vh;
   background: rgb(11, 18, 38);
   border-radius: 3%;
-  display: flex;
-  -webkit-box-pack: center;
-  justify-content: center;
-  flex-direction: column;
-  -webkit-box-align: center;
-  align-items: center;
   overflow: scroll;
   -ms-overflow-style: none;
   scrollbar-width: none;
   background: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgb(11, 18, 38) 100%);
   box-shadow: 0 0.5em 0.5em -0.4em black;
+  padding: 40px 50px 40px 10px;
 }
 
 .cdp-line2-holder::-webkit-scrollbar {
@@ -36,8 +31,6 @@
 }
 
 .per-cdp {
-  position: relative;
-  top: 100vh;
   width: 75vw;
   min-height: 15vh;
   background: rgb(5, 25, 46);

@@ -26,30 +26,44 @@ firebaseConfig = {
 firebase = pyrebase.initialize_app(firebaseConfig)
 db = firebase.database()
 
-def handle_event(event):
+def handle_open_cdp(event):
     e=json.loads(Web3.toJSON(event))
+    print("=== CDP OPEN ===")
     print(e["args"]["_cdpId"])
     db.child("cdps").child(e["args"]["_user"]).child(e["args"]["_cdpId"]).set({"cdpId":e["args"]["_cdpId"],"owner":e["args"]["_user"],"col": e["args"]["_value"],"debt":0})
 
+def handle_close_cdp(event):
+    e=json.loads(Web3.toJSON(event))
+    print("=== CDP CLOSE ===")
+    print(e["args"]["_cdpId"])
+    db.child("cdps").child(e["args"]["_user"]).child(e["args"]["_cdpId"]).remove()
 
-async def log_loop(event_filter, poll_interval):
+
+async def cdp_open_loop(event_filter, poll_interval):
     while True:
-        print("Test")
         for CDPOpen in event_filter.get_new_entries():
-            handle_event(CDPOpen)
+            handle_open_cdp(CDPOpen)
+        await asyncio.sleep(poll_interval)
+
+async def cdp_close_loop(event_filter, poll_interval):
+    while True:
+        for CDPClose in event_filter.get_new_entries():
+            handle_close_cdp(CDPClose)
         await asyncio.sleep(poll_interval)
 
 
 def main():
     contract = web3.eth.contract(address=CDPManager.ADDRESS_CDPMANAGER, abi=CDPManager.ABI_CDPMANAGER)
-    event_filter = contract.events.CDPOpen.createFilter(fromBlock='latest')
+    event_filter_cdp_open = contract.events.CDPOpen.createFilter(fromBlock='latest')
+    event_filter_cdp_close = contract.events.CDPClose.createFilter(fromBlock='latest')
     #block_filter = web3.eth.filter('latest')
     # tx_filter = web3.eth.filter('pending')
     loop = asyncio.get_event_loop()
     try:
         loop.run_until_complete(
             asyncio.gather(
-                log_loop(event_filter, 2)))
+                cdp_open_loop(event_filter_cdp_open, 2),
+                cdp_close_loop(event_filter_cdp_close, 2)))
                 # log_loop(block_filter, 2),
                 # log_loop(tx_filter, 2)))
     finally:

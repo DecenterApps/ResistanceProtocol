@@ -5,83 +5,18 @@ import { Chart as ChartJS, ArcElement, Tooltip as TP, Legend } from "chart.js";
 import { Pie } from "react-chartjs-2";
 import OpenCdpModal from "../OpenCdpModal/OpenCdpModal";
 import { FcInfo } from "react-icons/fc";
-import Footer from '../Footer/Footer'
+import Footer from "../Footer/Footer";
+import FirebaseService from "../../services/FirebaseService";
+import { useWeb3React } from "@web3-react/core";
+import {ethers} from 'ethers'
+import { ABI, address } from "../../contracts/CDPManager";
 
 ChartJS.register(ArcElement, TP, Legend);
 
-export default function CDPs({bAnimation,setBAnimation}) {
-  const [cdps, setCdps] = useState([
-    {
-      id: 1,
-      col: 0.22,
-      minted: 200,
-      fee: 3,
-      cr: 135,
-    },
-    {
-      id: 2,
-      col: 0.22,
-      minted: 200,
-      fee: 3,
-      cr: 135,
-    },
-    {
-      id: 3,
-      col: 0.22,
-      minted: 200,
-      fee: 3,
-      cr: 130,
-    },
-    {
-      id: 4,
-      col: 0.22,
-      minted: 200,
-      fee: 3,
-      cr: 135,
-    },
-    {
-      id: 5,
-      col: 0.22,
-      minted: 200,
-      fee: 3,
-      cr: 135,
-    },
-    {
-      id: 6,
-      col: 0.22,
-      minted: 200,
-      fee: 3,
-      cr: 135,
-    },
-    {
-      id: 7,
-      col: 0.22,
-      minted: 200,
-      fee: 3,
-      cr: 135,
-    },
-    {
-      id: 8,
-      col: 0.22,
-      minted: 200,
-      fee: 3,
-      cr: 125,
-    },
-    {
-      id: 9,
-      col: 0.22,
-      minted: 200,
-      fee: 3,
-      cr: 135,
-    },
-    {
-      id: 10,
-      col: 0.22,
-      minted: 200,
-      fee: 3,
-      cr: 135,
-    },
-  ]);
+export default function CDPs({ bAnimation, setBAnimation }) {
+  const { library, chainId, account, activate, deactivate, active } =
+    useWeb3React();
+  const [cdps, setCdps] = useState([]);
 
   const [openModal, setOpenModal] = useState(false);
   const labels = ["Minted", "Left"];
@@ -90,12 +25,24 @@ export default function CDPs({bAnimation,setBAnimation}) {
     setOpenModal(false);
   };
 
+  const closeCDP=(cdpId)=>{
+    const contractCDPManager = new ethers.Contract(address, ABI);
+    contractCDPManager
+      .connect(library.getSigner())
+      .closeCDP(cdpId);
+  }
+
   useEffect(() => {
+    FirebaseService.setUpCDPs(setCdps, account);
     const cdpsSorted = [...cdps].sort((c1, c2) => {
       return c1.cr - c2.cr;
     });
     setCdps(cdpsSorted);
   }, []);
+
+  useEffect(() => {
+    console.log(cdps);
+  }, [cdps]);
 
   return (
     <>
@@ -179,28 +126,28 @@ export default function CDPs({bAnimation,setBAnimation}) {
                 <Box className="cdp-line2-holder">
                   <VStack spacing="2vh">
                     {cdps.map((c) => (
-                      <Box className="per-cdp" key={c.id}>
+                      <Box className="per-cdp" key={c.cdpId}>
                         <HStack>
                           <HStack spacing="1vw" className="per-cdp-left">
                             <VStack>
                               <div>CDP Id</div>
-                              <div>{c.id}</div>
+                              <div>{c.cdpId}</div>
                             </VStack>
                             <VStack>
                               <div>Collateral locked</div>
-                              <div>{c.col}</div>
+                              <div>{ethers.utils.formatEther(ethers.BigNumber.from(c.col.toString()))} ETH</div>
                             </VStack>
                             <VStack>
                               <div>Minted NOI</div>
-                              <div>{c.minted}</div>
+                              <div>{c.debt}</div>
                             </VStack>
                             <VStack>
                               <div>Stabillity fee</div>
-                              <div>{c.fee}</div>
+                              <div>TO DO</div>
                             </VStack>
                             <VStack>
                               <div>CR</div>
-                              <div>{c.cr}</div>
+                              <div>TO DO</div>
                             </VStack>
                           </HStack>
                           <HStack className="per-cdp-center">
@@ -211,7 +158,7 @@ export default function CDPs({bAnimation,setBAnimation}) {
                                 datasets: [
                                   {
                                     label: "CDP Standing",
-                                    data: [c.minted, 5],
+                                    data: [c.debt, 5],
                                     borderColor: [
                                       "rgb(53, 162, 235)",
                                       "rgb(255, 99, 132)",
@@ -233,7 +180,9 @@ export default function CDPs({bAnimation,setBAnimation}) {
                               <Button className="selected-tlbr-btn raise">
                                 Mint
                               </Button>
-                              <Button className="selected-tlbr-btn raise">
+                              <Button className="selected-tlbr-btn raise" onClick={()=>{
+                                closeCDP(c.cdpId)
+                              }}>
                                 Close
                               </Button>
                             </VStack>
@@ -246,7 +195,10 @@ export default function CDPs({bAnimation,setBAnimation}) {
               </Box>
             </HStack>
           </VStack>
-          <Footer bAnimation={bAnimation} setBAnimation={setBAnimation}></Footer>
+          <Footer
+            bAnimation={bAnimation}
+            setBAnimation={setBAnimation}
+          ></Footer>
         </Box>
       </div>
     </>

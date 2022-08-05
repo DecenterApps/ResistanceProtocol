@@ -27,7 +27,7 @@ export default function OpenCdpModal({ open, handleClose }) {
     contractCDPManager
       .connect(library.getSigner())
       .openCDP(account, {
-        value: ethers.utils.parseEther("12"),
+        value: ethers.utils.parseEther(col.toString()),
       });
     handleClose();
   };
