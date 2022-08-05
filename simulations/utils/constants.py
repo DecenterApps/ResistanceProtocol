@@ -36,7 +36,7 @@ class RATE_TRADER:
     RR_LOW = 1 - RR_HIGH - RR_MID
 
 class LEVERAGER:
-    NUM = 300
+    NUM = 400
 
     ETH_AMOUNT = 4
 
@@ -94,7 +94,7 @@ class SAFE_OWNER:
     RELATIVE_GAP_SAFE = 0.5
 
 class WHALE_INSTANT_PRICE_SETTER:
-    NUM = 2
+    NUM = 0
 
     ETH_AMOUNT = 75
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
@@ -132,10 +132,26 @@ class NOI_TRUSTER:
     BOUND_LOW = 1 - BOUND_HIGH - BOUND_MID
 
 class RANDOM_TRADER:
-    NUM = 100
+    NUM = 10
 
     ETH_AMOUNT = 2
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
+
+class WHALE_LONGTERM_PRICE_SETTER:
+    NUM = 1
+
+    ETH_AMOUNT = 300
+    NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
+
+    # targetted difference between redemption price and market price
+    BOUND_HIGH = 1
+    BOUND_MID = 0.2
+    BOUND_LOW = 1 - BOUND_HIGH - BOUND_MID
+
+    # time period of whale infuencing the market price
+    SHORT_PERIOD = 0.3
+    MID_PERIOD = 0.3
+    LONG_PERIOD = 1 - SHORT_PERIOD - MID_PERIOD
 
 class POOL:
     ETH_AMOUNT = 200

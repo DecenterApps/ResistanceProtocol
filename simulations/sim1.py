@@ -49,6 +49,8 @@ def update_agents(params, substep, state_history, previous_state, policy_input):
     nums = agent_utils.nums
     total_sum = agent_utils.total_sum
 
+    update_whale_longterm_price_setter(agents, price_station, pool, eth_data)
+
     for i in range(agent_utils.total_sum // 2):
         p = np.random.random()
         if i % 2 == 0:

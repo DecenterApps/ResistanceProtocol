@@ -10,7 +10,7 @@ class Random_Trader(Trader):
         if self.eth < 0.00001:
             return False
         p = np.random.random()
-        if p > 0.2:
+        if p > 0.05:
             return False
         self.perc_amount = np.random.random()
         return True
@@ -19,7 +19,7 @@ class Random_Trader(Trader):
         if self.noi < 0.00001:
             return False
         p = np.random.random()
-        if p > 0.2:
+        if p > 0.05:
             return False
         self.perc_amount = np.random.random()
         return True
