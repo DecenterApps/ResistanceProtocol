@@ -2,12 +2,15 @@ const BigNumber = require('big-number');
 
 async function openAndMintFromCDP(CDPManagerContractObj, account, collateral, debt){
 
+    collateral = collateral.toString();
+    debt = BigNumber(10).pow(18).mult(debt).toString();
+
     const txOpenCDP = await CDPManagerContractObj.connect(account).openCDP(account.address, {value: ethers.utils.parseEther(collateral)});
     await txOpenCDP.wait();
     const getCDPIndex = await CDPManagerContractObj.connect(account).cdpi();
     const cdpIndex = getCDPIndex.toString();
 
-    const txmintFromCDPManager = await CDPManagerContractObj.connect(account).mintFromCDP(cdpIndex, BigNumber(10).pow(18).mult(debt).toString());
+    const txmintFromCDPManager = await CDPManagerContractObj.connect(account).mintFromCDP(cdpIndex, debt);
     await txmintFromCDPManager.wait();
 
     return cdpIndex;
@@ -32,8 +35,14 @@ async function repayToCDP(CDPManagerContractObj,noiContractObj,cdpIndex,account,
 
 }
 
+async function expectToFailWithError(transactionPromise, errorSignature){
+    let receipt = await expect(transactionPromise).to.be.reverted;
+    assert.equal(receipt['error'].data.data,ethers.utils.id(errorSignature).slice(0,10))
+}
+
 module.exports = {
     openAndMintFromCDP,
     approveAndLiquidatePosition,
-    repayToCDP
+    repayToCDP,
+    expectToFailWithError
 }

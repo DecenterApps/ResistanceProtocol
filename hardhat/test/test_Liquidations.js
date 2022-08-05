@@ -4,7 +4,7 @@ const BigNumber = require('big-number');
 const { takeSnapshot, revertToSnapshot } = require("../utils/snapshot");
 const { executeActionFromMSW } = require("../utils/multiSigAction");
 
-const {openAndMintFromCDP} = require("../utils/positionActions");
+const {openAndMintFromCDP, expectToFailWithError} = require("../utils/positionActions");
 
 describe("Liquidations", function () {
   this.timeout(80000);
@@ -74,12 +74,10 @@ describe("Liquidations", function () {
     const txmintFromCDPManager = await CDPManagerContractObj.connect(senderAcc[1]).mintFromCDP(cdpIndex, BigNumber(10).pow(18).mult(1000).toString());
     await txmintFromCDPManager.wait();
 
-    LiquidatorContract = await ethers.getContractFactory("Liquidator");
-    try {
-      await LiquidatorContractObj.connect(owner).liquidateCDP(cdpIndex);
-    } catch (err) {
-        //console.log("CATCH ERR", err.toString())
-        expect(err.toString()).to.have.string('Liquidator__CDPNotEligibleForLiquidation');
-      }
+    expectToFailWithError(
+      LiquidatorContractObj.connect(owner).liquidateCDP(cdpIndex),
+      "Liquidator__CDPNotEligibleForLiquidation()"
+    );
+
   });
 });
