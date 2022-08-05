@@ -47,6 +47,6 @@ def update_trader(agents, price_station: PriceStation, pool: Pool, eth_data: ETH
         eth_add, noi_add = pool.put_noi_get_eth(trader.noi*trader.perc_amount, price_station, eth_data)
         eth_add_trader = eth_add
         noi_add_trader = -noi_add
-    
+
     trader.eth += eth_add_trader
     trader.noi += noi_add_trader

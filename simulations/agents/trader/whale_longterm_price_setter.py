@@ -46,7 +46,11 @@ class Whale_Longterm_Price_Setter(Trader):
             q = 1
         if q < 0:
             q = 0
-        self.perc_amount = (self.max_val * q) / self.eth
+        if self.max_val * q > self.eth:
+            self.perc_amount = 1
+            self.sealed_position = True
+        else:
+            self.perc_amount = (self.max_val * q) / self.eth
         return True
 
     def buy_eth_condition(self, price_station):
@@ -63,7 +67,11 @@ class Whale_Longterm_Price_Setter(Trader):
             q = 1
         if q < 0:
             q = 0
-        self.perc_amount = (self.max_val * q) / self.noi
+        if self.max_val * q > self.noi:
+            self.perc_amount = 1
+            self.sealed_position = True
+        else:
+            self.perc_amount = (self.max_val * q) / self.noi
         return True
 
 def update_whale_longterm_price_setter(agents, price_station: PriceStation, pool: Pool, eth_data: ETHData):
