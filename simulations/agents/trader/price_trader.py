@@ -5,8 +5,6 @@ from classes.price_station import *
 from classes.eth_data import *
 import numpy as np
 
-import random
-
 class Price_Trader(Trader):
     def __init__(self, name, eth, noi, perc_amount, relative_gap):
         Trader.__init__(self, name, eth, noi)

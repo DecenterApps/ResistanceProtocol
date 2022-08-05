@@ -4,19 +4,12 @@ from cadCAD.configuration.utils import config_sim
 from cadCAD.configuration import Experiment
 from cadCAD import configs
 import pandas as pd
-import csv
 import numpy as np
-from classes.eth_data import *
 from classes.graph.a_graph import *
 from classes.price_station import *
-from classes.pool import *
-from agents.leverager import *
-from agents.trader.rate_trader import *
-from agents.trader.price_trader import *
-from agents.safe_owner import *
 from classes.graph.timestamp_graph import Timestamp_Graph
 from classes.graph.full_graph import Full_Graph
-from utils.constants import *
+from utils.util_functions import get_data_from_csv
 from utils.exchange import *
 from agents.agent_utlis import *
 
@@ -37,9 +30,7 @@ agent_utils.create_agents(agents)
 
 genesis_states = {'agents': agents}
 
-with open('dataset/eth_dollar.csv', 'r') as csvfile:
-    eth_dollar = list(csv.reader(csvfile))[0]
-    eth_data.eth_dollar = [float(i) for i in eth_dollar]
+eth_data.eth_dollar = get_data_from_csv('dataset/eth_dollar.csv')
 
 br = [0,0,0,0,0,0]
 

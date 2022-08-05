@@ -1,6 +1,6 @@
 from classes.price_station import PriceStation
 from classes.eth_data import ETHData
-from agents.a_cdp_holder import *
+from agents.holder.a_cdp_holder import *
 from utils.constants import *
 from utils.exchange import *
 
