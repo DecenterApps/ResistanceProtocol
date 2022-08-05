@@ -1,7 +1,5 @@
 from utils.constants import *
-from classes.pool import *
 from classes.price_station import *
-from classes.eth_data import *
 from abc import ABC, abstractmethod
 
 import random

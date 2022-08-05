@@ -1,7 +1,5 @@
 from abc import ABC, abstractmethod
 from classes.cdp_position import *
-from classes.eth_data import ETHData
-from classes.price_station import PriceStation
 import random
  
 class CDP_Holder(ABC):

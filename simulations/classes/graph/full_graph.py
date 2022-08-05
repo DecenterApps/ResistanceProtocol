@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 from agents.trader.price_trader import *
 from classes.graph.a_graph import Graph
 

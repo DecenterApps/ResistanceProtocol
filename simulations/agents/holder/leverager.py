@@ -1,10 +1,5 @@
-from classes.price_station import PriceStation
-from classes.eth_data import ETHData
 from agents.holder.a_cdp_holder import *
-from utils.constants import *
 from utils.exchange import *
-import numpy as np
-import random
 
 class Leverager(CDP_Holder):
 
@@ -32,31 +27,7 @@ class Leverager(CDP_Holder):
         self.debt_noi = 0
 
 def update_leverager(agents, price_station: PriceStation, pool: Pool, eth_data: ETHData):
-    if LEVERAGER.NUM == 0:
-        return
-    i = random.randint(0, LEVERAGER.NUM - 1)
-    name = 'leverager' + str(i)
-    leverager: Leverager = agents['agents'][name]
-    relative_gap = np.abs(
-        price_station.mp - price_station.rp) / price_station.rp
-
-    if leverager.opened_position:
-        current_cr = leverager.cdp_position.calculate_cr(eth_data, price_station)
-        if current_cr < LIQUIDATION_RATIO:
-            leverager.liquidation()
-        else:
-            if relative_gap > leverager.relative_gap and price_station.rp > price_station.mp:
-                leverager.close_position(eth_data, price_station, pool)
-            elif current_cr > leverager.boost_cr:
-                leverager.boost(eth_data, price_station, pool)
-            elif current_cr < leverager.repay_cr:
-                leverager.repay(eth_data, price_station, pool)
-    else:
-        
-        if relative_gap > leverager.relative_gap and price_station.rp < price_station.mp:
-            leverager.open_position(eth_data, price_station, pool)
-    
-    agents[name] = leverager
+    update_holder(agents, price_station, pool, eth_data, 'leverager', LEVERAGER)
 
 def create_new_leverager(name, eth_amount):
     diff, cr = get_holder_values(LEVERAGER)
@@ -68,6 +39,3 @@ def create_leveragers(agents):
     for i in range(LEVERAGER.NUM):
         name = 'leverager' + str(i)
         agents[name] = create_new_leverager(name, LEVERAGER.ETH_AMOUNT)
-
-def update_leverager(agents, price_station: PriceStation, pool: Pool, eth_data: ETHData):
-    update_holder(agents, price_station, pool, eth_data, 'leverager', LEVERAGER)

@@ -1,8 +1,4 @@
-from agents.trader.a_trader import Trader, update_trader
-from utils.constants import *
-from classes.pool import *
-from classes.price_station import *
-from classes.eth_data import *
+from agents.trader.a_trader import *
 import numpy as np
 
 class Price_Trader(Trader):

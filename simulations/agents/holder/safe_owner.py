@@ -1,7 +1,4 @@
-from classes.price_station import PriceStation
-from classes.eth_data import ETHData
 from agents.holder.a_cdp_holder import *
-from utils.constants import *
 from utils.exchange import *
 
 class Safe_Owner(CDP_Holder):
@@ -19,6 +16,9 @@ class Safe_Owner(CDP_Holder):
     #     self.opened_position = False
     #     self.debt_noi = 0
 
+def update_safe_owner(agents, price_station: PriceStation, pool: Pool, eth_data: ETHData):
+    update_holder(agents, price_station, pool, eth_data, 'safe_owner', SAFE_OWNER)
+
 def create_new_safe_owner(name, eth_amount):
     diff, cr = get_holder_values(SAFE_OWNER)
     perc_amount = get_holder_perc_amount(SAFE_OWNER)
@@ -29,6 +29,3 @@ def create_safe_owners(agents):
     for i in range(SAFE_OWNER.NUM):
         name = 'safe_owner' + str(i)
         agents[name] = create_new_safe_owner(name, SAFE_OWNER.ETH_AMOUNT)
-
-def update_safe_owner(agents, price_station: PriceStation, pool: Pool, eth_data: ETHData):
-    update_holder(agents, price_station, pool, eth_data, 'safe_owner', SAFE_OWNER)

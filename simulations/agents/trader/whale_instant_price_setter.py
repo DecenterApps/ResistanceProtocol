@@ -1,8 +1,4 @@
 from agents.trader.a_trader import *
-from utils.constants import *
-from classes.pool import *
-from classes.price_station import *
-from classes.eth_data import *
 import numpy as np
 
 class Whale_Instant_Price_Setter(Trader):

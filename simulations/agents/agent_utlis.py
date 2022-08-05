@@ -4,6 +4,7 @@ from agents.trader.price_trader import *
 from agents.trader.rate_trader import *
 from agents.trader.whale_instant_price_setter import *
 from agents.trader.whale_instant_rate_setter import *
+from agents.trader.noi_truster import *
 from utils.constants import *
 
 def get_agents_dict():
@@ -44,11 +45,19 @@ def get_agents_dict():
             'update': update_whale_instant_rate_setter,
             'graph': [],
         },
+        'noi_truster': {
+            'num': NOI_TRUSTER.NUM,
+            'create': create_noi_trusters,
+            'update': update_noi_truster,
+            'graph': [],
+        },
     }
 
-nums = [RATE_TRADER.NUM, PRICE_TRADER.NUM, LEVERAGER.NUM, SAFE_OWNER.NUM, WHALE_INSTANT_PRICE_SETTER.NUM, WHALE_INSTANT_RATE_SETTER.NUM]
+nums = [RATE_TRADER.NUM, PRICE_TRADER.NUM, LEVERAGER.NUM, SAFE_OWNER.NUM, WHALE_INSTANT_PRICE_SETTER.NUM, 
+        WHALE_INSTANT_RATE_SETTER.NUM, NOI_TRUSTER.NUM]
 total_sum = np.sum(nums)
-names = ['rate_trader', 'price_trader', 'leverager', 'safe_owner', 'whale_instant_price_setter', 'whale_instant_rate_setter']
+names = ['rate_trader', 'price_trader', 'leverager', 'safe_owner', 'whale_instant_price_setter',
+         'whale_instant_rate_setter', 'noi_truster']
 
 class Agent_Utils:
     def __init__(self):

@@ -32,7 +32,7 @@ genesis_states = {'agents': agents}
 
 eth_data.eth_dollar = get_data_from_csv('dataset/eth_dollar.csv')
 
-br = [0,0,0,0,0,0]
+br = [0]*len(agent_utils.nums)
 
 def update_agents(params, substep, state_history, previous_state, policy_input):
     global br, agents
