@@ -38,27 +38,18 @@ contract Liquidator{
     event LiquidateCDP(uint256 indexed _cdpIndex, uint _collateral, uint _debt, address indexed _liquidator);
 
 
-    function isEligibleForLiquidation(CDPManager.CDP memory _cdp) private view returns(bool){
-
-        uint256 LR = Parameters(parametersContractAddress).getLR() * EIGHTEEN_DECIMAL_NUMBER;
-
-        uint256 ethRp = CDPManager(cdpManagerContractAddress).ethRp();
-        uint256 CR = _cdp.lockedCollateral*ethRp*100/(_cdp.generatedDebt);
-
-        return CR <= LR;
-    }
 
     function isEligibleForLiquidation(uint256 _cdpIndex) public view returns(bool){
-        CDPManager cdpManager = CDPManager(cdpManagerContractAddress);
-        CDPManager.CDP memory cdp = cdpManager.getOneCDP(_cdpIndex);
-        return isEligibleForLiquidation(cdp);
+        uint256 CR = CDPManager(cdpManagerContractAddress).getCR(_cdpIndex);
+        uint256 LR = Parameters(parametersContractAddress).getLR();
+        return CR < LR;
     }
 
     function liquidateCDP(uint256 _cdpIndex) public payable{
         CDPManager cdpManager = CDPManager(cdpManagerContractAddress);
         CDPManager.CDP memory cdp = cdpManager.getOneCDP(_cdpIndex);
 
-        if(!isEligibleForLiquidation(cdp)) 
+        if(!isEligibleForLiquidation(_cdpIndex)) 
             revert Liquidator__CDPNotEligibleForLiquidation();
 
         cdpManager.liquidatePosition(_cdpIndex, msg.sender);
@@ -69,7 +60,8 @@ contract Liquidator{
         
         // calculate distribution of collateral
         uint256 total = cdp.lockedCollateral;
-        uint256 treasuryPart = (total-cdp.generatedDebt*rpEth/EIGHTEEN_DECIMAL_NUMBER)*treasuryPercent/100;
+        uint256 totalDebt = cdpManager.getDebtWithSF(_cdpIndex);
+        uint256 treasuryPart = (total-totalDebt*rpEth/EIGHTEEN_DECIMAL_NUMBER)*treasuryPercent/100;
         uint256 liquidatorPart = total-treasuryPart;
 
         // send part to the Treasury

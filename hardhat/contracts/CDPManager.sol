@@ -230,7 +230,7 @@ contract CDPManager {
         // check if the new minted coins will be under liquidation ratio
         uint256 newCollateral = cdpList[_cdpIndex].lockedCollateral - _amount;
         uint256 CR = calculateCR(newCollateral, getDebtWithSF(_cdpIndex));
-
+    
         if (CR < LR) revert CDPManager__LiquidationRatioReached();
 
         cdpList[_cdpIndex].lockedCollateral -= _amount;
@@ -323,6 +323,8 @@ contract CDPManager {
      * @param _debt 
      */
     function calculateCR(uint256 _collateral, uint256 _debt) public view returns (uint256){
+        if(_debt == 0)
+            return EIGHTEEN_DECIMAL_NUMBER;
         return (_collateral * ethRp * 100 / _debt) / EIGHTEEN_DECIMAL_NUMBER;
     }
 
@@ -332,7 +334,7 @@ contract CDPManager {
      * @param _cdpIndex index of cdp
      */
     function getCR(uint256 _cdpIndex) public view returns (uint256){
-        return calculateCR(cdpList[_cdpIndex].lockedCollateral, cdpList[_cdpIndex].generatedDebt);   
+        return calculateCR(cdpList[_cdpIndex].lockedCollateral, getDebtWithSF(_cdpIndex));   
     }
 
 

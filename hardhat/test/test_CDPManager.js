@@ -238,7 +238,7 @@ describe("CDPManager", function () {
             const cdpIndex = await openAndMintFromCDP(CDPManagerContractObj,senderAccounts[1],12,1000);
             await openAndMintFromCDP(CDPManagerContractObj,senderAccounts[1],20,1500);
             const txRepayClose = await repayAndCloseCDP(CDPManagerContractObj,noiContractObj,cdpIndex,senderAccounts[1]);
-            txRepayClose.wait();
+            await txRepayClose.wait();
         });
     });
 
@@ -248,7 +248,14 @@ describe("CDPManager", function () {
             
             const cdpIndex = await openAndMintFromCDP(CDPManagerContractObj,senderAccounts[1],12,1000);
             const withdrawCol = await CDPManagerContractObj.connect(senderAccounts[1]).withdrawCollateralFromCDP(cdpIndex,ethers.utils.parseEther("5"));
-            withdrawCol.wait();
+            await withdrawCol.wait();
+
+            const openCdp = await CDPManagerContractObj.connect(senderAccounts[2]).openCDP(senderAccounts[2].address, {value: ethers.utils.parseEther("20")});
+            await openCdp.wait();
+            const cdpIndex2 = await CDPManagerContractObj.connect(senderAccounts[2]).cdpi();
+
+            const withdrawCol2 = await CDPManagerContractObj.connect(senderAccounts[2]).withdrawCollateralFromCDP(cdpIndex2.toString(),ethers.utils.parseEther("20"));
+            await withdrawCol2.wait();
         });
 
 
