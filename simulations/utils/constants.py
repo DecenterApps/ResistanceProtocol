@@ -2,7 +2,7 @@
 ONE_ETH = 500
 
 class PRICE_TRADER:
-    NUM = 100
+    NUM = 200
 
     ETH_AMOUNT = 1
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
@@ -18,7 +18,7 @@ class PRICE_TRADER:
     BOUND_LOW = 1 - BOUND_HIGH - BOUND_MID
 
 class RATE_TRADER:
-    NUM = 100
+    NUM = 200
 
     ETH_AMOUNT = 1
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
@@ -65,7 +65,7 @@ class LEVERAGER:
     RELATIVE_GAP_SAFE = 0.5
 
 class SAFE_OWNER:
-    NUM = 400
+    NUM = 200
 
     ETH_AMOUNT = 5
 
@@ -94,7 +94,7 @@ class SAFE_OWNER:
     RELATIVE_GAP_SAFE = 0.5
 
 class WHALE_INSTANT_PRICE_SETTER:
-    NUM = 1
+    NUM = 0
 
     ETH_AMOUNT = 15
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH

@@ -1,7 +1,5 @@
 import numpy as np
-
-TIME_STEP = 10000
-NEGATIVE_RATE_LIMIT = 0.99
+from utils.constants import PID_CONTROLLER
 
 class ControllerGains(object):
     def __init__(self, Kp: float, Ki: float):
@@ -43,10 +41,10 @@ def getBoundedRedemptionRate(piOutput: float) -> float:
 
     negativeOutputExceedsHundred = (boundedPIOutput < 0 and -boundedPIOutput >= defaultRedemptionRate)
     if (negativeOutputExceedsHundred):
-        newRedemptionRate = NEGATIVE_RATE_LIMIT
+        newRedemptionRate = PID_CONTROLLER.NEGATIVE_RATE_LIMIT
     else:
-        if (boundedPIOutput < 0 and boundedPIOutput <= -NEGATIVE_RATE_LIMIT):
-            newRedemptionRate = defaultRedemptionRate - NEGATIVE_RATE_LIMIT
+        if (boundedPIOutput < 0 and boundedPIOutput <= -PID_CONTROLLER.NEGATIVE_RATE_LIMIT):
+            newRedemptionRate = defaultRedemptionRate - PID_CONTROLLER.NEGATIVE_RATE_LIMIT
         else:
             newRedemptionRate = defaultRedemptionRate + boundedPIOutput
 
@@ -61,7 +59,7 @@ def getNextPriceDeviationCumulative(proportionalTerm: float, accumulatedLeak: fl
     global priceDeviationCumulative
 
     lastProportionalTerm = getLastProportionalTerm()
-    timeElapsed = TIME_STEP # todo: check this
+    timeElapsed = PID_CONTROLLER.TIME_STEP # todo: check this
     
     newTimeAdjustedDeviation = riemannSum(proportionalTerm, lastProportionalTerm) * timeElapsed
     leakedPriceCumulative = accumulatedLeak * priceDeviationCumulative
@@ -83,12 +81,12 @@ def getGainAdjustedTerms(proportionalTerm: float, integralTerm: float) -> tuple:
     return proportionalTerm * controllerGains.Kp, integralTerm * controllerGains.Ki
 
 # --- Rate Validation/Calculation ---
-def computeRate(marketPrice: float, redemptionPrice: float, accumulatedLeak: float) -> float:
+def computeRateCPI(marketPrice: float, redemptionPrice: float, accumulatedLeak: float) -> float:
     global lastUpdateTime
     global priceDeviationCumulative
     proportionalTerm = redemptionPrice - marketPrice
     updateDeviationHistory(proportionalTerm, accumulatedLeak)
-    lastUpdateTime = lastUpdateTime + TIME_STEP
+    lastUpdateTime = lastUpdateTime + PID_CONTROLLER.TIME_STEP
     piOutput = getGainAdjustedPIOutput(proportionalTerm, priceDeviationCumulative)
     newRedemptionRate = getBoundedRedemptionRate(piOutput)
     return newRedemptionRate
@@ -102,12 +100,12 @@ def updateDeviationHistory(proportionalTerm: float, accumulatedLeak: float) -> N
     (virtualDeviationCumulative, _) = getNextPriceDeviationCumulative(proportionalTerm, accumulatedLeak)
     priceDeviationCumulative = virtualDeviationCumulative
     historicalCumulativeDeviations.append(priceDeviationCumulative)
-    deviationObservations.append(DeviationObservation(lastUpdateTime + TIME_STEP, proportionalTerm, priceDeviationCumulative))
+    deviationObservations.append(DeviationObservation(lastUpdateTime + PID_CONTROLLER.TIME_STEP, proportionalTerm, priceDeviationCumulative))
 
-def updateRedemptionPrice(redemptionPrice:float, redemptionRate: float) -> float:
+def updateRedemptionPriceCPI(redemptionPrice:float, redemptionRate: float) -> float:
     # Update redemption price
     # print(redemptionRate)
-    redemptionPrice = (redemptionRate ** TIME_STEP) * redemptionPrice
+    redemptionPrice = (redemptionRate ** PID_CONTROLLER.TIME_STEP) * redemptionPrice
     if redemptionPrice == 0:
         redemptionPrice = 1
 
@@ -120,8 +118,8 @@ defaultGlobalTimeline = 1
 historicalCumulativeDeviations = []
 feedbackOutputUpperBound = 0.5
 feedbackOutputLowerBound = -0.5
-integralPeriodSize = TIME_STEP
-controllerGains = ControllerGains(7.5*10**(-8), 2.4*10**(-14))
+integralPeriodSize = PID_CONTROLLER.TIME_STEP
+controllerGains = ControllerGains(0, 7.5*10**(-10))
 priceDeviationCumulative = 0.99999
 noiseBarrier = 0.05
 lastUpdateTime = 0
@@ -129,5 +127,5 @@ historicalCumulativeDeviations.append(priceDeviationCumulative)
 ok = True
 
 if __name__ == "__main__":
-    rr = computeRate(2.71, 2.8, 0)
-    rp = updateRedemptionPrice(100, rr)
+    rr = computeRateCPI(2.71, 2.8, 0)
+    rp = updateRedemptionPriceCPI(100, rr)

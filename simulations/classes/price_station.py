@@ -1,6 +1,6 @@
 from classes.ext_data import ExtData
 from classes.pool import Pool
-from controllers.pi_controller import updateRedemptionPrice, computeRate
+from controllers.fuzzy_module import calculate_rp_and_rr
 from utils.constants import TWAP_TIMESTAMPS
 
 class PriceStation:
@@ -32,7 +32,7 @@ class PriceStation:
     def calculate_market_twap(self):
         if self.num_steps >= TWAP_TIMESTAMPS:
             self.market_sum -= self.graph.m_prices[len(self.graph.m_prices)-TWAP_TIMESTAMPS]
-        
+
         self.market_sum += self.mp
         self.num_steps = min(self.num_steps+1, TWAP_TIMESTAMPS)
         return self.market_sum / self.num_steps
@@ -41,15 +41,8 @@ class PriceStation:
         self.update_mp(pool, ext_data)
         return self.mp
 
-    def calculate_redemption_price(self):
-        rr = self.calculate_redemption_rate()
-
-        self.rp = updateRedemptionPrice(self.rp, rr)
-        self.rr = rr
-
-    def calculate_redemption_rate(self):
-        rr = computeRate(self.market_twap, self.rp, self.accumulated_leak)
-        return rr
+    def calculate_redemption_price(self, ext_data: ExtData):
+        self.rp, self.rr = calculate_rp_and_rr(self.market_twap, self.rp, self.accumulated_leak, ext_data)
     
     #returns the value of noi in usd with market price
     #input: amount of noi
