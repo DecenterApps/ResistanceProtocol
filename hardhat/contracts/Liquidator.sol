@@ -6,6 +6,7 @@ import "./Parameters.sol";
 import "./CDPManager.sol";
 import "./NOI.sol";
 
+import "hardhat/console.sol";
 
 error Liquidator__CDPNotEligibleForLiquidation();
 
@@ -62,12 +63,13 @@ contract Liquidator{
 
         cdpManager.liquidatePosition(_cdpIndex, msg.sender);
 
-        uint256 redemptionPrice=1; // should get it from RateSetter contract
-        uint256 ethPrice = 1000;     // should get it from RateSetter contract
+        uint256 ethRp = CDPManager(cdpManagerContractAddress).ethRp();
+        uint256 rpEth = (EIGHTEEN_DECIMAL_NUMBER * EIGHTEEN_DECIMAL_NUMBER) / ethRp;
 
+        
         // calculate distribution of collateral
         uint256 total = cdp.lockedCollateral;
-        uint256 treasuryPart = (total-(cdp.generatedDebt*redemptionPrice)/ethPrice)*treasuryPercent/100;
+        uint256 treasuryPart = (total-cdp.generatedDebt*rpEth/EIGHTEEN_DECIMAL_NUMBER)*treasuryPercent/100;
         uint256 liquidatorPart = total-treasuryPart;
 
         // send part to the Treasury
