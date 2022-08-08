@@ -2,7 +2,7 @@
 ONE_ETH = 500
 
 class PRICE_TRADER:
-    NUM = 200
+    NUM = 100
 
     ETH_AMOUNT = 1
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
@@ -18,7 +18,7 @@ class PRICE_TRADER:
     BOUND_LOW = 1 - BOUND_HIGH - BOUND_MID
 
 class RATE_TRADER:
-    NUM = 200
+    NUM = 100
 
     ETH_AMOUNT = 1
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
@@ -65,7 +65,7 @@ class LEVERAGER:
     RELATIVE_GAP_SAFE = 0.5
 
 class SAFE_OWNER:
-    NUM = 200
+    NUM = 400
 
     ETH_AMOUNT = 5
 
@@ -94,9 +94,9 @@ class SAFE_OWNER:
     RELATIVE_GAP_SAFE = 0.5
 
 class WHALE_INSTANT_PRICE_SETTER:
-    NUM = 0
+    NUM = 1
 
-    ETH_AMOUNT = 75
+    ETH_AMOUNT = 45
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
 
     # relative difference between redemption price and market price when whale is activated
@@ -107,7 +107,7 @@ class WHALE_INSTANT_PRICE_SETTER:
 class WHALE_INSTANT_RATE_SETTER:
     NUM = 0
 
-    ETH_AMOUNT = 75
+    ETH_AMOUNT = 45
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
 
     # relative difference between redemption price and market price when whale is activated
@@ -138,7 +138,7 @@ class RANDOM_TRADER:
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
 
 class WHALE_LONGTERM_PRICE_SETTER:
-    NUM = 1
+    NUM = 0
 
     ETH_AMOUNT = 300
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
@@ -167,3 +167,5 @@ MONTE_CARLO_SIMULATIONS = 1
 LIQUIDATION_RATIO = 1.2
 
 INF = 10000000000
+
+TWAP_TIMESTAMPS = 100

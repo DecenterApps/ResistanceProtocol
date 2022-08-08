@@ -1,6 +1,7 @@
 from classes.ext_data import ExtData
 from classes.pool import Pool
 from controllers.pi_controller import updateRedemptionPrice, computeRate
+from utils.constants import TWAP_TIMESTAMPS
 
 class PriceStation:
     def __init__(self, market_price, redemption_price, redemption_rate, accumulated_leak, graph):
@@ -13,14 +14,28 @@ class PriceStation:
         # accumulated_leak
         self.accumulated_leak = accumulated_leak
         self.graph = graph
+        self.market_twap = market_price
+        self.market_sum = 0
+        self.num_steps = 0
     
     def update_mp(self, pool: Pool, ext_data: ExtData) -> float:
         eth_value = ext_data.get_eth_value()
         self.mp =  eth_value * pool.eth / pool.noi
+        
         self.graph.add_to_graph(self, pool)
+
+        self.market_twap = self.calculate_market_twap()
 
         if pool.eth <= 0 or pool.noi <= 0:
             assert False, "ASSERT 05, pool values negative"
+
+    def calculate_market_twap(self):
+        if self.num_steps >= TWAP_TIMESTAMPS:
+            self.market_sum -= self.graph.m_prices[len(self.graph.m_prices)-TWAP_TIMESTAMPS]
+        
+        self.market_sum += self.mp
+        self.num_steps = min(self.num_steps+1, TWAP_TIMESTAMPS)
+        return self.market_sum / self.num_steps
     
     def get_fresh_mp(self, pool: Pool, ext_data: ExtData):
         self.update_mp(pool, ext_data)
@@ -33,7 +48,7 @@ class PriceStation:
         self.rr = rr
 
     def calculate_redemption_rate(self):
-        rr = computeRate(self.mp, self.rp, self.accumulated_leak)
+        rr = computeRate(self.market_twap, self.rp, self.accumulated_leak)
         return rr
     
     #returns the value of noi in usd with market price

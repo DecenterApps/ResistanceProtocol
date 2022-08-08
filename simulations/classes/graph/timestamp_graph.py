@@ -18,7 +18,7 @@ class Timestamp_Graph(Graph):
         self.agent_utils.calculate_all_amounts(previous_state)
     
     def plot(self, ext_data: ExtData):
-        Graph.plotGraph1(self, 'images/timestamp_graph.png', ext_data)
+        Graph.plotGraph1(self, 'images/timestamp_graph.png', ext_data, 'timestamp_graph')
         self.plotGraph2()
 
     def plotGraph2(self):

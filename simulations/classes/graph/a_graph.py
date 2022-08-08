@@ -8,6 +8,7 @@ class Graph:
         self.noi = []
         self.r_prices = []
         self.m_prices = []
+        self.market_twap_prices = []
         self.pool_ratio = []
         self.trader_money_ratio = []
         self.redemption_rate = []
@@ -18,6 +19,7 @@ class Graph:
 
     def add_to_graph(self, price_station, pool):
         self.m_prices.append(price_station.mp)
+        self.market_twap_prices.append(price_station.market_twap)
         self.r_prices.append(price_station.rp)
         self.eth.append(pool.eth)
         self.noi.append(pool.noi)
@@ -31,13 +33,19 @@ class Graph:
         self.plotGraph1()
         self.plotGraph2()
     
-    def plotGraph1(self, filename, ext_data: ExtData):
+    def plotGraph1(self, filename, ext_data: ExtData, graph_name):
         figure, axis = plt.subplots(2, 2, figsize=(15,8))
         axis[0, 0].plot(self.m_prices)
         axis[0,0].plot(self.r_prices)
-        axis[0,0].plot(ext_data.cpi_value)
-        axis[0,0].legend(['market price', 'redemption price', 'cpi'])
-        axis[0, 0].set_title("Market price, Redemption price, Inflation value")
+        if graph_name == 'timestamp_graph':
+            axis[0,0].plot(ext_data.cpi_value)
+            axis[0,0].legend(['market price', 'redemption price', 'cpi'])
+            axis[0, 0].set_title("Market price, Redemption price, Inflation value")
+        
+        else:
+            axis[0,0].plot(self.market_twap_prices)
+            axis[0,0].legend(['market price', 'redemption price', 'market twap price'])
+            axis[0, 0].set_title("Market price, Redemption price, Market twap price")
         
         # axis[0, 1].plot(self.pool_ratio)
         # axis[0, 1].set_title("Pool ratio")
