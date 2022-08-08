@@ -3,13 +3,14 @@ import "./CDPs.css";
 import { Box, VStack, HStack, Image, Button, Tooltip } from "@chakra-ui/react";
 import { Chart as ChartJS, ArcElement, Tooltip as TP, Legend } from "chart.js";
 import { Pie } from "react-chartjs-2";
-import OpenCdpModal from "../OpenCdpModal/OpenCdpModal";
+import MyInputModal from "../MyInputModal/MyInputModal";
 import { FcInfo } from "react-icons/fc";
 import Footer from "../Footer/Footer";
 import FirebaseService from "../../services/FirebaseService";
 import { useWeb3React } from "@web3-react/core";
-import {ethers} from 'ethers'
+import { ethers } from "ethers";
 import { ABI, address } from "../../contracts/CDPManager";
+import { ABI as ABI_NOI, address as address_NOI } from "../../contracts/NOI";
 
 ChartJS.register(ArcElement, TP, Legend);
 
@@ -17,6 +18,10 @@ export default function CDPs({ bAnimation, setBAnimation }) {
   const { library, chainId, account, activate, deactivate, active } =
     useWeb3React();
   const [cdps, setCdps] = useState([]);
+  const [actionType, setActionType] = useState("");
+  const [selectedCDP, setSelectedCDP] = useState();
+  const [modalTitle, setModalTitle] = useState("");
+  const [symbol, setSymbol] = useState("");
 
   const [openModal, setOpenModal] = useState(false);
   const labels = ["Minted", "Left"];
@@ -25,28 +30,92 @@ export default function CDPs({ bAnimation, setBAnimation }) {
     setOpenModal(false);
   };
 
-  const closeCDP=(cdpId)=>{
+  const openCDP = (col) => {
+    const contractCDPManager = new ethers.Contract(address, ABI);
+    contractCDPManager.connect(library.getSigner()).openCDP(account, {
+      value: ethers.utils.parseEther(col.toString()),
+    });
+  };
+
+  const mintCDP = (amount) => {
     const contractCDPManager = new ethers.Contract(address, ABI);
     contractCDPManager
       .connect(library.getSigner())
-      .closeCDP(cdpId);
+      .mintFromCDP(selectedCDP, ethers.utils.parseEther(amount.toString()));
+  };
+
+  const repayCDP = async (amount) => {
+    const contractNOI = new ethers.Contract(address_NOI, ABI_NOI);
+    console.log(ethers.utils.parseEther(amount.toString()))
+    const txApprove = await contractNOI
+      .connect(library.getSigner())
+      .approve(address, ethers.utils.parseEther(amount.toString()));
+    await listenForTransactionMine(txApprove, library);
+    const contractCDPManager = new ethers.Contract(address, ABI);
+    const txRepay = await contractCDPManager
+      .connect(library.getSigner())
+      .repayToCDP(selectedCDP, ethers.utils.parseEther(amount.toString()));
+    await listenForTransactionMine(txRepay, library);
+  };
+
+  const closeCDP = (cdpId) => {
+    const contractCDPManager = new ethers.Contract(address, ABI);
+    contractCDPManager.connect(library.getSigner()).closeCDP(cdpId);
+  };
+
+  function listenForTransactionMine(transactionResponse, provider) {
+    console.log(`Mining ${transactionResponse.hash}...`); // create a listener for the blockchain
+    return new Promise((resolve, reject) => {
+      // listen for this tx to finish
+      provider.once(transactionResponse.hash, (transactionReceipt) => {
+        console.log(
+          `Completed with ${transactionReceipt.confirmations} confirmations`
+        ); // we return when resolve or reject is called
+        resolve();
+      });
+    });
   }
 
+  const modalCallback = (col) => {
+    switch (actionType) {
+      case "OPEN": {
+        openCDP(col);
+        break;
+      }
+      case "REPAY": {
+        repayCDP(col);
+        break;
+      }
+      case "MINT": {
+        mintCDP(col);
+        break;
+      }
+      default:
+        break;
+    }
+  };
+
   useEffect(() => {
-    FirebaseService.setUpCDPs(setCdps, account);
+    FirebaseService.setUpCDPs(setCdps, account,cdps);
+    //FirebaseService.loadCDPs(setCdps,account)
     const cdpsSorted = [...cdps].sort((c1, c2) => {
       return c1.cr - c2.cr;
     });
-    setCdps(cdpsSorted);
+    //setCdps(cdpsSorted);
   }, []);
 
   useEffect(() => {
-    console.log(cdps);
   }, [cdps]);
 
   return (
     <>
-      <OpenCdpModal open={openModal} handleClose={closeModal}></OpenCdpModal>
+      <MyInputModal
+        open={openModal}
+        handleClose={closeModal}
+        doOnConfirm={modalCallback}
+        title={modalTitle}
+        symbol={symbol}
+      ></MyInputModal>
       <div className="dashboard animated bounceIn">
         <Box>
           <VStack spacing="7vh">
@@ -118,6 +187,9 @@ export default function CDPs({ bAnimation, setBAnimation }) {
                 <Button
                   className="selected-tlbr-btn raise open-btn"
                   onClick={() => {
+                    setActionType("OPEN");
+                    setModalTitle("Open CDP");
+                    setSymbol("ETH");
                     setOpenModal(true);
                   }}
                 >
@@ -135,11 +207,20 @@ export default function CDPs({ bAnimation, setBAnimation }) {
                             </VStack>
                             <VStack>
                               <div>Collateral locked</div>
-                              <div>{ethers.utils.formatEther(ethers.BigNumber.from(c.col.toString()))} ETH</div>
+                              <div>
+                                {ethers.utils.formatEther(
+                                  ethers.BigNumber.from(c.col.toString())
+                                )}{" "}
+                                ETH
+                              </div>
                             </VStack>
                             <VStack>
                               <div>Minted NOI</div>
-                              <div>{c.debt}</div>
+                              <div>
+                                {ethers.utils.formatEther(
+                                  ethers.BigNumber.from(c.debt.toString())
+                                )}{" "}
+                              </div>
                             </VStack>
                             <VStack>
                               <div>Stabillity fee</div>
@@ -174,15 +255,36 @@ export default function CDPs({ bAnimation, setBAnimation }) {
                           </HStack>
                           <HStack className="per-cdp-right">
                             <VStack>
-                              <Button className="selected-tlbr-btn raise">
+                              <Button
+                                className="selected-tlbr-btn raise"
+                                onClick={() => {
+                                  setActionType("REPAY");
+                                  setSelectedCDP(c.cdpId);
+                                  setModalTitle("Repay debt");
+                                  setSymbol("NOI");
+                                  setOpenModal(true);
+                                }}
+                              >
                                 Repay
                               </Button>
-                              <Button className="selected-tlbr-btn raise">
+                              <Button
+                                className="selected-tlbr-btn raise"
+                                onClick={() => {
+                                  setActionType("MINT");
+                                  setSelectedCDP(c.cdpId);
+                                  setModalTitle("Mint NOI");
+                                  setSymbol("NOI");
+                                  setOpenModal(true);
+                                }}
+                              >
                                 Mint
                               </Button>
-                              <Button className="selected-tlbr-btn raise" onClick={()=>{
-                                closeCDP(c.cdpId)
-                              }}>
+                              <Button
+                                className="selected-tlbr-btn raise"
+                                onClick={() => {
+                                  closeCDP(c.cdpId);
+                                }}
+                              >
                                 Close
                               </Button>
                             </VStack>
