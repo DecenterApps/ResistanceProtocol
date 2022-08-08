@@ -16,7 +16,7 @@ const firebaseConfig = {
 
 const app = firebase.initializeApp(firebaseConfig);
 
-const setUpCDPs = async (setCDPs, address, cdps) => {
+const setUpCDPs = async (cdpsOrigin, setCDPs, address) => {
   const cdpsRef = firebase.database().ref(`cdps/${address}`);
 
   cdpsRef.on("value", (snapshot) => {
@@ -31,9 +31,15 @@ const setUpCDPs = async (setCDPs, address, cdps) => {
   });
 
   cdpsRef.on("child_added", (snapshot) => {
-    console.log(snapshot.val());
-    if (cdps.filter((cdp) => cdp.cdpId === snapshot.val().cdpId).length === 0)
-      setCDPs((state) => [...state, snapshot.val()]);
+    if (cdpsOrigin)
+      if (
+        cdpsOrigin.filter((cdp) => cdp.cdpId === snapshot.val().cdpId)
+          .length === 0
+      )
+        setCDPs((state) => [...state, snapshot.val()]);
+      else {
+        setCDPs((state) => [...state, snapshot.val()]);
+      }
   });
 
   cdpsRef.on("child_removed", (snapshot) => {
@@ -44,11 +50,16 @@ const setUpCDPs = async (setCDPs, address, cdps) => {
 
 const loadCDPs = async (setCDPs, address) => {
   const cdpsRef = firebase.database().ref(`cdps/${address}`);
-  cdpsRef
+  await cdpsRef
     .get()
     .then((snapshot) => {
       if (snapshot.exists()) {
-        console.log(snapshot.val());
+        let newCdps = [];
+        Object.keys(snapshot.val()).forEach((key) => {
+          newCdps.push(snapshot.val()[key]);
+        });
+        setCDPs(newCdps);
+        return newCdps;
       } else {
         console.log("No data available");
       }

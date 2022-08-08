@@ -95,16 +95,24 @@ export default function CDPs({ bAnimation, setBAnimation }) {
     }
   };
 
-  useEffect(() => {
-    FirebaseService.setUpCDPs(setCdps, account,cdps);
+  useEffect(() => { 
+
+    async function fetchData(){
+      const tempCdps=await FirebaseService.loadCDPs(setCdps,account)
+      FirebaseService.setUpCDPs(tempCdps,setCdps, account);
+    }
+    fetchData()
     //FirebaseService.loadCDPs(setCdps,account)
     const cdpsSorted = [...cdps].sort((c1, c2) => {
       return c1.cr - c2.cr;
     });
     //setCdps(cdpsSorted);
+
   }, []);
+  
 
   useEffect(() => {
+    console.log(cdps)
   }, [cdps]);
 
   return (
