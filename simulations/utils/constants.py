@@ -96,7 +96,7 @@ class SAFE_OWNER:
 class WHALE_INSTANT_PRICE_SETTER:
     NUM = 1
 
-    ETH_AMOUNT = 45
+    ETH_AMOUNT = 15
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
 
     # relative difference between redemption price and market price when whale is activated
@@ -158,9 +158,15 @@ class POOL:
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
 
 class REDEMPTION_RATES:
+    MIN_RR = (1 + 1e-8*(-0.08), 1 + 1e-8*0.08)
     LOW_RR = (1 + 1e-8*(-0.2), 1 + 1e-8*0.2)
     MID_RR = (1 + 1e-8*(-0.5), 1 + 1e-8*0.5)
     HIGH_RR = (1 + 1e-8*(-0.9), 1 + 1e-8*0.9)
+
+class PID_CONTROLLER:
+    
+    TIME_STEP = 10000
+    NEGATIVE_RATE_LIMIT = 0.99
 
 MONTE_CARLO_SIMULATIONS = 1
 

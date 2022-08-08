@@ -43,7 +43,7 @@ def update_agents(params, substep, state_history, previous_state, policy_input):
 
     ext_data.set_parameters(substep, previous_state)
     price_station.get_fresh_mp(pool, ext_data)
-    price_station.calculate_redemption_price()
+    price_station.calculate_redemption_price(ext_data)
     timestamp_graph.add_to_graph(previous_state, price_station, pool)
 
     names = agent_utils.names

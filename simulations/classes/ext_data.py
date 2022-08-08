@@ -8,6 +8,9 @@ class ExtData:
     def get_eth_value(self):
         return self.eth_dollar[self.get_current_timestep()]
     
+    def get_cpi_value(self):
+        return self.cpi_value[self.get_current_timestep()]
+    
     #for amount of eth, returns eth value in usd
     def get_eth_value_for_amount(self, eth_amount):
         return eth_amount * self.get_eth_value()

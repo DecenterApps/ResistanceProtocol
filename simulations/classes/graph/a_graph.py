@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 from classes.ext_data import ExtData
 from utils.constants import REDEMPTION_RATES
+import numpy as np
 
 class Graph:
     def __init__(self):
@@ -12,8 +13,8 @@ class Graph:
         self.pool_ratio = []
         self.trader_money_ratio = []
         self.redemption_rate = []
-        self.redemption_rate_up = []
-        self.redemption_rate_down = []
+        self.rr_coef = [REDEMPTION_RATES.MIN_RR, REDEMPTION_RATES.LOW_RR, REDEMPTION_RATES.MID_RR, REDEMPTION_RATES.HIGH_RR]
+        self.rr_colors = ['green', 'yellow', 'orange', 'red']
         self.relative_gap_mp_rp = []
 
 
@@ -26,8 +27,6 @@ class Graph:
         self.pool_ratio.append(pool.eth / (pool.eth + pool.noi))
         self.relative_gap_mp_rp.append((price_station.mp - price_station.rp) / price_station.rp)
         self.redemption_rate.append(price_station.rr)
-        self.redemption_rate_down.append(REDEMPTION_RATES.LOW_RR[0])
-        self.redemption_rate_up.append(REDEMPTION_RATES.LOW_RR[1])
     
     def plot(self):
         self.plotGraph1()
@@ -69,8 +68,11 @@ class Graph:
         # axis[1, 1].legend(['noi amount'])
 
         axis[1, 1].plot(self.redemption_rate)
-        axis[1, 1].plot(self.redemption_rate_up)
-        axis[1, 1].plot(self.redemption_rate_down)
+        arr_size = len(self.redemption_rate)
+        for i in range(len(self.rr_coef)):
+            axis[1, 1].plot(np.full(arr_size, self.rr_coef[i][0]), label='rr_down_' + str(i), color=self.rr_colors[i])
+            axis[1, 1].plot(np.full(arr_size, self.rr_coef[i][1]), label='rr_up_' + str(i), color=self.rr_colors[i])
+
         axis[1, 1].set_title("Redemption rate")
         axis[1, 1].legend(['redemption rate'])
 
@@ -88,3 +90,7 @@ class Graph:
         plt.tight_layout()
 
         plt.savefig('images/graph2.png')
+
+@np.vectorize
+def constant_function(x):
+    return x
