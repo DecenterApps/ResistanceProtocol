@@ -35,6 +35,24 @@ async function repayToCDP(CDPManagerContractObj,noiContractObj,cdpIndex,account,
 
 }
 
+async function repayAndCloseCDP(CDPManagerContractObj,noiContractObj,cdpIndex,account){
+    
+    const totalDebt = await CDPManagerContractObj.connect(account).getDebtWithSF(cdpIndex);
+    const sfps = await getSFperSecond(CDPManagerContractObj,cdpIndex);
+
+    const txApprove = await noiContractObj.connect(account).approve(CDPManagerContractObj.address, (totalDebt + 2*sfps).toString());
+    await txApprove.wait();
+
+    return CDPManagerContractObj.connect(account).repayAndCloseCDP(cdpIndex);
+}
+
+async function getSFperSecond(CDPManagerContractObj, cdpIndex)
+{
+    const debt = await CDPManagerContractObj.getOnlyDebt(cdpIndex);
+    const sfps = Math.ceil(debt * 2 / 3153600000);
+    return sfps;
+}
+
 async function expectToFailWithError(transactionPromise, errorSignature){
     let receipt = await expect(transactionPromise).to.be.reverted;
     assert.equal(receipt['error'].data.data,ethers.utils.id(errorSignature).slice(0,10))
@@ -44,5 +62,6 @@ module.exports = {
     openAndMintFromCDP,
     approveAndLiquidatePosition,
     repayToCDP,
+    repayAndCloseCDP,
     expectToFailWithError
 }
