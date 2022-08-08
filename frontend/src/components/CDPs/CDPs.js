@@ -333,7 +333,7 @@ export default function CDPs({ bAnimation, setBAnimation }) {
                             </VStack>
                             <VStack>
                               <div>CR</div>
-                              <div>TO DO</div>
+                              <div>{c.cr}%</div>
                             </VStack>
                           </HStack>
                           <HStack className="per-cdp-center">

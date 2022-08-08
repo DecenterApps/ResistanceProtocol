@@ -33,7 +33,7 @@ def handle_open_cdp(event):
     print("=== CDP OPEN ===")
     print(e["args"]["_cdpIndex"])
     db.child("cdps").child(e["args"]["_user"]).child(e["args"]["_cdpIndex"]).set(
-        {"cdpId": e["args"]["_cdpIndex"], "owner": e["args"]["_user"], "col": e["args"]["_amount"], "debt": 0, "sf": 0})
+        {"cdpId": e["args"]["_cdpIndex"], "owner": e["args"]["_user"], "col": e["args"]["_amount"], "debt": 0, "sf": 0,"cr":0})
 
 
 def handle_close_cdp(event):
@@ -50,6 +50,7 @@ def handle_mint(event):
     print(e["args"]["_cdpIndex"])
     oldEntery = db.child("cdps").child(
         e["args"]["_from"]).child(e["args"]["_cdpIndex"]).get()
+    print(oldEntery.val()["debt"]+e["args"]["_amount"])
     db.child("cdps").child(e["args"]["_from"]).child(e["args"]["_cdpIndex"]).update(
         {"debt": oldEntery.val()["debt"]+e["args"]["_amount"]})
 
@@ -93,13 +94,30 @@ def calculate_sf(contract):
                         res=contract.functions.getOnlySF(int(cdp["cdpId"])).call()
                         db.child("cdps").child(user).child(cdp["cdpId"]).update(
                             {"sf": res})
-                        print(res)
             else:
                 for cdpId in user_cdps.val().keys():
                     res=contract.functions.getOnlySF(int(cdpId)).call()
                     db.child("cdps").child(user).child(cdpId).update(
                         {"sf": res})
-                    print(res)
+    except:
+        return
+
+def update_cr(contract):
+    all_users = db.child("cdps").get()
+    try:
+        for user in all_users.val().keys():
+            user_cdps = db.child("cdps").child(user).get()
+            if(type(user_cdps.val())==type([])):
+                for cdp in user_cdps.val():
+                    if(cdp!=None):
+                        res=contract.functions.getCR(int(cdp["cdpId"])).call()
+                        db.child("cdps").child(user).child(cdp["cdpId"]).update(
+                            {"cr": res})
+            else:
+                for cdpId in user_cdps.val().keys():
+                    res=contract.functions.getCR(int(cdpId)).call()
+                    db.child("cdps").child(user).child(cdpId).update(
+                        {"cr": res})
     except:
         return
 
@@ -148,6 +166,11 @@ async def calculate_sf_loop(contract, poll_interval):
         calculate_sf(contract)
         await asyncio.sleep(poll_interval)
 
+async def update_cr_loop(contract, poll_interval):
+    while True:
+        update_cr(contract)
+        await asyncio.sleep(poll_interval)
+
 
 def main():
     contract = web3.eth.contract(
@@ -177,6 +200,7 @@ def main():
                 withdraw_loop(event_filter_withdraw, 2),
                 boost_loop(event_filter_boost, 2),
                 calculate_sf_loop(contract, 10),
+                update_cr_loop(contract, 10),
             ))
         # log_loop(block_filter, 2),
         # log_loop(tx_filter, 2)))
