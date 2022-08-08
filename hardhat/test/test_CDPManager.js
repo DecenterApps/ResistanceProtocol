@@ -230,6 +230,8 @@ describe("CDPManager", function () {
                 )
             ).to.be.reverted;
         });
+    });
+    describe("Repay", function () {
 
         it("... repay and close CDP", async () => {
             
@@ -237,6 +239,23 @@ describe("CDPManager", function () {
             await openAndMintFromCDP(CDPManagerContractObj,senderAccounts[1],20,1500);
             const txRepayClose = await repayAndCloseCDP(CDPManagerContractObj,noiContractObj,cdpIndex,senderAccounts[1]);
             txRepayClose.wait();
+        });
+    });
+
+    describe("Withdraw Collateral", function () {
+
+        it("... should withdraw collateral", async () => {
+            
+            const cdpIndex = await openAndMintFromCDP(CDPManagerContractObj,senderAccounts[1],12,1000);
+            const withdrawCol = await CDPManagerContractObj.connect(senderAccounts[1]).withdrawCollateralFromCDP(cdpIndex,ethers.utils.parseEther("5"));
+            withdrawCol.wait();
+        });
+
+
+        it("... should fail withdrawal", async () => {
+            
+            const cdpIndex = await openAndMintFromCDP(CDPManagerContractObj,senderAccounts[1],12,1000);
+            await expect(CDPManagerContractObj.connect(senderAccounts[1]).withdrawCollateralFromCDP(cdpIndex,ethers.utils.parseEther("11"))).to.be.reverted;
         });
     });
 });
