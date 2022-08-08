@@ -76,6 +76,39 @@ export default function CDPs({ bAnimation, setBAnimation }) {
     contractCDPManager.connect(library.getSigner()).closeCDP(cdpId);
   };
 
+  const repayAndClose = async (cdpId) => {
+    const contractNOI = new ethers.Contract(address_NOI, ABI_NOI);
+    const txApprove = await contractNOI
+      .connect(library.getSigner())
+      .approve(address, ethers.utils.parseEther("100000000000000000000000000000000"));
+    await listenForTransactionMine(txApprove, library);
+    const contractCDPManager = new ethers.Contract(address, ABI);
+    const txRepayAndClose = await contractCDPManager
+      .connect(library.getSigner())
+      .repayAndCloseCDP(cdpId);
+    await listenForTransactionMine(txRepayAndClose, library);
+    
+  };
+
+  const withdrawCol = (amount) => {
+    const contractCDPManager = new ethers.Contract(address, ABI);
+    contractCDPManager
+      .connect(library.getSigner())
+      .withdrawCollateralFromCDP(
+        selectedCDP,
+        ethers.utils.parseEther(amount.toString())
+      );
+  };
+
+  const boost = (amount) => {
+    const contractCDPManager = new ethers.Contract(address, ABI);
+    contractCDPManager
+      .connect(library.getSigner())
+      .transferCollateralToCDP(selectedCDP, {
+        value: ethers.utils.parseEther(amount.toString()),
+      });
+  };
+
   function listenForTransactionMine(transactionResponse, provider) {
     console.log(`Mining ${transactionResponse.hash}...`); // create a listener for the blockchain
     return new Promise((resolve, reject) => {
@@ -101,6 +134,14 @@ export default function CDPs({ bAnimation, setBAnimation }) {
       }
       case "MINT": {
         mintCDP(col);
+        break;
+      }
+      case "WITHDRAW": {
+        withdrawCol(col);
+        break;
+      }
+      case "BOOST": {
+        boost(col);
         break;
       }
       default:
@@ -318,6 +359,40 @@ export default function CDPs({ bAnimation, setBAnimation }) {
                             />
                           </HStack>
                           <HStack className="per-cdp-right">
+                            <VStack>
+                              <Button
+                                className="selected-tlbr-btn raise"
+                                onClick={() => {
+                                  setActionType("WITHDRAW");
+                                  setSelectedCDP(c.cdpId);
+                                  setModalTitle("Withdraw collateral");
+                                  setSymbol("ETH");
+                                  setOpenModal(true);
+                                }}
+                              >
+                                Withdraw
+                              </Button>
+                              <Button
+                                className="selected-tlbr-btn raise"
+                                onClick={() => {
+                                  setActionType("BOOST");
+                                  setSelectedCDP(c.cdpId);
+                                  setModalTitle("Boost collateral");
+                                  setSymbol("ETH");
+                                  setOpenModal(true);
+                                }}
+                              >
+                                Boost
+                              </Button>
+                              <Button
+                                className="selected-tlbr-btn raise"
+                                onClick={() => {
+                                  repayAndClose(c.cdpId)
+                                }}
+                              >
+                                Repay & Close
+                              </Button>
+                            </VStack>
                             <VStack>
                               <Button
                                 className="selected-tlbr-btn raise"

@@ -31,37 +31,55 @@ db = firebase.database()
 def handle_open_cdp(event):
     e = json.loads(Web3.toJSON(event))
     print("=== CDP OPEN ===")
-    print(e["args"]["_cdpId"])
-    db.child("cdps").child(e["args"]["_user"]).child(e["args"]["_cdpId"]).set(
-        {"cdpId": e["args"]["_cdpId"], "owner": e["args"]["_user"], "col": e["args"]["_value"], "debt": 0, "sf": 0})
+    print(e["args"]["_cdpIndex"])
+    db.child("cdps").child(e["args"]["_user"]).child(e["args"]["_cdpIndex"]).set(
+        {"cdpId": e["args"]["_cdpIndex"], "owner": e["args"]["_user"], "col": e["args"]["_amount"], "debt": 0, "sf": 0})
 
 
 def handle_close_cdp(event):
     e = json.loads(Web3.toJSON(event))
     print("=== CDP CLOSE ===")
-    print(e["args"]["_cdpId"])
+    print(e["args"]["_cdpIndex"])
     db.child("cdps").child(e["args"]["_user"]).child(
-        e["args"]["_cdpId"]).remove()
+        e["args"]["_cdpIndex"]).remove()
 
 
 def handle_mint(event):
     e = json.loads(Web3.toJSON(event))
     print("=== MINT ===")
-    print(e["args"]["_cdpId"])
+    print(e["args"]["_cdpIndex"])
     oldEntery = db.child("cdps").child(
-        e["args"]["_from"]).child(e["args"]["_cdpId"]).get()
-    db.child("cdps").child(e["args"]["_from"]).child(e["args"]["_cdpId"]).update(
+        e["args"]["_from"]).child(e["args"]["_cdpIndex"]).get()
+    db.child("cdps").child(e["args"]["_from"]).child(e["args"]["_cdpIndex"]).update(
         {"debt": oldEntery.val()["debt"]+e["args"]["_amount"]})
 
 
 def handle_repay(event):
     e = json.loads(Web3.toJSON(event))
     print("=== MINT ===")
-    print(e["args"]["_cdpId"])
+    print(e["args"]["_cdpIndex"])
     oldEntery = db.child("cdps").child(
-        e["args"]["_from"]).child(e["args"]["_cdpId"]).get()
-    db.child("cdps").child(e["args"]["_from"]).child(e["args"]["_cdpId"]).update(
+        e["args"]["_from"]).child(e["args"]["_cdpIndex"]).get()
+    db.child("cdps").child(e["args"]["_from"]).child(e["args"]["_cdpIndex"]).update(
         {"debt": oldEntery.val()["debt"]-e["args"]["_amount"]})
+
+def handle_withdraw(event):
+    e = json.loads(Web3.toJSON(event))
+    print("=== WITHDRAW ===")
+    print(e["args"]["_cdpIndex"])
+    oldEntery = db.child("cdps").child(
+        e["args"]["_user"]).child(e["args"]["_cdpIndex"]).get()
+    db.child("cdps").child(e["args"]["_user"]).child(e["args"]["_cdpIndex"]).update(
+        {"col": oldEntery.val()["col"]-e["args"]["_amount"]})
+
+def handle_boost(event):
+    e = json.loads(Web3.toJSON(event))
+    print("=== WITHDRAW ===")
+    print(e["args"]["_cdpIndex"])
+    oldEntery = db.child("cdps").child(
+        e["args"]["_user"]).child(e["args"]["_cdpIndex"]).get()
+    db.child("cdps").child(e["args"]["_user"]).child(e["args"]["_cdpIndex"]).update(
+        {"col": oldEntery.val()["col"]+e["args"]["_amount"]})
 
 
 def calculate_sf(contract):
@@ -113,6 +131,17 @@ async def repay_loop(event_filter, poll_interval):
             handle_repay(RepayCDP)
         await asyncio.sleep(poll_interval)
 
+async def withdraw_loop(event_filter, poll_interval):
+    while True:
+        for WithdrawCollateral in event_filter.get_new_entries():
+            handle_withdraw(WithdrawCollateral)
+        await asyncio.sleep(poll_interval)
+
+async def boost_loop(event_filter, poll_interval):
+    while True:
+        for TransferCollateral in event_filter.get_new_entries():
+            handle_boost(TransferCollateral)
+        await asyncio.sleep(poll_interval)
 
 async def calculate_sf_loop(contract, poll_interval):
     while True:
@@ -131,6 +160,10 @@ def main():
         fromBlock='latest')
     event_filter_repay = contract.events.RepayCDP.createFilter(
         fromBlock='latest')
+    event_filter_withdraw = contract.events.WithdrawCollateral.createFilter(
+        fromBlock='latest')
+    event_filter_boost = contract.events.TransferCollateral.createFilter(
+        fromBlock='latest')
     #block_filter = web3.eth.filter('latest')
     # tx_filter = web3.eth.filter('pending')
     loop = asyncio.get_event_loop()
@@ -141,6 +174,8 @@ def main():
                 cdp_close_loop(event_filter_cdp_close, 2),
                 mint_loop(event_filter_mint, 2),
                 repay_loop(event_filter_repay, 2),
+                withdraw_loop(event_filter_withdraw, 2),
+                boost_loop(event_filter_boost, 2),
                 calculate_sf_loop(contract, 10),
             ))
         # log_loop(block_filter, 2),

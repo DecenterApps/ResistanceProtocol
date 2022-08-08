@@ -95,7 +95,7 @@ export const ABI= [
       {
         "indexed": true,
         "internalType": "uint256",
-        "name": "_cdpId",
+        "name": "_cdpIndex",
         "type": "uint256"
       }
     ],
@@ -114,13 +114,13 @@ export const ABI= [
       {
         "indexed": true,
         "internalType": "uint256",
-        "name": "_cdpId",
+        "name": "_cdpIndex",
         "type": "uint256"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "_value",
+        "name": "_amount",
         "type": "uint256"
       }
     ],
@@ -139,7 +139,7 @@ export const ABI= [
       {
         "indexed": true,
         "internalType": "uint256",
-        "name": "_cdpId",
+        "name": "_cdpIndex",
         "type": "uint256"
       },
       {
@@ -208,7 +208,7 @@ export const ABI= [
       {
         "indexed": true,
         "internalType": "uint256",
-        "name": "_cdpId",
+        "name": "_cdpIndex",
         "type": "uint256"
       }
     ],
@@ -240,7 +240,7 @@ export const ABI= [
       {
         "indexed": true,
         "internalType": "uint256",
-        "name": "_cdpId",
+        "name": "_cdpIndex",
         "type": "uint256"
       },
       {
@@ -265,17 +265,42 @@ export const ABI= [
       {
         "indexed": true,
         "internalType": "uint256",
-        "name": "_cdpId",
+        "name": "_cdpIndex",
         "type": "uint256"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "_value",
+        "name": "_amount",
         "type": "uint256"
       }
     ],
     "name": "TransferCollateral",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_user",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "_cdpIndex",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "WithdrawCollateral",
     "type": "event"
   },
   {
@@ -311,6 +336,30 @@ export const ABI= [
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_collateral",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_debt",
+        "type": "uint256"
+      }
+    ],
+    "name": "calculateCR",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "cdpi",
     "outputs": [
@@ -339,6 +388,25 @@ export const ABI= [
   {
     "inputs": [],
     "name": "ethRp",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_cdpIndex",
+        "type": "uint256"
+      }
+    ],
+    "name": "getCR",
     "outputs": [
       {
         "internalType": "uint256",
@@ -409,6 +477,25 @@ export const ABI= [
         "internalType": "struct CDPManager.CDP",
         "name": "searchedCDP",
         "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_cdpIndex",
+        "type": "uint256"
+      }
+    ],
+    "name": "getOnlyDebt",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -582,6 +669,19 @@ export const ABI= [
         "internalType": "uint256",
         "name": "_cdpIndex",
         "type": "uint256"
+      }
+    ],
+    "name": "repayAndCloseCDP",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_cdpIndex",
+        "type": "uint256"
       },
       {
         "internalType": "uint256",
@@ -678,6 +778,24 @@ export const ABI= [
       }
     ],
     "name": "transferOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_cdpIndex",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "withdrawCollateralFromCDP",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
