@@ -1,6 +1,7 @@
-class ETHData:
+class ExtData:
     def __init__(self):
         self.eth_dollar = []
+        self.cpi_value = []
         self.substep = 0
         self.previous_state = {}
     

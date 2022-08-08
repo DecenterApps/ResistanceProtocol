@@ -17,8 +17,8 @@ class Price_Trader(Trader):
     def buy_eth_condition(self, price_station):
         return price_station.mp > price_station.rp and self.noi > 0.00001
 
-def update_price_trader(agents, price_station: PriceStation, pool: Pool, eth_data: ETHData):
-    update_trader(agents, price_station, pool, eth_data, 'price_trader', PRICE_TRADER)
+def update_price_trader(agents, price_station: PriceStation, pool: Pool, ext_data: ExtData):
+    update_trader(agents, price_station, pool, ext_data, 'price_trader', PRICE_TRADER)
 
 def create_new_price_trader(name, eth_amount, noi_amount):
     return Price_Trader(name, eth_amount, noi_amount, get_price_trader_perc_amount(), get_price_trader_relative_gap())

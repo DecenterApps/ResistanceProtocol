@@ -23,14 +23,15 @@ timestamp_graph = Timestamp_Graph(agent_utils)
 full_graph = Full_Graph()
 
 price_station = PriceStation(2, 2, 1, 0, full_graph)
-eth_data = ETHData()
+ext_data = ExtData()
 agents = dict()
 
 agent_utils.create_agents(agents)
 
 genesis_states = {'agents': agents}
 
-eth_data.eth_dollar = get_data_from_csv('dataset/eth_dollar.csv')
+ext_data.eth_dollar = get_data_from_csv('dataset/eth_dollar.csv')
+ext_data.cpi_value = get_data_from_csv('dataset/cpi_value.csv')
 
 br = [0]*len(agent_utils.nums)
 
@@ -40,8 +41,8 @@ def update_agents(params, substep, state_history, previous_state, policy_input):
     
     # print(previous_state['timestep'])
 
-    eth_data.set_parameters(substep, previous_state)
-    price_station.get_fresh_mp(pool, eth_data)
+    ext_data.set_parameters(substep, previous_state)
+    price_station.get_fresh_mp(pool, ext_data)
     price_station.calculate_redemption_price()
     timestamp_graph.add_to_graph(previous_state, price_station, pool)
 
@@ -49,19 +50,19 @@ def update_agents(params, substep, state_history, previous_state, policy_input):
     nums = agent_utils.nums
     total_sum = agent_utils.total_sum
 
-    update_whale_longterm_price_setter(agents, price_station, pool, eth_data)
+    update_whale_longterm_price_setter(agents, price_station, pool, ext_data)
 
     for i in range(agent_utils.total_sum // 2):
         p = np.random.random()
         if i % 2 == 0:
             if RATE_TRADER.NUM + PRICE_TRADER.NUM > 0 and p < RATE_TRADER.NUM / (RATE_TRADER.NUM + PRICE_TRADER.NUM):
-                update_rate_trader(agents, price_station, pool, eth_data)
+                update_rate_trader(agents, price_station, pool, ext_data)
             else:
-                update_price_trader(agents, price_station, pool, eth_data)
+                update_price_trader(agents, price_station, pool, ext_data)
             continue
         for i in range(len(nums)):
             if p < nums[i] / total_sum:
-                agent_utils.agents_dict[names[i]]['update'](agents, price_station, pool, eth_data)
+                agent_utils.agents_dict[names[i]]['update'](agents, price_station, pool, ext_data)
                 br[i] += 1
                 break
             p -= nums[i] / total_sum
@@ -79,7 +80,7 @@ partial_state_update_blocks = [
 ]
 
 sim_config_dict = {
-    'T': range(999),
+    'T': range(999),  # about 4 months
     'N': 1,
     # 'M': ,
 }
@@ -101,7 +102,7 @@ raw_system_events, tensor_field, sessions = simulation.execute()
 simulation_result = pd.DataFrame(raw_system_events)
 simulation_result.set_index(['subset', 'run', 'timestep', 'substep'])
 
-full_graph.plot()
-timestamp_graph.plot()
+full_graph.plot(ext_data)
+timestamp_graph.plot(ext_data)
 
 print(br)

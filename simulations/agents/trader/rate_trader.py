@@ -17,8 +17,8 @@ class Rate_Trader(Trader):
     def buy_eth_condition(self, price_station):
         return price_station.rr < self.rr_low and price_station.mp > price_station.rp and self.noi > 0.0001
 
-def update_rate_trader(agents, price_station: PriceStation, pool: Pool, eth_data: ETHData):
-    update_trader(agents, price_station, pool, eth_data, 'rate_trader', RATE_TRADER)
+def update_rate_trader(agents, price_station: PriceStation, pool: Pool, ext_data: ExtData):
+    update_trader(agents, price_station, pool, ext_data, 'rate_trader', RATE_TRADER)
 
 def create_new_rate_trader(name, eth_amount, noi_amount):
     rr_low, rr_high = get_rate_trader_apy_bound()

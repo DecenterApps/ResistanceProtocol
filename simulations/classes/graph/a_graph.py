@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+from classes.ext_data import ExtData
 from utils.constants import REDEMPTION_RATES
 
 class Graph:
@@ -13,6 +14,7 @@ class Graph:
         self.redemption_rate_up = []
         self.redemption_rate_down = []
         self.relative_gap_mp_rp = []
+
 
     def add_to_graph(self, price_station, pool):
         self.m_prices.append(price_station.mp)
@@ -29,12 +31,13 @@ class Graph:
         self.plotGraph1()
         self.plotGraph2()
     
-    def plotGraph1(self, filename):
+    def plotGraph1(self, filename, ext_data: ExtData):
         figure, axis = plt.subplots(2, 2, figsize=(15,8))
         axis[0, 0].plot(self.m_prices)
         axis[0,0].plot(self.r_prices)
-        axis[0,0].legend(['market price', 'redemption price'])
-        axis[0, 0].set_title("Market price, Redemption price")
+        axis[0,0].plot(ext_data.cpi_value)
+        axis[0,0].legend(['market price', 'redemption price', 'cpi'])
+        axis[0, 0].set_title("Market price, Redemption price, Inflation value")
         
         # axis[0, 1].plot(self.pool_ratio)
         # axis[0, 1].set_title("Pool ratio")

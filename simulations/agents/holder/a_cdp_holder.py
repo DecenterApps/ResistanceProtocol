@@ -16,30 +16,30 @@ class CDP_Holder(ABC):
         self.opened_position = False
         self.cdp_position: CDP_Position = None
     
-    def calculate_cr(self, eth_data: ETHData, price_station: PriceStation):
-        return self.cdp_position.calculate_cr(eth_data, price_station)
+    def calculate_cr(self, ext_data: ExtData, price_station: PriceStation):
+        return self.cdp_position.calculate_cr(ext_data, price_station)
     
     @abstractmethod
-    def boost(self, eth_data: ETHData, price_station: PriceStation, pool: Pool):
+    def boost(self, ext_data: ExtData, price_station: PriceStation, pool: Pool):
         pass
 
     @abstractmethod
-    def repay(self, eth_data: ETHData, price_station: PriceStation, pool: Pool):
+    def repay(self, ext_data: ExtData, price_station: PriceStation, pool: Pool):
         pass
 
-    def close_position(self, eth_data: ETHData, price_station: PriceStation, pool: Pool):
+    def close_position(self, ext_data: ExtData, price_station: PriceStation, pool: Pool):
         self.opened_position = False
-        self.eth += self.cdp_position.close_position(self.debt_noi, eth_data, price_station, pool)
+        self.eth += self.cdp_position.close_position(self.debt_noi, ext_data, price_station, pool)
         self.debt_noi = 0
 
-    def open_position(self, eth_data:ETHData, price_station: PriceStation, pool: Pool):
+    def open_position(self, ext_data:ExtData, price_station: PriceStation, pool: Pool):
         self.opened_position = True
         collateral = self.eth * self.perc_amount
         self.eth -= collateral
-        self.debt_noi = price_station.get_amount_of_noi_for_rp_value(eth_data.get_eth_value_for_amount(collateral)) / self.initial_cr
+        self.debt_noi = price_station.get_amount_of_noi_for_rp_value(ext_data.get_eth_value_for_amount(collateral)) / self.initial_cr
         self.cdp_position = CDP_Position(collateral, self.debt_noi, self.initial_cr, self.repay_cr, self.boost_cr)
 
-        added_eth, added_noi = pool.put_noi_get_eth(self.debt_noi, price_station, eth_data)
+        added_eth, added_noi = pool.put_noi_get_eth(self.debt_noi, price_station, ext_data)
         return added_eth, added_noi
 
     def liquidation(self):
@@ -47,7 +47,7 @@ class CDP_Holder(ABC):
         self.debt_noi = 0
 
 
-def update_holder(agents, price_station: PriceStation, pool: Pool, eth_data: ETHData, name_literal, CONST):
+def update_holder(agents, price_station: PriceStation, pool: Pool, ext_data: ExtData, name_literal, CONST):
     leverager: bool = False
     if name_literal == 'leverager':
         leverager = True
@@ -60,20 +60,20 @@ def update_holder(agents, price_station: PriceStation, pool: Pool, eth_data: ETH
         price_station.mp - price_station.rp) / price_station.rp
 
     if holder.opened_position:
-        current_cr = holder.cdp_position.calculate_cr(eth_data, price_station)
+        current_cr = holder.cdp_position.calculate_cr(ext_data, price_station)
         if current_cr < LIQUIDATION_RATIO and leverager:
             holder.liquidation()
         else:
             if relative_gap > holder.relative_gap and price_station.rp > price_station.mp and leverager:
-                holder.close_position(eth_data, price_station, pool)
+                holder.close_position(ext_data, price_station, pool)
             elif current_cr > holder.boost_cr:
-                holder.boost(eth_data, price_station, pool)
+                holder.boost(ext_data, price_station, pool)
             elif current_cr < holder.repay_cr:
-                holder.repay(eth_data, price_station, pool)
+                holder.repay(ext_data, price_station, pool)
     else:
         
         if relative_gap > holder.relative_gap and price_station.rp < price_station.mp and holder.eth > 0:
-            holder.open_position(eth_data, price_station, pool)
+            holder.open_position(ext_data, price_station, pool)
     
     agents[name] = holder
 

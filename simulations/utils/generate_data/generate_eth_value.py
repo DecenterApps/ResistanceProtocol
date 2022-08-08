@@ -15,7 +15,7 @@ def ETH_Dollar_value():
 
 if __name__ == "__main__":
     eth_dollar = ETH_Dollar_value()
-    with open('dataset/eth_dollar.csv', 'w') as csvfile:
+    with open('../../dataset/eth_dollar.csv', 'w') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(eth_dollar)
     plt.figure()
@@ -23,4 +23,4 @@ if __name__ == "__main__":
     plt.title("ETH -> dollar")
     plt.xlabel("time")
     plt.ylabel("Value of ETH")
-    plt.savefig("images/eth_dollar.png")
+    plt.savefig("../../images/eth_dollar.png")

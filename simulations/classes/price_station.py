@@ -1,6 +1,6 @@
-from classes.eth_data import ETHData
+from classes.ext_data import ExtData
 from classes.pool import Pool
-from pi_controller import updateRedemptionPrice, computeRate
+from controllers.pi_controller import updateRedemptionPrice, computeRate
 
 class PriceStation:
     def __init__(self, market_price, redemption_price, redemption_rate, accumulated_leak, graph):
@@ -14,16 +14,16 @@ class PriceStation:
         self.accumulated_leak = accumulated_leak
         self.graph = graph
     
-    def update_mp(self, pool: Pool, eth_data: ETHData) -> float:
-        eth_value = eth_data.get_eth_value()
+    def update_mp(self, pool: Pool, ext_data: ExtData) -> float:
+        eth_value = ext_data.get_eth_value()
         self.mp =  eth_value * pool.eth / pool.noi
         self.graph.add_to_graph(self, pool)
 
         if pool.eth <= 0 or pool.noi <= 0:
             assert False, "ASSERT 05, pool values negative"
     
-    def get_fresh_mp(self, pool: Pool, eth_data: ETHData):
-        self.update_mp(pool, eth_data)
+    def get_fresh_mp(self, pool: Pool, ext_data: ExtData):
+        self.update_mp(pool, ext_data)
         return self.mp
 
     def calculate_redemption_price(self):

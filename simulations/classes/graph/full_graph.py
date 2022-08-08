@@ -7,8 +7,8 @@ class Full_Graph(Graph):
     def add_to_graph(self, price_station, pool):
         Graph.add_to_graph(self, price_station, pool)
 
-    def plot(self):
-        Graph.plotGraph1(self, 'images/full_graph.png')
+    def plot(self, ext_data: ExtData):
+        Graph.plotGraph1(self, 'images/full_graph.png', ext_data)
         self.plotGraph2()
 
     def plotGraph2(self):
