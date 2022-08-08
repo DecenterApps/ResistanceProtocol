@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import "./CDPs.css";
 import { Box, VStack, HStack, Image, Button, Tooltip } from "@chakra-ui/react";
 import { Chart as ChartJS, ArcElement, Tooltip as TP, Legend } from "chart.js";
@@ -11,6 +11,10 @@ import { useWeb3React } from "@web3-react/core";
 import { ethers } from "ethers";
 import { ABI, address } from "../../contracts/CDPManager";
 import { ABI as ABI_NOI, address as address_NOI } from "../../contracts/NOI";
+import {
+  ABI as ABI_ETH,
+  address as address_ETH,
+} from "../../contracts/EthTwapFeed";
 
 ChartJS.register(ArcElement, TP, Legend);
 
@@ -22,12 +26,21 @@ export default function CDPs({ bAnimation, setBAnimation }) {
   const [selectedCDP, setSelectedCDP] = useState();
   const [modalTitle, setModalTitle] = useState("");
   const [symbol, setSymbol] = useState("");
+  const [ethPrice, setEthPrice] = useState(0);
 
   const [openModal, setOpenModal] = useState(false);
   const labels = ["Minted", "Left"];
 
   const closeModal = () => {
     setOpenModal(false);
+  };
+
+  const getEthPrice = async () => {
+    const ethTwapFeedContract = new ethers.Contract(address_ETH, ABI_ETH);
+    const ethResponse = await ethTwapFeedContract
+      .connect(library.getSigner())
+      .getEthPrice();
+    setEthPrice(ethResponse.div(10 ** 8).toString());
   };
 
   const openCDP = (col) => {
@@ -46,7 +59,7 @@ export default function CDPs({ bAnimation, setBAnimation }) {
 
   const repayCDP = async (amount) => {
     const contractNOI = new ethers.Contract(address_NOI, ABI_NOI);
-    console.log(ethers.utils.parseEther(amount.toString()))
+    console.log(ethers.utils.parseEther(amount.toString()));
     const txApprove = await contractNOI
       .connect(library.getSigner())
       .approve(address, ethers.utils.parseEther(amount.toString()));
@@ -95,25 +108,23 @@ export default function CDPs({ bAnimation, setBAnimation }) {
     }
   };
 
-  useEffect(() => { 
-
-    async function fetchData(){
-      const tempCdps=await FirebaseService.loadCDPs(setCdps,account)
-      FirebaseService.setUpCDPs(tempCdps,setCdps, account);
+  useEffect(() => {
+    async function fetchData() {
+      const tempCdps = await FirebaseService.loadCDPs(setCdps, account);
+      FirebaseService.setUpCDPs(tempCdps, setCdps, account);
     }
-    fetchData()
-    //FirebaseService.loadCDPs(setCdps,account)
-    const cdpsSorted = [...cdps].sort((c1, c2) => {
+    fetchData();
+    getEthPrice();
+    setInterval(async () => {
+      await getEthPrice();
+    }, 5000 * 60);
+    /*const cdpsSorted = [...cdps].sort((c1, c2) => {
       return c1.cr - c2.cr;
     });
-    //setCdps(cdpsSorted);
-
+    setCdps(cdpsSorted);*/
   }, []);
-  
 
-  useEffect(() => {
-    console.log(cdps)
-  }, [cdps]);
+  useEffect(() => {}, [cdps]);
 
   return (
     <>
@@ -145,7 +156,28 @@ export default function CDPs({ bAnimation, setBAnimation }) {
                     borderRadius="3px"
                   />
                   <div>Total ETH locked in your CDPs</div>
-                  <div className="bold-text">6.3 ($10823)</div>
+                  <div className="bold-text">
+                    {ethers.utils.formatEther(
+                      cdps
+                        .reduce(
+                          (previousValue, currentValue) =>
+                            previousValue + currentValue["col"],
+                          0
+                        )
+                        .toString()
+                    )}{" "}
+                    ($
+                    {ethers.utils.formatEther(
+                      cdps
+                        .reduce(
+                          (previousValue, currentValue) =>
+                            previousValue + currentValue["col"],
+                          0
+                        )
+                        .toString()
+                    ) * ethPrice}
+                    )
+                  </div>
                 </VStack>
               </Box>
               <Box className="div-line1">
@@ -165,7 +197,17 @@ export default function CDPs({ bAnimation, setBAnimation }) {
                     borderRadius="3px"
                   />
                   <div>Minted NOI</div>
-                  <div className="bold-text">2000</div>
+                  <div className="bold-text">
+                    {ethers.utils.formatEther(
+                      cdps
+                        .reduce(
+                          (previousValue, currentValue) =>
+                            previousValue + currentValue["debt"],
+                          0
+                        )
+                        .toString()
+                    )}
+                  </div>
                 </VStack>
               </Box>
               <Box className="div-line1">
@@ -185,7 +227,17 @@ export default function CDPs({ bAnimation, setBAnimation }) {
                     borderRadius="3px"
                   />
                   <div>Stability fee</div>
-                  <div className="bold-text">132</div>
+                  <div className="bold-text">
+                    {ethers.utils.formatEther(
+                      cdps
+                        .reduce(
+                          (previousValue, currentValue) =>
+                            previousValue + currentValue["sf"],
+                          0
+                        )
+                        .toString()
+                    )}
+                  </div>
                 </VStack>
               </Box>
             </HStack>
@@ -232,7 +284,11 @@ export default function CDPs({ bAnimation, setBAnimation }) {
                             </VStack>
                             <VStack>
                               <div>Stabillity fee</div>
-                              <div>TO DO</div>
+                              <div>
+                                {c.sf !== undefined
+                                  ? ethers.utils.formatEther(c.sf.toString())
+                                  : "Calculating..."}
+                              </div>
                             </VStack>
                             <VStack>
                               <div>CR</div>

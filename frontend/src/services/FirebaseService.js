@@ -35,9 +35,9 @@ const setUpCDPs = async (cdpsOrigin, setCDPs, address) => {
       if (
         cdpsOrigin.filter((cdp) => cdp.cdpId === snapshot.val().cdpId)
           .length === 0
-      )
+      ) {
         setCDPs((state) => [...state, snapshot.val()]);
-      else {
+      } else {
         setCDPs((state) => [...state, snapshot.val()]);
       }
   });

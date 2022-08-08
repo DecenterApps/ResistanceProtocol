@@ -1,3 +1,4 @@
+from types import NoneType
 from dotenv import load_dotenv
 import os
 import pyrebase
@@ -26,31 +27,63 @@ firebaseConfig = {
 firebase = pyrebase.initialize_app(firebaseConfig)
 db = firebase.database()
 
+
 def handle_open_cdp(event):
-    e=json.loads(Web3.toJSON(event))
+    e = json.loads(Web3.toJSON(event))
     print("=== CDP OPEN ===")
     print(e["args"]["_cdpId"])
-    db.child("cdps").child(e["args"]["_user"]).child(e["args"]["_cdpId"]).set({"cdpId":e["args"]["_cdpId"],"owner":e["args"]["_user"],"col": e["args"]["_value"],"debt":0})
+    db.child("cdps").child(e["args"]["_user"]).child(e["args"]["_cdpId"]).set(
+        {"cdpId": e["args"]["_cdpId"], "owner": e["args"]["_user"], "col": e["args"]["_value"], "debt": 0, "sf": 0})
+
 
 def handle_close_cdp(event):
-    e=json.loads(Web3.toJSON(event))
+    e = json.loads(Web3.toJSON(event))
     print("=== CDP CLOSE ===")
     print(e["args"]["_cdpId"])
-    db.child("cdps").child(e["args"]["_user"]).child(e["args"]["_cdpId"]).remove()
+    db.child("cdps").child(e["args"]["_user"]).child(
+        e["args"]["_cdpId"]).remove()
+
 
 def handle_mint(event):
-    e=json.loads(Web3.toJSON(event))
+    e = json.loads(Web3.toJSON(event))
     print("=== MINT ===")
     print(e["args"]["_cdpId"])
-    oldEntery=db.child("cdps").child(e["args"]["_from"]).child(e["args"]["_cdpId"]).get()
-    db.child("cdps").child(e["args"]["_from"]).child(e["args"]["_cdpId"]).update({"debt":oldEntery.val()["debt"]+e["args"]["_amount"]})
+    oldEntery = db.child("cdps").child(
+        e["args"]["_from"]).child(e["args"]["_cdpId"]).get()
+    db.child("cdps").child(e["args"]["_from"]).child(e["args"]["_cdpId"]).update(
+        {"debt": oldEntery.val()["debt"]+e["args"]["_amount"]})
+
 
 def handle_repay(event):
-    e=json.loads(Web3.toJSON(event))
+    e = json.loads(Web3.toJSON(event))
     print("=== MINT ===")
     print(e["args"]["_cdpId"])
-    oldEntery=db.child("cdps").child(e["args"]["_from"]).child(e["args"]["_cdpId"]).get()
-    db.child("cdps").child(e["args"]["_from"]).child(e["args"]["_cdpId"]).update({"debt":oldEntery.val()["debt"]-e["args"]["_amount"]})
+    oldEntery = db.child("cdps").child(
+        e["args"]["_from"]).child(e["args"]["_cdpId"]).get()
+    db.child("cdps").child(e["args"]["_from"]).child(e["args"]["_cdpId"]).update(
+        {"debt": oldEntery.val()["debt"]-e["args"]["_amount"]})
+
+
+def calculate_sf(contract):
+    all_users = db.child("cdps").get()
+    try:
+        for user in all_users.val().keys():
+            user_cdps = db.child("cdps").child(user).get()
+            if(type(user_cdps.val())==type([])):
+                for cdp in user_cdps.val():
+                    if(cdp!=None):
+                        res=contract.functions.getOnlySF(int(cdp["cdpId"])).call()
+                        db.child("cdps").child(user).child(cdp["cdpId"]).update(
+                            {"sf": res})
+                        print(res)
+            else:
+                for cdpId in user_cdps.val().keys():
+                    res=contract.functions.getOnlySF(int(cdpId)).call()
+                    db.child("cdps").child(user).child(cdpId).update(
+                        {"sf": res})
+                    print(res)
+    except:
+        return
 
 
 async def cdp_open_loop(event_filter, poll_interval):
@@ -59,17 +92,20 @@ async def cdp_open_loop(event_filter, poll_interval):
             handle_open_cdp(CDPOpen)
         await asyncio.sleep(poll_interval)
 
+
 async def cdp_close_loop(event_filter, poll_interval):
     while True:
         for CDPClose in event_filter.get_new_entries():
             handle_close_cdp(CDPClose)
         await asyncio.sleep(poll_interval)
 
+
 async def mint_loop(event_filter, poll_interval):
     while True:
         for MintCDP in event_filter.get_new_entries():
             handle_mint(MintCDP)
         await asyncio.sleep(poll_interval)
+
 
 async def repay_loop(event_filter, poll_interval):
     while True:
@@ -78,12 +114,23 @@ async def repay_loop(event_filter, poll_interval):
         await asyncio.sleep(poll_interval)
 
 
+async def calculate_sf_loop(contract, poll_interval):
+    while True:
+        calculate_sf(contract)
+        await asyncio.sleep(poll_interval)
+
+
 def main():
-    contract = web3.eth.contract(address=CDPManager.ADDRESS_CDPMANAGER, abi=CDPManager.ABI_CDPMANAGER)
-    event_filter_cdp_open = contract.events.CDPOpen.createFilter(fromBlock='latest')
-    event_filter_cdp_close = contract.events.CDPClose.createFilter(fromBlock='latest')
-    event_filter_mint = contract.events.MintCDP.createFilter(fromBlock='latest')
-    event_filter_repay = contract.events.RepayCDP.createFilter(fromBlock='latest')
+    contract = web3.eth.contract(
+        address=CDPManager.ADDRESS_CDPMANAGER, abi=CDPManager.ABI_CDPMANAGER)
+    event_filter_cdp_open = contract.events.CDPOpen.createFilter(
+        fromBlock='latest')
+    event_filter_cdp_close = contract.events.CDPClose.createFilter(
+        fromBlock='latest')
+    event_filter_mint = contract.events.MintCDP.createFilter(
+        fromBlock='latest')
+    event_filter_repay = contract.events.RepayCDP.createFilter(
+        fromBlock='latest')
     #block_filter = web3.eth.filter('latest')
     # tx_filter = web3.eth.filter('pending')
     loop = asyncio.get_event_loop()
@@ -93,9 +140,11 @@ def main():
                 cdp_open_loop(event_filter_cdp_open, 2),
                 cdp_close_loop(event_filter_cdp_close, 2),
                 mint_loop(event_filter_mint, 2),
-                repay_loop(event_filter_repay, 2)))
-                # log_loop(block_filter, 2),
-                # log_loop(tx_filter, 2)))
+                repay_loop(event_filter_repay, 2),
+                calculate_sf_loop(contract, 10),
+            ))
+        # log_loop(block_filter, 2),
+        # log_loop(tx_filter, 2)))
     finally:
         # close loop to free up system resources
         loop.close()
