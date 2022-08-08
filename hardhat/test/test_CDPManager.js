@@ -2,6 +2,7 @@ const { getNamedAccounts, network, deployments, ethers } = require("hardhat");
 const { assert, expect } = require("chai");
 const BigNumber = require("big-number");
 const { takeSnapshot, revertToSnapshot } = require("../utils/snapshot");
+const { openAndMintFromCDP, repayAndCloseCDP } = require("../utils/positionActions");
 
 describe("CDPManager", function () {
     const senderAccounts = [];
@@ -228,6 +229,14 @@ describe("CDPManager", function () {
                     repayValue
                 )
             ).to.be.reverted;
+        });
+
+        it("... repay and close CDP", async () => {
+            
+            const cdpIndex = await openAndMintFromCDP(CDPManagerContractObj,senderAccounts[1],12,1000);
+            await openAndMintFromCDP(CDPManagerContractObj,senderAccounts[1],20,1500);
+            const txRepayClose = await repayAndCloseCDP(CDPManagerContractObj,noiContractObj,cdpIndex,senderAccounts[1]);
+            txRepayClose.wait();
         });
     });
 });

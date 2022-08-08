@@ -261,7 +261,8 @@ contract CDPManager {
     function getOnlySF(uint256 _cdpIndex) public view returns (uint256) {
         uint8 SF = Parameters(parametersContractAddress).getSF();
         CDP memory cdp = cdpList[_cdpIndex];
-        uint fee = (cdp.generatedDebt *
+        uint fee = cdpList[_cdpIndex].accumulatedFee +
+            (cdp.generatedDebt *
             SF *
             (block.timestamp - cdp.updatedTime)) / (SECONDS_PER_YEAR * 100);
         return fee;
@@ -273,9 +274,17 @@ contract CDPManager {
      */
     function getDebtWithSF(uint256 _cdpIndex) public view returns (uint256) {
         uint total = cdpList[_cdpIndex].generatedDebt +
-            cdpList[_cdpIndex].accumulatedFee +
             getOnlySF(_cdpIndex);
         return total;
+    }
+
+    function getOnlyDebt(uint256 _cdpIndex) public view returns (uint256) {
+        return cdpList[_cdpIndex].generatedDebt;        
+    }
+
+    function recalculateSF(uint256 _cdpIndex) public {
+        cdpList[_cdpIndex].accumulatedFee = getOnlySF(_cdpIndex);
+        cdpList[_cdpIndex].updatedTime = block.timestamp;
     }
 
     /*
@@ -326,11 +335,6 @@ contract CDPManager {
         emit MintCDP(cdpList[_cdpIndex].owner, _cdpIndex, _amount);
     }
 
-    function recalculateSF(uint256 _cdpIndex) public {
-        cdpList[_cdpIndex].accumulatedFee += getOnlySF(_cdpIndex);
-        cdpList[_cdpIndex].updatedTime = block.timestamp;
-    }
-
     function transferSFtoTreasury() private returns (uint256) {
         uint8 SF = Parameters(parametersContractAddress).getSF();
         uint amount = (totalDebt *
@@ -345,7 +349,7 @@ contract CDPManager {
     /*
      * @notice repay debt in coins
      * @param _cdpIndex index of cdp
-     * @param _liquidatorUsr address that initiated liquidation
+     * @param _amount amount of tokens to repay
      */
     function repayToCDP(uint256 _cdpIndex, uint256 _amount)
         public
@@ -372,9 +376,32 @@ contract CDPManager {
     }
 
     /*
+     * @notice repay total debt and close position
+     * @param _cdpIndex index of cdp
+     */
+    function repayAndCloseCDP(uint256 _cdpIndex)
+        public
+        CDPExists(_cdpIndex)
+    {
+        recalculateSF(_cdpIndex);
+        uint256 amount = cdpList[_cdpIndex].accumulatedFee + cdpList[_cdpIndex].generatedDebt;
+        transferSFtoTreasury();
+        
+
+        NOI_COIN.burn(msg.sender, amount);
+
+        cdpList[_cdpIndex].accumulatedFee = 0;
+        cdpList[_cdpIndex].generatedDebt = 0;
+
+        emit RepayCDP(cdpList[_cdpIndex].owner, _cdpIndex, amount);
+
+        closeCDP(_cdpIndex);
+    }
+
+    /*
      * @notice liquidate position
      * @param _cdpIndex index of cdp
-     * @param _amount amount of tokens to repay
+     * @param _liquidatorUsr address that initiated liquidation
      */
     function liquidatePosition(uint _cdpIndex, address _liquidatorUsr)
         public
