@@ -12,7 +12,7 @@ delay = 5
 
 eventLoopInterval = 2
 
-minimumBalance = 0.1
+minimumBalance = 100000000000000000 # 0.1 ETH
 
 # account_from = {
 #     'address': sys.argv[0],
@@ -55,36 +55,31 @@ def updateLoop():
     except:
         print(f'Tx failed')
 
-    balance = web3.fromWei(web3.eth.get_balance(
-        account_from['address']), "ether")
-    print(f'Bot Wallet Balance: {balance}')
+    balance = web3.eth.get_balance(account_from['address'])
 
-    # if(balance < minimumBalance):
-    #     fetchFunds()
+    print(f'Bot Wallet Balance: {web3.fromWei(balance, "ether")} ETH')
+
+    if(balance < minimumBalance):
+        fetchFunds()
 
 
 def fetchFunds():
     print("fetching funds...")
     try:
-        fetch_tx = treasuryContract.functions.getFunds().buildTransaction(
+        update_tx = treasuryContract.functions.getFunds(100000000000000000).buildTransaction(
             {
-                # 'maxFeePerGas': web3.eth.gas_price,
-                # 'maxPriorityFeePerGas': web3.eth.generate_gas_price(),
-                # "gasPrice": web3.eth.gas_price,
                 'from': account_from['address'],
                 'nonce': web3.eth.get_transaction_count(account_from['address']),
             }
         )
 
-        tx = web3.eth.account.sign_transaction(
-            fetch_tx, account_from['private_key'])
-        tx_hash = web3.eth.send_raw_transaction(tx.rawTransaction)
+        tx_create = web3.eth.account.sign_transaction(
+            update_tx, account_from['private_key'])
+
+        tx_hash = web3.eth.send_raw_transaction(tx_create.rawTransaction)
+
         tx_receipt = web3.eth.wait_for_transaction_receipt(tx_hash)
-
-        balance = web3.fromWei(web3.eth.get_balance(
-            account_from['address']), "ether")
-
-        print(f'Fetching successful, new balance: { balance }')
+        print(f'Fetching successful with hash: { tx_receipt.transactionHash.hex() }')
     except:
         print(f'Fetching failed')
 

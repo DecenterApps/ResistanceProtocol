@@ -16,9 +16,10 @@ async function main() {
     const balance = await Treasury.provider.getBalance(Treasury.address);
     console.log("Treasury balance: ", balance.toString())
 
+    // add balance so bot can get more from treasury
     const sendToBot = await owner.sendTransaction({
         to: process.env.BOT_ACCOUNT,
-        value: ethers.utils.parseEther("100.0"),
+        value: ethers.utils.parseEther("0.001"),
     });
 
     await sendToBot.wait();
