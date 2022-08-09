@@ -1,0 +1,9 @@
+.confirm{
+    border-color: #39FF14 !important;
+    color: #39FF14 !important;
+}
+
+.confirm:hover {
+    box-shadow: 0 0.5em 0.5em -0.4em #39FF14 !important;
+    transform: translateY(-0.25em);
+  }

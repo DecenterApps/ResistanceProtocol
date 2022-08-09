@@ -112,7 +112,6 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
 
   const getEthPrice=async ()=>{
     if (ethTwapFeedContract) {
-      console.log(library.getSigner());
       const ethResponse = await ethTwapFeedContract
         .connect(library.getSigner())
         .getEthPrice();
@@ -122,7 +121,6 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
 
   useEffect(() => {
     if (library) {
-      console.log(library);
       const contract1 = new ethers.Contract(address, ABI);
       setEthTwapFeedContract(contract1);
     }
