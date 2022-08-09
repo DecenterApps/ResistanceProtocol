@@ -1,5 +1,5 @@
 const { getNamedAccounts, deployments, network, ethers } = require("hardhat");
-const {getTheAbi, writeAbiAndAddress} = require('../utils/abi')
+const { getTheAbi, writeAbiAndAddress } = require('../utils/abi')
 
 module.exports = async ({ getNamedAccounts }) => {
     const { deployer } = await getNamedAccounts();
@@ -15,17 +15,19 @@ module.exports = async ({ getNamedAccounts }) => {
     const ParametersContractObj = await ethers.getContract("Parameters", deployer);
     const RateSetterContractObj = await ethers.getContract("RateSetter", deployer);
     const EthTWAPFeedContractObj = await ethers.getContract("EthTwapFeed", deployer);
+    const MarketTwapFeed = await ethers.getContract("MarketTwapFeed", deployer);
 
-    writeAbiAndAddress("MultiSigWallet",msw.address)
-    writeAbiAndAddress("NOI",noiContract.address)
-    writeAbiAndAddress("CDPManager",cdpManagerContractObj.address)
-    writeAbiAndAddress("Liquidator",LiquidatorContractObj.address)
-    writeAbiAndAddress("Treasury",TreasuryContractObj.address)
-    writeAbiAndAddress("Parameters",ParametersContractObj.address)
-    writeAbiAndAddress("RateSetter",RateSetterContractObj.address)
-    writeAbiAndAddress("EthTwapFeed",EthTWAPFeedContractObj.address)
+    writeAbiAndAddress("MultiSigWallet", msw.address)
+    writeAbiAndAddress("NOI", noiContract.address)
+    writeAbiAndAddress("CDPManager", cdpManagerContractObj.address)
+    writeAbiAndAddress("Liquidator", LiquidatorContractObj.address)
+    writeAbiAndAddress("Treasury", TreasuryContractObj.address)
+    writeAbiAndAddress("Parameters", ParametersContractObj.address)
+    writeAbiAndAddress("RateSetter", RateSetterContractObj.address)
+    writeAbiAndAddress("EthTwapFeed", EthTWAPFeedContractObj.address)
+    writeAbiAndAddress("MarketTwapFeed", MarketTwapFeed.address)
 
-    
+
 };
 
 module.exports.tags = ["all", "writeforfront"];
