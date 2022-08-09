@@ -106,6 +106,16 @@ module.exports = async ({ getNamedAccounts }) => {
         ["address"],
         [RateSetterContractObj.address]
     );
+
+    // authorize updateBot
+    await executeActionFromMSW(
+        msw,
+        0,
+        TreasuryContractObj.address,
+        "addAuthorization",
+        ["address"],
+        [process.env.BOT_ACCOUNT]
+    );
 };
 
 module.exports.tags = ["all", "addauthorization"];
