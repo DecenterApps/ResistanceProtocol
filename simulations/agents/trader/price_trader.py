@@ -42,8 +42,8 @@ def get_price_trader_perc_amount() -> float:
 def get_price_trader_relative_gap():
     p = np.random.random()
     if p < PRICE_TRADER.BOUND_HIGH:
-        return 0.03
+        return 0.02
     p -= PRICE_TRADER.BOUND_HIGH
     if p < PRICE_TRADER.BOUND_MID:
-        return 0.06
-    return 0.1
+        return 0.04
+    return 0.08
