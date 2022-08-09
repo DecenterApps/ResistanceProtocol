@@ -1,5 +1,7 @@
-dataset/
+dataset/*
 images/
+
+!dataset/historic_cpi_data.csv
 
 __pycache__/
 

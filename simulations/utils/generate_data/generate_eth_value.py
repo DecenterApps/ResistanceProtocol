@@ -15,7 +15,6 @@ def ETH_Dollar_value():
     timestamp = 1
     twap[0] = out[0]
     twap_sum = out[0]
-    print(out[0], twap[0])
     for i in range(1, 1000):
         out[i] = out[i-1] + delta[i]
         twap_sum += out[i]
@@ -24,7 +23,6 @@ def ETH_Dollar_value():
             twap_sum -= out[i-TWAP_LEN]
             timestamp = TWAP_LEN
         twap[i] = twap_sum / timestamp
-        print(out[i], twap[i])
     return out, twap
 
 if __name__ == "__main__":
