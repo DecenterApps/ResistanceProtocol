@@ -4,7 +4,7 @@ ONE_ETH = 500
 class PRICE_TRADER:
     NUM = 200
 
-    ETH_AMOUNT = 1
+    ETH_AMOUNT = 2
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
 
     #percentage of traders resource when trading
@@ -13,14 +13,14 @@ class PRICE_TRADER:
     SAFE = 1 - MODERATE - RISKY
 
     # relative difference between redemption price and market price when trader is activated
-    BOUND_HIGH = 0.3
+    BOUND_HIGH = 0.5
     BOUND_MID = 0.2
     BOUND_LOW = 1 - BOUND_HIGH - BOUND_MID
 
 class RATE_TRADER:
     NUM = 200
 
-    ETH_AMOUNT = 1
+    ETH_AMOUNT = 2
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
 
     #percentage of traders resource when trading
@@ -36,7 +36,7 @@ class RATE_TRADER:
     RR_LOW = 1 - RR_HIGH - RR_MID
 
 class LEVERAGER:
-    NUM = 200
+    NUM = 100
 
     ETH_AMOUNT = 4
 
@@ -67,7 +67,7 @@ class LEVERAGER:
 class SAFE_OWNER:
     NUM = 200
 
-    ETH_AMOUNT = 5
+    ETH_AMOUNT = 4
 
     RISKY = 0.2
     MODERATE = 0.3
@@ -107,7 +107,7 @@ class WHALE_INSTANT_PRICE_SETTER:
 class WHALE_INSTANT_RATE_SETTER:
     NUM = 0
 
-    ETH_AMOUNT = 45
+    ETH_AMOUNT = 30
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
 
     # relative difference between redemption price and market price when whale is activated
@@ -132,7 +132,7 @@ class NOI_TRUSTER:
     BOUND_LOW = 1 - BOUND_HIGH - BOUND_MID
 
 class RANDOM_TRADER:
-    NUM = 0
+    NUM = 300
 
     ETH_AMOUNT = 2
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH

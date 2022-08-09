@@ -11,11 +11,11 @@ def calculate_rp_and_rr(market_twap, redemption_price, accumulated_leak, ext_dat
     w_cpi = 0
     if err_stable_perc > 0.1:
         w_stable, w_cpi = 1, 0
-    elif err_stable_perc > 0.5:
+    elif err_stable_perc > 0.05:
         w_stable, w_cpi = 0.95, 0.05
-    elif err_stable_perc > 0.4:
+    elif err_stable_perc > 0.04:
         w_stable, w_cpi = 0.9, 0.1
-    elif err_stable_perc > 0.3:
+    elif err_stable_perc > 0.03:
         w_stable, w_cpi = 0.85, 0.15
     else:
         w_stable, w_cpi = 0.8, 0.2
