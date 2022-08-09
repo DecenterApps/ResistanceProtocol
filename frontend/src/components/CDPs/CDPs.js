@@ -15,6 +15,7 @@ import {
   ABI as ABI_ETH,
   address as address_ETH,
 } from "../../contracts/EthTwapFeed";
+import Decimal from "decimal.js";
 
 ChartJS.register(ArcElement, TP, Legend);
 
@@ -202,21 +203,21 @@ export default function CDPs({ bAnimation, setBAnimation }) {
                       cdps
                         .reduce(
                           (previousValue, currentValue) =>
-                            previousValue + currentValue["col"],
+                            previousValue + new Decimal(currentValue["col"]),
                           0
                         )
                         .toString()
-                    )}{" "}
+                        )}{" "}
                     ($
                     {ethers.utils.formatEther(
                       cdps
                         .reduce(
                           (previousValue, currentValue) =>
-                            previousValue + currentValue["col"],
+                            previousValue + new Decimal(currentValue["col"]),
                           0
                         )
                         .toString()
-                    ) * ethPrice}
+                        ) * ethPrice}
                     )
                   </div>
                 </VStack>
@@ -243,11 +244,11 @@ export default function CDPs({ bAnimation, setBAnimation }) {
                       cdps
                         .reduce(
                           (previousValue, currentValue) =>
-                            previousValue + currentValue["debt"],
+                            previousValue + new Decimal(currentValue["debt"]),
                           0
                         )
                         .toString()
-                    )}
+                        )}
                   </div>
                 </VStack>
               </Box>
@@ -273,7 +274,7 @@ export default function CDPs({ bAnimation, setBAnimation }) {
                       cdps
                         .reduce(
                           (previousValue, currentValue) =>
-                            previousValue + currentValue["sf"],
+                            previousValue + new Decimal(currentValue["sf"]),
                           0
                         )
                         .toString()
@@ -309,9 +310,9 @@ export default function CDPs({ bAnimation, setBAnimation }) {
                             <VStack>
                               <div>Collateral locked</div>
                               <div>
-                                {ethers.utils.formatEther(
-                                  ethers.BigNumber.from(c.col.toString())
-                                )}{" "}
+                                {
+                                  ethers.utils.formatEther((new Decimal(c.col.toString())).toString())
+                                }{" "}
                                 ETH
                               </div>
                             </VStack>
@@ -319,7 +320,7 @@ export default function CDPs({ bAnimation, setBAnimation }) {
                               <div>Minted NOI</div>
                               <div>
                                 {ethers.utils.formatEther(
-                                  ethers.BigNumber.from(c.debt.toString())
+                                  (new Decimal(c.debt.toString())).toString()
                                 )}{" "}
                               </div>
                             </VStack>
@@ -327,7 +328,7 @@ export default function CDPs({ bAnimation, setBAnimation }) {
                               <div>Stabillity fee</div>
                               <div>
                                 {c.sf !== undefined
-                                  ? ethers.utils.formatEther(c.sf.toString())
+                                  ? ethers.utils.formatEther((new Decimal(c.sf.toString())).toString())
                                   : "Calculating..."}
                               </div>
                             </VStack>
@@ -344,7 +345,7 @@ export default function CDPs({ bAnimation, setBAnimation }) {
                                 datasets: [
                                   {
                                     label: "CDP Standing",
-                                    data: [c.debt, 5],
+                                    data: [1000, 5],
                                     borderColor: [
                                       "rgb(53, 162, 235)",
                                       "rgb(255, 99, 132)",
