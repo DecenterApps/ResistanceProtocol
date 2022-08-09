@@ -240,7 +240,7 @@ export default function CDPs({ bAnimation, setBAnimation }) {
                   />
                   <div>Minted NOI</div>
                   <div className="bold-text">
-                    {ethers.utils.formatEther(
+                    {/*ethers.utils.formatEther(
                       cdps
                         .reduce(
                           (previousValue, currentValue) =>
@@ -248,7 +248,7 @@ export default function CDPs({ bAnimation, setBAnimation }) {
                           0
                         )
                         .toString()
-                        )}
+                        )*/}
                   </div>
                 </VStack>
               </Box>

@@ -35,7 +35,17 @@ import { FcInfo } from "react-icons/fc";
 import Footer from "../Footer/Footer";
 import { useWeb3React } from "@web3-react/core";
 import { ABI, address } from "../../contracts/EthTwapFeed";
-import {ethers} from 'ethers'
+import {
+  ABI as ABI_CDPMANAGER,
+  address as address_CDPMANAGER,
+} from "../../contracts/CDPManager";
+import {
+  ABI as ABI_PARAMETERS,
+  address as address_PARAMETERS,
+} from "../../contracts/Parameters";
+import {ABI as ABI_RATESETTER, address as address_RATESETTER} from '../../contracts/RateSetter'
+import { ethers } from "ethers";
+import Decimal from "decimal.js";
 
 ChartJS.register(
   CategoryScale,
@@ -107,39 +117,121 @@ export const data3 = {
 export default function Dashboard({ bAnimation, setBAnimation }) {
   const { library, chainId, account, activate, deactivate, active } =
     useWeb3React();
-  const [ethTwapFeedContract, setEthTwapFeedContract] = useState();
   const [ethPrice, setEthPrice] = useState(0);
+  const [totalEth, setTotalEth] = useState(0);
+  const [sf, setSF] = useState(0);
+  const [lr, setLR] = useState(0);
+  const [rr, setRR] = useState(0);
 
-  const getEthPrice=async ()=>{
-    if (ethTwapFeedContract) {
-      const ethResponse = await ethTwapFeedContract
-        .connect(library.getSigner())
-        .getEthPrice();
-      setEthPrice(ethResponse.div(10**8).toString());
+  const getEthPrice = async () => {
+    let signer;
+    if (library) {
+      signer = library.getSigner();
+    } else {
+      const provider = new ethers.providers.JsonRpcProvider(
+        "http://127.0.0.1:8545/"
+      );
+      signer = provider.getSigner();
     }
+    const ethTwapFeedContract = new ethers.Contract(address, ABI);
+    const ethResponse = await ethTwapFeedContract.connect(signer).getEthPrice();
+    setEthPrice(ethResponse.div(10 ** 8).toString());
+  };
+
+  const getTotalEth = async () => {
+    let signer;
+    if (library) {
+      signer = library.getSigner();
+    } else {
+      const provider = new ethers.providers.JsonRpcProvider(
+        "http://127.0.0.1:8545/"
+      );
+      signer = provider.getSigner();
+    }
+    const contractCDPManager = new ethers.Contract(
+      address_CDPMANAGER,
+      ABI_CDPMANAGER
+    );
+    const ethResponse = await contractCDPManager
+      .connect(signer)
+      .getTotalSupply();
+    setTotalEth(ethResponse);
+  };
+
+  const getSF = async ()=>{
+    let signer;
+    if (library) {
+      signer = library.getSigner();
+    } else {
+      const provider = new ethers.providers.JsonRpcProvider(
+        "http://127.0.0.1:8545/"
+      );
+      signer = provider.getSigner();
+    }
+    const contractPARAMETERS = new ethers.Contract(
+      address_PARAMETERS,
+      ABI_PARAMETERS
+    );
+    const sfResponse = await contractPARAMETERS
+      .connect(signer)
+      .getSF();
+    setSF(sfResponse);
   }
 
-  useEffect(() => {
+  const getLR = async ()=>{
+    let signer;
     if (library) {
-      const contract1 = new ethers.Contract(address, ABI);
-      setEthTwapFeedContract(contract1);
+      signer = library.getSigner();
+    } else {
+      const provider = new ethers.providers.JsonRpcProvider(
+        "http://127.0.0.1:8545/"
+      );
+      signer = provider.getSigner();
     }
-  }, [library]);
+    const contractPARAMETERS = new ethers.Contract(
+      address_PARAMETERS,
+      ABI_PARAMETERS
+    );
+    const lrResponse = await contractPARAMETERS
+      .connect(signer)
+      .getLR();
+    setLR(lrResponse);
+  }
+
+  const getRedemptionRate = async ()=>{
+    let signer;
+    if (library) {
+      signer = library.getSigner();
+    } else {
+      const provider = new ethers.providers.JsonRpcProvider(
+        "http://127.0.0.1:8545/"
+      );
+      signer = provider.getSigner();
+    }
+    const contractRATESETTER = new ethers.Contract(
+      address_RATESETTER,
+      ABI_RATESETTER
+    );
+    const rrResponse = await contractRATESETTER
+      .connect(signer)
+      .getLR();
+    setRR(rrResponse);
+  }
+
+  useEffect(() => {}, [library]);
 
   useEffect(() => {
-    if (library) {
-      console.log(library);
-      const contract1 = new ethers.Contract(address, ABI);
-      setEthTwapFeedContract(contract1);
-    }
-  }, []);
-
-  useEffect(() => {
-    getEthPrice()
+    getEthPrice();
+    getTotalEth();
+    getLR();
+    getSF();
     setInterval(async () => {
-      await getEthPrice()
-    }, 5000*60);
-  }, [ethTwapFeedContract]);
+      await getEthPrice();
+      await getTotalEth();
+      await getLR();
+      await getSF();
+    }, 5000 * 60);
+  }, [library]);
 
   return (
     <div className="dashboard animated bounceIn">
@@ -163,7 +255,16 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
                   borderRadius="3px"
                 />
                 <div>Total ETH locked</div>
-                <div className="bold-text">29,887 ($50 m)</div>
+                <div className="bold-text">
+                  {ethers.utils.formatEther(
+                    new Decimal(totalEth.toString()).toString()
+                  )}{" "}
+                  ($
+                  {ethers.utils.formatEther(
+                    new Decimal(totalEth.toString()).toString()
+                  ) * ethPrice}
+                  ){" "}
+                </div>
               </VStack>
             </Box>
             <Box className="div-line1">
@@ -221,7 +322,7 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
                   </div>
                   <VStack>
                     <div>Stability fee</div>
-                    <div className="bold-text">2%</div>
+                    <div className="bold-text">{sf}%</div>
                   </VStack>
                 </Box>
                 <Box className="div-indiv-line2 ">
@@ -253,7 +354,7 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
                   </div>
                   <VStack>
                     <div>Liquidation ratio</div>
-                    <div className="bold-text">120%</div>
+                    <div className="bold-text">{lr}%</div>
                   </VStack>
                 </Box>
               </HStack>

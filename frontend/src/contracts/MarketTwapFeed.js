@@ -13,7 +13,7 @@ export const ABI= [
       },
       {
         "internalType": "address",
-        "name": "_ethPriceFeed",
+        "name": "_lendingPool",
         "type": "address"
       }
     ],
@@ -22,7 +22,7 @@ export const ABI= [
   },
   {
     "inputs": [],
-    "name": "EthTwapFeed__TimeIntervalDidNotPass",
+    "name": "MarketTwapFeed__TimeIntervalDidNotPass",
     "type": "error"
   },
   {
@@ -37,13 +37,13 @@ export const ABI= [
       {
         "indexed": true,
         "internalType": "uint256",
-        "name": "ethCurrentPrice",
+        "name": "currentPrice",
         "type": "uint256"
       },
       {
         "indexed": true,
         "internalType": "uint256",
-        "name": "ethTwapPrice",
+        "name": "twapPrice",
         "type": "uint256"
       },
       {
@@ -58,7 +58,20 @@ export const ABI= [
   },
   {
     "inputs": [],
-    "name": "ethTwapPrice",
+    "name": "daiPriceFeed",
+    "outputs": [
+      {
+        "internalType": "contract AggregatorV3Interface",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getDaiPrice",
     "outputs": [
       {
         "internalType": "uint256",
@@ -71,7 +84,7 @@ export const ABI= [
   },
   {
     "inputs": [],
-    "name": "getEthPrice",
+    "name": "getMarketPrice",
     "outputs": [
       {
         "internalType": "uint256",
@@ -85,6 +98,19 @@ export const ABI= [
   {
     "inputs": [],
     "name": "getTwap",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "marketTwapPrice",
     "outputs": [
       {
         "internalType": "uint256",
@@ -129,4 +155,4 @@ export const ABI= [
     "type": "function"
   }
 ]
-export const address= "0xb932C8342106776E73E39D695F3FFC3A9624eCE0"
+export const address= "0xE8F7d98bE6722d42F29b50500B0E318EF2be4fc8"

@@ -138,6 +138,10 @@ contract RateSetter {
         return data;
     }
 
+    function getRedemptionRate() public view returns (uint256){
+        return redemptionRate;
+    }
+
     function rpower(
         uint x,
         uint n,

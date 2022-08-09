@@ -115,6 +115,19 @@ export const ABI= [
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "getRedemptionRate",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "bytes32",
@@ -231,4 +244,4 @@ export const ABI= [
     "type": "function"
   }
 ]
-export const address= "0xb932C8342106776E73E39D695F3FFC3A9624eCE0"
+export const address= "0x2c8ED11fd7A058096F2e5828799c68BE88744E2F"
