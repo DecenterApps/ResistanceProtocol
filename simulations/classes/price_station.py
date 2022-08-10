@@ -4,15 +4,17 @@ from controllers.fuzzy_module import calculate_rp_and_rr
 from utils.constants import TWAP_TIMESTAMPS
 
 class PriceStation:
-    def __init__(self, market_price, redemption_price, redemption_rate, accumulated_leak, graph):
+    def __init__(self, market_price, redemption_price, redemption_rate, graph):
         # market price
         self.mp = market_price
         # redemption price
         self.rp = redemption_price
         # redemption rate
         self.rr = redemption_rate
-        # accumulated_leak
-        self.accumulated_leak = accumulated_leak
+        # accumulated_leak_stable
+        self.accumulated_leak_stable = 0.999
+        # accumulated_leak_cpi
+        self.accumulated_leak_cpi = 0.999
         self.graph = graph
         self.market_twap = market_price
         self.market_sum = 0
@@ -42,7 +44,7 @@ class PriceStation:
         return self.mp
 
     def calculate_redemption_price(self, ext_data: ExtData):
-        self.rp, self.rr = calculate_rp_and_rr(self.market_twap, self.rp, self.accumulated_leak, ext_data)
+        self.rp, self.rr = calculate_rp_and_rr(self.market_twap, self.rp, self.accumulated_leak_stable, self.accumulated_leak_cpi, ext_data, self.graph)
     
     #returns the value of noi in usd with market price
     #input: amount of noi

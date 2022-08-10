@@ -102,16 +102,6 @@ def updateDeviationHistory(proportionalTerm: float, accumulatedLeak: float) -> N
     historicalCumulativeDeviations.append(priceDeviationCumulative)
     deviationObservations.append(DeviationObservation(lastUpdateTime + PID_CONTROLLER.TIME_STEP, proportionalTerm, priceDeviationCumulative))
 
-def updateRedemptionPriceStable(redemptionPrice:float, redemptionRate: float) -> float:
-    # Update redemption price
-    # print(redemptionRate)
-    redemptionPrice = (redemptionRate ** PID_CONTROLLER.TIME_STEP) * redemptionPrice
-    if redemptionPrice == 0:
-        redemptionPrice = 1
-
-    # Return updated redemption price
-    return redemptionPrice
-
 deviationObservations = []
 defaultRedemptionRate = 1
 defaultGlobalTimeline = 1
@@ -120,7 +110,7 @@ feedbackOutputUpperBound = 0.5
 feedbackOutputLowerBound = -0.5
 integralPeriodSize = PID_CONTROLLER.TIME_STEP
 controllerGains = ControllerGains(7.5*10**(-8), 2.4*10**(-14))
-priceDeviationCumulative = 0.99999
+priceDeviationCumulative = 0
 noiseBarrier = 0.05
 lastUpdateTime = 0
 historicalCumulativeDeviations.append(priceDeviationCumulative)
@@ -128,4 +118,4 @@ ok = True
 
 if __name__ == "__main__":
     rr = computeRateStable(2.71, 2.8, 0)
-    rp = updateRedemptionPriceStable(100, rr)
+    # rp = updateRedemptionPriceStable(100, rr)
