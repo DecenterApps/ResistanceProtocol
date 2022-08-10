@@ -8,11 +8,11 @@ You can also call the scripts generate_eth_value.py and generate_cpi_value.py in
 
 | ETH/USD  |
 | :---: |
-| ![Alt text](images/eth_dollar.png?raw=true "Title") |
+| ![Alt text](documentation_images/eth_dollar.png?raw=true "Title") |
 
 | CPI value |
 | :---: |
-| ![Alt text](https://www.dropbox.com/s/pz9nml6tl6te1je/cpi_value.png?dl=0?raw=true "Title") |
+| ![Alt text](documentation_images/cpi_value.png?raw=true "Title") |
 
 There are 1000 timestamps, and the duration of one timestamp is approximately 3 hours, so that means the simulation simulates the period of around 4 months.
 
@@ -24,14 +24,14 @@ To view and change quantity and parameters of different agents, see file utils/c
 ## Seeing the results
 
 When the simulation is finished with executing, a few graphs will appear in the /images folder.
-agents.png file represents the amount of ETH each agent group has at the start of every timestamp.
+agents.png file represents the amount of ETH and NOI each agent group has at the start of every timestamp.
 
-![](images/agents.png?raw=true "Agents ETH balances")
+![](documentation_images/agents.png?raw=true "Agents ETH/NOI balances")
 
 full_graph.png(1) shows data after every transaction, and timestamp_graph.png(2) shows information on the start of every timestamp.
 | 1 | 2|
 | :---: | :---: |
-|![](images/full_graph.png?raw=true "Full graph") | ![Alt text](images/timestamp_graph.png?raw=true "Timestamp graph")|
+|![](documentation_images/full_graph.png?raw=true "Full graph") | ![Alt text](documentation_images/timestamp_graph.png?raw=true "Timestamp graph")|
 
 Timestamp graph is convenient to see the market price trend, and full graph is useful to see how the market reacts to sudden changes of the market price(from malicious whales).
 

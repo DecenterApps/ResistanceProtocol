@@ -96,7 +96,7 @@ class SAFE_OWNER:
 class WHALE_INSTANT_PRICE_SETTER:
     NUM = 1
 
-    ETH_AMOUNT = 75
+    ETH_AMOUNT = 50
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
 
     # relative difference between redemption price and market price when whale is activated
@@ -138,9 +138,9 @@ class RANDOM_TRADER:
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
 
 class WHALE_LONGTERM_PRICE_SETTER:
-    NUM = 1
+    NUM = 0
 
-    ETH_AMOUNT = 200
+    ETH_AMOUNT = 20
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
 
     # targetted difference between redemption price and market price

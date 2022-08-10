@@ -37,12 +37,12 @@ class Graph:
         axis[0, 0].plot(self.m_prices)
         axis[0,0].plot(self.r_prices, color='red')
         if graph_name == 'timestamp_graph':
-            axis[0,0].plot(ext_data.cpi_value, color='yellow')
+            axis[0,0].plot(ext_data.cpi_value, color='greenyellow')
             axis[0,0].legend(['market price', 'redemption price', 'cpi'])
             axis[0, 0].set_title("Market price, Redemption price, Inflation value")
         
         else:
-            axis[0,0].plot(self.market_twap_prices, color='yellow')
+            axis[0,0].plot(self.market_twap_prices, color='greenyellow')
             axis[0,0].legend(['market price', 'redemption price', 'market twap price'])
             axis[0, 0].set_title("Market price, Redemption price, Market twap price")
         
