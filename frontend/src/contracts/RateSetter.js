@@ -89,6 +89,38 @@ export const ABI= [
     "type": "event"
   },
   {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_marketPrice",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_redemptionPrice",
+        "type": "uint256"
+      }
+    ],
+    "name": "NewPrices",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_value",
+        "type": "uint256"
+      }
+    ],
+    "name": "NewRedemptionRate",
+    "type": "event"
+  },
+  {
     "inputs": [],
     "name": "RAY",
     "outputs": [

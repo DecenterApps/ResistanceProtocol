@@ -5,7 +5,10 @@ import pyrebase
 from web3 import Web3
 import asyncio
 import CDPManager
+import NOI
+import RateSetter
 import json
+import time
 
 load_dotenv()
 
@@ -121,6 +124,19 @@ def update_cr(contract):
     except:
         return
 
+def update_noi_supply(contract):
+    supply=contract.functions.totalSupply().call()
+    db.child("noiSupply").push({"supply":supply,"timestamp":time.time()})
+
+def update_prices(event):
+    e = json.loads(Web3.toJSON(event))
+    timestamp=time.time()
+    db.child("marketPrices").push({"price":e["args"]["_marketPrice"],"timestamp":timestamp})
+    db.child("redemptionPrices").push({"price":e["args"]["_redemptionPrice"],"timestamp":timestamp})
+
+def update_redemption_rate(event):
+    e = json.loads(Web3.toJSON(event))
+    db.child("rates").push({"redemptionRate":e["args"]["_value"],"timestamp":time.time()})
 
 async def cdp_open_loop(event_filter, poll_interval):
     while True:
@@ -171,6 +187,23 @@ async def update_cr_loop(contract, poll_interval):
         update_cr(contract)
         await asyncio.sleep(poll_interval)
 
+async def log_noi_supply(contract, poll_interval):
+    while True:
+        update_noi_supply(contract)
+        await asyncio.sleep(poll_interval)
+
+async def log_prices(event_filter, poll_interval):
+    while True:
+        for NewPrices in event_filter.get_new_entries():
+            update_prices(NewPrices)
+        await asyncio.sleep(poll_interval)
+
+async def log_redemption_rate(event_filter, poll_interval):
+    while True:
+        for NewRedemptionRate in event_filter.get_new_entries():
+            update_redemption_rate(NewRedemptionRate)
+        await asyncio.sleep(poll_interval)
+
 
 def main():
     contract = web3.eth.contract(
@@ -187,8 +220,17 @@ def main():
         fromBlock='latest')
     event_filter_boost = contract.events.TransferCollateral.createFilter(
         fromBlock='latest')
-    #block_filter = web3.eth.filter('latest')
-    # tx_filter = web3.eth.filter('pending')
+
+    contractNOI=web3.eth.contract(
+        address=NOI.ADDRESS_NOI, abi=NOI.ABI_NOI)
+
+    contractRateSetter=web3.eth.contract(
+        address=RateSetter.ADDRESS_RATESETTER, abi=RateSetter.ABI_RATESETTER)
+    event_filter_prices = contractRateSetter.events.NewPrices.createFilter(
+        fromBlock='latest')
+    event_filter_redemption_rate = contractRateSetter.events.NewRedemptionRate.createFilter(
+        fromBlock='latest')
+
     loop = asyncio.get_event_loop()
     try:
         loop.run_until_complete(
@@ -201,11 +243,11 @@ def main():
                 boost_loop(event_filter_boost, 2),
                 calculate_sf_loop(contract, 10),
                 update_cr_loop(contract, 10),
+                log_noi_supply(contractNOI, 10),
+                log_prices(event_filter_prices,10),
+                log_redemption_rate(event_filter_redemption_rate,10),
             ))
-        # log_loop(block_filter, 2),
-        # log_loop(tx_filter, 2)))
     finally:
-        # close loop to free up system resources
         loop.close()
 
 
