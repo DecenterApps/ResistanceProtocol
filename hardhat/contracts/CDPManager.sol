@@ -236,6 +236,19 @@ contract CDPManager {
         return cdpi;
     }
 
+    /// @notice open a new cdp for a given _user address and mint tokens
+    /// @param _user address of cdp owner
+    /// @param _amount amount of tokens to be minted
+    function openCDPandMint(address _user, uint256 _amount)
+        public
+        payable
+        returns (uint256)
+    {
+        uint256 cdpIndex = openCDP(_user);
+        mintFromCDP(cdpIndex,_amount);
+        return cdpIndex; 
+    }
+
     /// @notice adds collateral to an existing CDP
     /// @param _cdpIndex index of cdp
     function transferCollateralToCDP(uint256 _cdpIndex)
