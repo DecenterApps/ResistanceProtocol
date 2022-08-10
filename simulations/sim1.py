@@ -12,6 +12,7 @@ from classes.graph.full_graph import Full_Graph
 from utils.util_functions import get_data_from_csv
 from utils.exchange import *
 from agents.agent_utlis import *
+from tqdm import tqdm
 
 exp = Experiment()
 
@@ -35,11 +36,13 @@ ext_data.cpi_value = get_data_from_csv('dataset/cpi_value.csv')
 
 br = [0]*len(agent_utils.nums)
 
+pbar = tqdm(total=SIMULATION_TIMESTAMPS)
+
 def update_agents(params, substep, state_history, previous_state, policy_input):
     global br, agents
     ret = agents
     
-    # print(previous_state['timestep'])
+    pbar.update(1)
 
     ext_data.set_parameters(substep, previous_state)
     price_station.get_fresh_mp(pool, ext_data)
@@ -80,7 +83,7 @@ partial_state_update_blocks = [
 ]
 
 sim_config_dict = {
-    'T': range(999),  # about 4 months
+    'T': range(SIMULATION_TIMESTAMPS),  # about 4 months
     'N': 1,
     # 'M': ,
 }
@@ -98,6 +101,9 @@ local_mode_ctx = ExecutionContext(exec_mode.multi_proc)
 simulation = Executor(exec_context=local_mode_ctx, configs=exp.configs)
 
 raw_system_events, tensor_field, sessions = simulation.execute()
+
+pbar.close()
+
 
 simulation_result = pd.DataFrame(raw_system_events)
 simulation_result.set_index(['subset', 'run', 'timestep', 'substep'])
