@@ -77,42 +77,6 @@ export const options = {
   plugins: {},
 };
 
-
-const labels2 = [1, 2, 3, 4, 5, 6];
-
-export const data2 = {
-  labels: labels2,
-  datasets: [
-    {
-      label: "Redemption rate",
-      data: [1, -5, 6, -7, 1, 3],
-      backgroundColor: "rgba(53, 162, 235, 0.5)",
-    },
-  ],
-};
-
-const labels3 = [1, 2, 3, 4, 5, 6];
-
-export const data3 = {
-  labels: labels3,
-  datasets: [
-    {
-      fill: true,
-      label: "Market price",
-      data: [2.5, 3.4, 3.5, 3.8, 2.9, 2.6],
-      borderColor: "rgb(53, 162, 235)",
-      backgroundColor: "rgba(53, 162, 235, 0.5)",
-    },
-    {
-      fill: true,
-      label: "Redemption price",
-      data: [3.14, 3.12, 3.1, 3.08, 3.06, 3.04],
-      borderColor: "rgb(255, 99, 132)",
-      backgroundColor: "rgba(255, 99, 132, 0.5)",
-    },
-  ],
-};
-
 export default function Dashboard({ bAnimation, setBAnimation }) {
   const { library, chainId, account, activate, deactivate, active } =
     useWeb3React();
@@ -127,6 +91,9 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
   const [pTerm, setPTerm] = useState(0);
   const [iTerm, setITerm] = useState(0);
   const [noiSupplyHistory, setNOISupplyHistory] = useState([]);
+  const [redemptionRateHistory, setRedemptionRateHistory] = useState([]);
+  const [redemptionPriceHistory, setRedemptionPriceHistory] = useState([]);
+  const [marketPriceHistory, setMarketPriceHistory] = useState([]);
 
   const getEthPrice = async (signer) => {
     const ethTwapFeedContract = new ethers.Contract(address, ABI);
@@ -221,6 +188,9 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
 
   useEffect(() => {
     FirebaseService.setUpNOITracking(setNOISupplyHistory);
+    FirebaseService.setUpMPTracking(setMarketPriceHistory);
+    FirebaseService.setUpRPTracking(setRedemptionPriceHistory);
+    FirebaseService.setUpRRTracking(setRedemptionRateHistory);
   }, []);
 
   const updateInfo = async () => {
@@ -521,12 +491,12 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
               <Line
                 options={options}
                 data={{
-                  labels: noiSupplyHistory.map(e=>e["timestamp"]),
+                  labels: noiSupplyHistory.map((e) => e["timestamp"]),
                   datasets: [
                     {
                       fill: true,
                       label: "NOI issued",
-                      data: noiSupplyHistory.map(e=>e["supply"]),
+                      data: noiSupplyHistory.map((e) => e["supply"]),
                       borderColor: "rgb(53, 162, 235)",
                       backgroundColor: "rgba(53, 162, 235, 0.5)",
                     },
@@ -536,13 +506,48 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
             </Box>
             <Box className="div-line2">
               <h2 className="h-test">Redemption Rate</h2>
-              <Bar options={options} data={data2} />
+              <Bar
+                options={options}
+                data={{
+                  labels: redemptionRateHistory.map((e) => e["timestamp"]),
+                  datasets: [
+                    {
+                      label: "Redemption rate",
+                      data: redemptionRateHistory.map(
+                        (e) => e["redemptionRate"]
+                      ),
+                      backgroundColor: "rgba(53, 162, 235, 0.5)",
+                    },
+                  ],
+                }}
+              />
             </Box>
           </HStack>
           <HStack spacing="5vw">
             <Box className="div-line2">
               <h2 className="h-test">Prices</h2>
-              <Line options={options} data={data3} />
+              <Line
+                options={options}
+                data={{
+                  labels: marketPriceHistory.map((e) => e["timestamp"]),
+                  datasets: [
+                    {
+                      fill: true,
+                      label: "Market price",
+                      data: marketPriceHistory.map((e)=> e["price"]),
+                      borderColor: "rgb(53, 162, 235)",
+                      backgroundColor: "rgba(53, 162, 235, 0.5)",
+                    },
+                    {
+                      fill: true,
+                      label: "Redemption price",
+                      data: redemptionPriceHistory.map((e)=> e["price"]),
+                      borderColor: "rgb(255, 99, 132)",
+                      backgroundColor: "rgba(255, 99, 132, 0.5)",
+                    },
+                  ],
+                }}
+              />
             </Box>
           </HStack>
         </VStack>

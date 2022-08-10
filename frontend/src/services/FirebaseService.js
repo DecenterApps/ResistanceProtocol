@@ -19,14 +19,36 @@ const app = firebase.initializeApp(firebaseConfig);
 const setUpNOITracking = async(setNOISupplyHistory)=>{
   const noiRef = firebase.database().ref(`noiSupply`);
 
-  noiRef.on("value", (snapshot) => {
-    console.log(snapshot.val());
-    let nois = snapshot.val() || {};
-  });
-
   noiRef.on("child_added", (snapshot) => {
     console.log(snapshot.val());
     setNOISupplyHistory((state) => [...state, snapshot.val()]);
+  });
+}
+
+const setUpRRTracking = async(setRedemptionRateHistory)=>{
+  const rrRef = firebase.database().ref(`rates`);
+
+  rrRef.on("child_added", (snapshot) => {
+    console.log(snapshot.val());
+    setRedemptionRateHistory((state) => [...state, snapshot.val()]);
+  });
+}
+
+const setUpRPTracking = async(setRedemptionPriceHistory)=>{
+  const rpRef = firebase.database().ref(`redemptionPrices`);
+
+  rpRef.on("child_added", (snapshot) => {
+    console.log(snapshot.val());
+    setRedemptionPriceHistory((state) => [...state, snapshot.val()]);
+  });
+}
+
+const setUpMPTracking = async(setMarketPriceHistory)=>{
+  const marketRef = firebase.database().ref(`marketPrices`);
+
+  marketRef.on("child_added", (snapshot) => {
+    console.log(snapshot.val());
+    setMarketPriceHistory((state) => [...state, snapshot.val()]);
   });
 }
 
@@ -83,4 +105,4 @@ const loadCDPs = async (setCDPs, address) => {
     });
 };
 
-export default { setUpCDPs, loadCDPs,setUpNOITracking };
+export default { setUpCDPs, loadCDPs,setUpNOITracking,setUpMPTracking,setUpRPTracking,setUpRRTracking };
