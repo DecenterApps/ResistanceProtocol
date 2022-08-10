@@ -52,9 +52,13 @@ import {
   address as address_MARKET,
 } from "../../contracts/MarketTwapFeed";
 import { ABI as ABI_NOI, address as address_NOI } from "../../contracts/NOI";
-import {ABI as ABI_CONTROLLER, address as address_CONTROLLER} from '../../contracts/AbsPiController'
+import {
+  ABI as ABI_CONTROLLER,
+  address as address_CONTROLLER,
+} from "../../contracts/AbsPiController";
 import { ethers } from "ethers";
 import Decimal from "decimal.js";
+import FirebaseService from "../../services/FirebaseService";
 
 ChartJS.register(
   CategoryScale,
@@ -73,20 +77,6 @@ export const options = {
   plugins: {},
 };
 
-const labels1 = [1, 2, 3, 4, 5, 6];
-
-export const data1 = {
-  labels: labels1,
-  datasets: [
-    {
-      fill: true,
-      label: "RAI issued",
-      data: [1, 5, 6, 7, 1, 3],
-      borderColor: "rgb(53, 162, 235)",
-      backgroundColor: "rgba(53, 162, 235, 0.5)",
-    },
-  ],
-};
 
 const labels2 = [1, 2, 3, 4, 5, 6];
 
@@ -136,6 +126,7 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
   const [noiSupply, setNOISupply] = useState(0);
   const [pTerm, setPTerm] = useState(0);
   const [iTerm, setITerm] = useState(0);
+  const [noiSupplyHistory, setNOISupplyHistory] = useState([]);
 
   const getEthPrice = async (signer) => {
     const ethTwapFeedContract = new ethers.Contract(address, ABI);
@@ -206,19 +197,31 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
     setNOISupply(noiResponse);
   };
 
-  const getProportionalTerm= async (signer)=>{
-    const contractCONTROLLER = new ethers.Contract(address_CONTROLLER, ABI_CONTROLLER);
-    const pResponse = await contractCONTROLLER.connect(signer).getLastProportionalTerm();
+  const getProportionalTerm = async (signer) => {
+    const contractCONTROLLER = new ethers.Contract(
+      address_CONTROLLER,
+      ABI_CONTROLLER
+    );
+    const pResponse = await contractCONTROLLER
+      .connect(signer)
+      .getLastProportionalTerm();
     setPTerm(pResponse);
-  }
+  };
 
-  const getIntegralTerm= async (signer)=>{
-    const contractCONTROLLER = new ethers.Contract(address_CONTROLLER, ABI_CONTROLLER);
-    const iResponse = await contractCONTROLLER.connect(signer).getLastIntegralTerm();
+  const getIntegralTerm = async (signer) => {
+    const contractCONTROLLER = new ethers.Contract(
+      address_CONTROLLER,
+      ABI_CONTROLLER
+    );
+    const iResponse = await contractCONTROLLER
+      .connect(signer)
+      .getLastIntegralTerm();
     setITerm(iResponse);
-  }
+  };
 
-  useEffect(() => {}, [library]);
+  useEffect(() => {
+    FirebaseService.setUpNOITracking(setNOISupplyHistory);
+  }, []);
 
   const updateInfo = async () => {
     let signer;
@@ -239,6 +242,7 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
     await getMarketPrice(signer);
     await getNOISupply(signer);
     await getProportionalTerm(signer);
+    await getIntegralTerm(signer);
   };
 
   useEffect(() => {
@@ -358,10 +362,12 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
                       {new Decimal(rr.toString()).div(10 ** 27).toString()}%
                     </div>
                     <div>
-                      <b>pRate</b>:{new Decimal(pTerm.toString()).div(10 ** 27).toString()}%
+                      <b>pRate</b>:
+                      {new Decimal(pTerm.toString()).div(10 ** 27).toString()}%
                     </div>
                     <div>
-                      <b>iRate</b>: {new Decimal(iTerm.toString()).div(10 ** 27).toString()}%
+                      <b>iRate</b>:{" "}
+                      {new Decimal(iTerm.toString()).div(10 ** 27).toString()}%
                     </div>
                   </VStack>
                 </Box>
@@ -512,7 +518,21 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
           <HStack spacing="5vw">
             <Box className="div-line2">
               <h2 className="h-test">NOI issued</h2>
-              <Line options={options} data={data1} />
+              <Line
+                options={options}
+                data={{
+                  labels: noiSupplyHistory.map(e=>e["timestamp"]),
+                  datasets: [
+                    {
+                      fill: true,
+                      label: "NOI issued",
+                      data: noiSupplyHistory.map(e=>e["supply"]),
+                      borderColor: "rgb(53, 162, 235)",
+                      backgroundColor: "rgba(53, 162, 235, 0.5)",
+                    },
+                  ],
+                }}
+              />
             </Box>
             <Box className="div-line2">
               <h2 className="h-test">Redemption Rate</h2>

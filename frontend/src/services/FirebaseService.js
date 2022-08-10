@@ -16,6 +16,20 @@ const firebaseConfig = {
 
 const app = firebase.initializeApp(firebaseConfig);
 
+const setUpNOITracking = async(setNOISupplyHistory)=>{
+  const noiRef = firebase.database().ref(`noiSupply`);
+
+  noiRef.on("value", (snapshot) => {
+    console.log(snapshot.val());
+    let nois = snapshot.val() || {};
+  });
+
+  noiRef.on("child_added", (snapshot) => {
+    console.log(snapshot.val());
+    setNOISupplyHistory((state) => [...state, snapshot.val()]);
+  });
+}
+
 const setUpCDPs = async (cdpsOrigin, setCDPs, address) => {
   const cdpsRef = firebase.database().ref(`cdps/${address}`);
 
@@ -69,4 +83,4 @@ const loadCDPs = async (setCDPs, address) => {
     });
 };
 
-export default { setUpCDPs, loadCDPs };
+export default { setUpCDPs, loadCDPs,setUpNOITracking };
