@@ -13,13 +13,16 @@ contract ExchangePool {
     uint constant scale = 10**18;
     uint constant MAX_UINT = 2**256 - 1;
 
+    //for tests only
+    event LiquidityProvided(address provider, uint256 amountLPTokens);
+
     constructor(address _noiAddr) {
         poolRouterAddr = 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D; //both mainnet & kovan address
         poolFactoryAddr = IRouter02(poolRouterAddr).factory();
         daiAddr = 0x6B175474E89094C44Da98b954EedeAC495271d0F; //mainnet address (kovan address is different)
         noiAddr = _noiAddr;
 
-        poolAddr = IFactory(poolFactoryAddr).createPair(daiAddr, noiAddr);
+        poolAddr = IFactory(poolFactoryAddr).createPair(noiAddr, daiAddr);
     }
 
     function getRouterAddress() public view returns (address routerAddress) {
@@ -28,13 +31,14 @@ contract ExchangePool {
 
     function getReserves()
         public
+        view
         returns (
             uint112 _reserve0,
             uint112 _reserve1,
             uint32 _blockTimestampLast
         )
     {
-        return IPool(poolAddr).getReserves();
+        (_reserve0, _reserve1, _blockTimestampLast) = IPool(poolAddr).getReserves();
     }
 
     /*
@@ -58,7 +62,13 @@ contract ExchangePool {
             uint liquidity
         )
     {
-        return
+        IERC20(noiAddr).transferFrom(msg.sender, address(this), _amountNoi);
+        IERC20(daiAddr).transferFrom(msg.sender, address(this), _amountDai);
+
+        IERC20(noiAddr).approve(poolRouterAddr, _amountNoi);
+        IERC20(daiAddr).approve(poolRouterAddr, _amountDai);
+
+        (amountA,amountB, liquidity) = 
             IRouter02(poolRouterAddr).addLiquidity(
                 noiAddr,
                 daiAddr,
@@ -69,12 +79,17 @@ contract ExchangePool {
                 address(msg.sender),
                 MAX_UINT
             );
+        emit LiquidityProvided(msg.sender, liquidity);
     }
 
     function removeLiquidity(
         uint _liquidity /*, uint minNoi, uint minDai */
     ) external returns (uint amountNoi, uint amountDai) {
-        return
+        IPool(poolAddr).transferFrom(msg.sender, address(this), _liquidity);
+
+        IPool(poolAddr).approve(poolRouterAddr, _liquidity);
+
+        (amountNoi, amountDai) = 
             IRouter02(poolRouterAddr).removeLiquidity(
                 noiAddr,
                 daiAddr,
@@ -93,6 +108,9 @@ contract ExchangePool {
         address[] memory tokenAddresses;
         tokenAddresses[0] = noiAddr;
         tokenAddresses[1] = daiAddr;
+
+        IERC20(noiAddr).transferFrom(msg.sender, address(this), _amount);
+        IERC20(noiAddr).approve(poolRouterAddr, _amount);
 
         uint[] memory returnAmounts = IRouter02(poolRouterAddr)
             .swapExactTokensForTokens(
@@ -114,6 +132,9 @@ contract ExchangePool {
         address[] memory tokenAddresses;
         tokenAddresses[0] = daiAddr;
         tokenAddresses[1] = noiAddr;
+        
+        IERC20(daiAddr).transferFrom(msg.sender, address(this), _amount);
+        IERC20(daiAddr).approve(poolRouterAddr, _amount);
 
         uint[] memory returnAmounts = IRouter02(poolRouterAddr)
             .swapExactTokensForTokens(
@@ -128,7 +149,7 @@ contract ExchangePool {
         outputAmount = returnAmounts[1];
     }
 
-    //for test purposes only; dont forget to authorize router for tokens!!!!!!!!!! nigguh
+    //for test purposes only; dont forget to authorize router for tokens!!!!!!!!!! 
     function getDAI(uint _amount) public payable returns (uint amountReceived) {
         IRouter02 rout = IRouter02(poolRouterAddr);
         address[] memory addrs = new address[](2);
