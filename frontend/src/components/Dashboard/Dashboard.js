@@ -43,7 +43,16 @@ import {
   ABI as ABI_PARAMETERS,
   address as address_PARAMETERS,
 } from "../../contracts/Parameters";
-import {ABI as ABI_RATESETTER, address as address_RATESETTER} from '../../contracts/RateSetter'
+import {
+  ABI as ABI_RATESETTER,
+  address as address_RATESETTER,
+} from "../../contracts/RateSetter";
+import {
+  ABI as ABI_MARKET,
+  address as address_MARKET,
+} from "../../contracts/MarketTwapFeed";
+import { ABI as ABI_NOI, address as address_NOI } from "../../contracts/NOI";
+import {ABI as ABI_CONTROLLER, address as address_CONTROLLER} from '../../contracts/AbsPiController'
 import { ethers } from "ethers";
 import Decimal from "decimal.js";
 
@@ -122,32 +131,19 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
   const [sf, setSF] = useState(0);
   const [lr, setLR] = useState(0);
   const [rr, setRR] = useState(0);
+  const [redemptionPrice, setRedemptionPrice] = useState(0);
+  const [marketPrice, setMarketPrice] = useState(0);
+  const [noiSupply, setNOISupply] = useState(0);
+  const [pTerm, setPTerm] = useState(0);
+  const [iTerm, setITerm] = useState(0);
 
-  const getEthPrice = async () => {
-    let signer;
-    if (library) {
-      signer = library.getSigner();
-    } else {
-      const provider = new ethers.providers.JsonRpcProvider(
-        "http://127.0.0.1:8545/"
-      );
-      signer = provider.getSigner();
-    }
+  const getEthPrice = async (signer) => {
     const ethTwapFeedContract = new ethers.Contract(address, ABI);
-    const ethResponse = await ethTwapFeedContract.connect(signer).getEthPrice();
+    const ethResponse = await ethTwapFeedContract.connect(signer).getTwap();
     setEthPrice(ethResponse.div(10 ** 8).toString());
   };
 
-  const getTotalEth = async () => {
-    let signer;
-    if (library) {
-      signer = library.getSigner();
-    } else {
-      const provider = new ethers.providers.JsonRpcProvider(
-        "http://127.0.0.1:8545/"
-      );
-      signer = provider.getSigner();
-    }
+  const getTotalEth = async (signer) => {
     const contractCDPManager = new ethers.Contract(
       address_CDPMANAGER,
       ABI_CDPMANAGER
@@ -158,78 +154,97 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
     setTotalEth(ethResponse);
   };
 
-  const getSF = async ()=>{
-    let signer;
-    if (library) {
-      signer = library.getSigner();
-    } else {
-      const provider = new ethers.providers.JsonRpcProvider(
-        "http://127.0.0.1:8545/"
-      );
-      signer = provider.getSigner();
-    }
+  const getSF = async (signer) => {
     const contractPARAMETERS = new ethers.Contract(
       address_PARAMETERS,
       ABI_PARAMETERS
     );
-    const sfResponse = await contractPARAMETERS
-      .connect(signer)
-      .getSF();
+    const sfResponse = await contractPARAMETERS.connect(signer).getSF();
     setSF(sfResponse);
-  }
+  };
 
-  const getLR = async ()=>{
-    let signer;
-    if (library) {
-      signer = library.getSigner();
-    } else {
-      const provider = new ethers.providers.JsonRpcProvider(
-        "http://127.0.0.1:8545/"
-      );
-      signer = provider.getSigner();
-    }
+  const getLR = async (signer) => {
     const contractPARAMETERS = new ethers.Contract(
       address_PARAMETERS,
       ABI_PARAMETERS
     );
-    const lrResponse = await contractPARAMETERS
-      .connect(signer)
-      .getLR();
+    const lrResponse = await contractPARAMETERS.connect(signer).getLR();
     setLR(lrResponse);
-  }
+  };
 
-  const getRedemptionRate = async ()=>{
-    let signer;
-    if (library) {
-      signer = library.getSigner();
-    } else {
-      const provider = new ethers.providers.JsonRpcProvider(
-        "http://127.0.0.1:8545/"
-      );
-      signer = provider.getSigner();
-    }
+  const getRedemptionRate = async (signer) => {
     const contractRATESETTER = new ethers.Contract(
       address_RATESETTER,
       ABI_RATESETTER
     );
     const rrResponse = await contractRATESETTER
       .connect(signer)
-      .getLR();
+      .getRedemptionRate();
     setRR(rrResponse);
+  };
+
+  const getRedemptionPrice = async (signer) => {
+    const contractRATESETTER = new ethers.Contract(
+      address_RATESETTER,
+      ABI_RATESETTER
+    );
+    const rpResponse = await contractRATESETTER
+      .connect(signer)
+      .getRedemptionPrice();
+    setRedemptionPrice(rpResponse);
+  };
+
+  const getMarketPrice = async (signer) => {
+    const contractMARKET = new ethers.Contract(address_MARKET, ABI_MARKET);
+    const marketResponse = await contractMARKET.connect(signer).getTwap();
+    setMarketPrice(marketResponse);
+  };
+
+  const getNOISupply = async (signer) => {
+    const contractNOI = new ethers.Contract(address_NOI, ABI_NOI);
+    const noiResponse = await contractNOI.connect(signer).totalSupply();
+    setNOISupply(noiResponse);
+  };
+
+  const getProportionalTerm= async (signer)=>{
+    const contractCONTROLLER = new ethers.Contract(address_CONTROLLER, ABI_CONTROLLER);
+    const pResponse = await contractCONTROLLER.connect(signer).getLastProportionalTerm();
+    setPTerm(pResponse);
+  }
+
+  const getIntegralTerm= async (signer)=>{
+    const contractCONTROLLER = new ethers.Contract(address_CONTROLLER, ABI_CONTROLLER);
+    const iResponse = await contractCONTROLLER.connect(signer).getLastIntegralTerm();
+    setITerm(iResponse);
   }
 
   useEffect(() => {}, [library]);
 
+  const updateInfo = async () => {
+    let signer;
+    if (library) {
+      signer = library.getSigner();
+    } else {
+      const provider = new ethers.providers.JsonRpcProvider(
+        "http://127.0.0.1:8545/"
+      );
+      signer = provider.getSigner();
+    }
+    await getEthPrice(signer);
+    await getTotalEth(signer);
+    await getLR(signer);
+    await getSF(signer);
+    await getRedemptionRate(signer);
+    await getRedemptionPrice(signer);
+    await getMarketPrice(signer);
+    await getNOISupply(signer);
+    await getProportionalTerm(signer);
+  };
+
   useEffect(() => {
-    getEthPrice();
-    getTotalEth();
-    getLR();
-    getSF();
+    updateInfo();
     setInterval(async () => {
-      await getEthPrice();
-      await getTotalEth();
-      await getLR();
-      await getSF();
+      await updateInfo();
     }, 5000 * 60);
   }, [library]);
 
@@ -284,7 +299,11 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
                   borderRadius="3px"
                 />
                 <div>Outstanding NOI</div>
-                <div className="bold-text">5,000,000/10,000,000</div>
+                <div className="bold-text">
+                  {ethers.utils.formatEther(
+                    new Decimal(noiSupply.toString()).toString()
+                  )}
+                </div>
               </VStack>
             </Box>
             <Box className="div-line1">
@@ -304,7 +323,7 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
                   borderRadius="3px"
                 />
                 <div>Active CDPs</div>
-                <div className="bold-text">100</div>
+                <div className="bold-text">TO DO</div>
               </VStack>
             </Box>
           </HStack>
@@ -335,12 +354,14 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
                   </div>
                   <VStack>
                     <div>Redemption rate</div>
-                    <div className="bold-text">-8.234%</div>
-                    <div>
-                      <b>pRate</b>: -8.234%
+                    <div className="bold-text">
+                      {new Decimal(rr.toString()).div(10 ** 27).toString()}%
                     </div>
                     <div>
-                      <b>iRate</b>: 0%
+                      <b>pRate</b>:{new Decimal(pTerm.toString()).div(10 ** 27).toString()}%
+                    </div>
+                    <div>
+                      <b>iRate</b>: {new Decimal(iTerm.toString()).div(10 ** 27).toString()}%
                     </div>
                   </VStack>
                 </Box>
@@ -373,7 +394,11 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
                     </div>
                     <VStack>
                       <div>ERC20 NOI Supply</div>
-                      <div className="bold-text">4,664,863</div>
+                      <div className="bold-text">
+                        {ethers.utils.formatEther(
+                          new Decimal(noiSupply.toString()).toString()
+                        )}
+                      </div>
                     </VStack>
                   </Box>
                   <Box className="div-indiv2-line2 ">
@@ -386,7 +411,7 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
                     </div>
                     <VStack>
                       <div>NOI in Uniswap V2 (NOI/ETH)</div>
-                      <div className="bold-text">521,245</div>
+                      <div className="bold-text">TO DO</div>
                     </VStack>
                   </Box>
                 </HStack>
@@ -400,7 +425,7 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
                   </div>
                   <VStack>
                     <div>NOI in treasury</div>
-                    <div className="bold-text">97,026 NOI</div>
+                    <div className="bold-text">TO DO</div>
                   </VStack>
                 </Box>
               </VStack>
@@ -420,7 +445,13 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
                   </div>
                   <VStack>
                     <div>NOI Market Price (TWAP)</div>
-                    <div className="bold-text">2.9235 USD</div>
+                    <div className="bold-text">
+                      {" "}
+                      {new Decimal(marketPrice.toString())
+                        .div(10 ** 8)
+                        .toString()}{" "}
+                      USD
+                    </div>
                   </VStack>
                 </Box>
                 <Box className="div-indiv-line3 ">
@@ -433,7 +464,12 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
                   </div>
                   <VStack>
                     <div>NOI Redemption Price</div>
-                    <div className="bold-text">2.9079 USD</div>
+                    <div className="bold-text">
+                      {new Decimal(redemptionPrice.toString())
+                        .div(10 ** 27)
+                        .toString()}{" "}
+                      USD
+                    </div>
                   </VStack>
                 </Box>
                 <Box className="div-indiv-line3 ">
@@ -446,7 +482,15 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
                   </div>
                   <VStack>
                     <div>Market/Redemption Delta (TWAP)</div>
-                    <div className="bold-text">0.0156 USD</div>
+                    <div className="bold-text">
+                      {new Decimal(marketPrice.toString())
+                        .div(10 ** 8)
+                        .sub(
+                          new Decimal(redemptionPrice.toString()).div(10 ** 27)
+                        )
+                        .toString()}{" "}
+                      USD
+                    </div>
                   </VStack>
                 </Box>
                 <Box className="div-indiv-line3 ">
