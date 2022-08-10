@@ -12,7 +12,7 @@ You can also call the scripts generate_eth_value.py and generate_cpi_value.py in
 
 | CPI value |
 | :---: |
-| ![Alt text](images/cpi_value.png?raw=true "Title") |
+| ![Alt text](https://www.dropbox.com/s/pz9nml6tl6te1je/cpi_value.png?dl=0?raw=true "Title") |
 
 There are 1000 timestamps, and the duration of one timestamp is approximately 3 hours, so that means the simulation simulates the period of around 4 months.
 

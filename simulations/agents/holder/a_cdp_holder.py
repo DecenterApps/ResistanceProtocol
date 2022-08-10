@@ -46,7 +46,6 @@ class CDP_Holder(ABC):
         self.opened_position = False
         self.debt_noi = 0
 
-
 def update_holder(agents, price_station: PriceStation, pool: Pool, ext_data: ExtData, name_literal, CONST):
     leverager: bool = False
     if name_literal == 'leverager':

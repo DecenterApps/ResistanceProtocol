@@ -22,7 +22,7 @@ agent_utils: Agent_Utils = Agent_Utils()
 timestamp_graph = Timestamp_Graph(agent_utils)
 full_graph = Full_Graph()
 
-price_station = PriceStation(2, 2, 1, 0, full_graph)
+price_station = PriceStation(2, 2, 1, full_graph)
 ext_data = ExtData()
 agents = dict()
 

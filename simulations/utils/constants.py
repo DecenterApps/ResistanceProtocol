@@ -2,9 +2,9 @@
 ONE_ETH = 500
 
 class PRICE_TRADER:
-    NUM = 200
+    NUM = 300
 
-    ETH_AMOUNT = 2
+    ETH_AMOUNT = 4
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
 
     #percentage of traders resource when trading
@@ -36,7 +36,7 @@ class RATE_TRADER:
     RR_LOW = 1 - RR_HIGH - RR_MID
 
 class LEVERAGER:
-    NUM = 100
+    NUM = 200
 
     ETH_AMOUNT = 4
 
@@ -132,7 +132,7 @@ class NOI_TRUSTER:
     BOUND_LOW = 1 - BOUND_HIGH - BOUND_MID
 
 class RANDOM_TRADER:
-    NUM = 0
+    NUM = 100
 
     ETH_AMOUNT = 2
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
@@ -140,7 +140,7 @@ class RANDOM_TRADER:
 class WHALE_LONGTERM_PRICE_SETTER:
     NUM = 1
 
-    ETH_AMOUNT = 400
+    ETH_AMOUNT = 200
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
 
     # targetted difference between redemption price and market price

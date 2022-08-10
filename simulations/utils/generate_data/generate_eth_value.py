@@ -35,6 +35,7 @@ if __name__ == "__main__":
         writer.writerow(twap_eth_dollar)
     plt.figure()
     plt.plot(time, eth_dollar, twap_eth_dollar)
+    plt.legend(['eth_dollar', 'twap_eth_dollar'])
     plt.title("ETH -> dollar")
     plt.xlabel("time")
     plt.ylabel("Value of ETH")
