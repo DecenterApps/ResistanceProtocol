@@ -34,31 +34,10 @@ import { Line, Bar } from "react-chartjs-2";
 import { FcInfo } from "react-icons/fc";
 import Footer from "../Footer/Footer";
 import { useWeb3React } from "@web3-react/core";
-import { ABI, address } from "../../contracts/EthTwapFeed";
-import {
-  ABI as ABI_CDPMANAGER,
-  address as address_CDPMANAGER,
-} from "../../contracts/CDPManager";
-import {
-  ABI as ABI_PARAMETERS,
-  address as address_PARAMETERS,
-} from "../../contracts/Parameters";
-import {
-  ABI as ABI_RATESETTER,
-  address as address_RATESETTER,
-} from "../../contracts/RateSetter";
-import {
-  ABI as ABI_MARKET,
-  address as address_MARKET,
-} from "../../contracts/MarketTwapFeed";
-import { ABI as ABI_NOI, address as address_NOI } from "../../contracts/NOI";
-import {
-  ABI as ABI_CONTROLLER,
-  address as address_CONTROLLER,
-} from "../../contracts/AbsPiController";
 import { ethers } from "ethers";
 import Decimal from "decimal.js";
 import FirebaseService from "../../services/FirebaseService";
+import InfoService from '../../services/InfoService'
 
 ChartJS.register(
   CategoryScale,
@@ -96,107 +75,7 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
   const [redemptionPriceHistory, setRedemptionPriceHistory] = useState([]);
   const [marketPriceHistory, setMarketPriceHistory] = useState([]);
 
-  const getEthPrice = async (signer) => {
-    const ethTwapFeedContract = new ethers.Contract(address, ABI);
-    const ethResponse = await ethTwapFeedContract.connect(signer).getTwap();
-    setEthPrice(ethResponse.div(10 ** 8).toString());
-  };
-
-  const getTotalEth = async (signer) => {
-    const contractCDPManager = new ethers.Contract(
-      address_CDPMANAGER,
-      ABI_CDPMANAGER
-    );
-    const ethResponse = await contractCDPManager
-      .connect(signer)
-      .getTotalSupply();
-    setTotalEth(ethResponse);
-  };
-
-  const getSF = async (signer) => {
-    const contractPARAMETERS = new ethers.Contract(
-      address_PARAMETERS,
-      ABI_PARAMETERS
-    );
-    const sfResponse = await contractPARAMETERS.connect(signer).getSF();
-    setSF(sfResponse);
-  };
-
-  const getLR = async (signer) => {
-    const contractPARAMETERS = new ethers.Contract(
-      address_PARAMETERS,
-      ABI_PARAMETERS
-    );
-    const lrResponse = await contractPARAMETERS.connect(signer).getLR();
-    setLR(lrResponse);
-  };
-
-  const getRedemptionRate = async (signer) => {
-    const contractRATESETTER = new ethers.Contract(
-      address_RATESETTER,
-      ABI_RATESETTER
-    );
-    const rrResponse = await contractRATESETTER
-      .connect(signer)
-      .getRedemptionRate();
-    setRR(rrResponse);
-  };
-
-  const getRedemptionPrice = async (signer) => {
-    const contractRATESETTER = new ethers.Contract(
-      address_RATESETTER,
-      ABI_RATESETTER
-    );
-    const rpResponse = await contractRATESETTER
-      .connect(signer)
-      .getRedemptionPrice();
-    setRedemptionPrice(rpResponse);
-  };
-
-  const getMarketPrice = async (signer) => {
-    const contractMARKET = new ethers.Contract(address_MARKET, ABI_MARKET);
-    const marketResponse = await contractMARKET.connect(signer).getTwap();
-    setMarketPrice(marketResponse);
-  };
-
-  const getNOISupply = async (signer) => {
-    const contractNOI = new ethers.Contract(address_NOI, ABI_NOI);
-    const noiResponse = await contractNOI.connect(signer).totalSupply();
-    setNOISupply(noiResponse);
-  };
-
-  const getProportionalTerm = async (signer) => {
-    const contractCONTROLLER = new ethers.Contract(
-      address_CONTROLLER,
-      ABI_CONTROLLER
-    );
-    const pResponse = await contractCONTROLLER
-      .connect(signer)
-      .getLastProportionalTerm();
-    setPTerm(pResponse);
-  };
-
-  const getIntegralTerm = async (signer) => {
-    const contractCONTROLLER = new ethers.Contract(
-      address_CONTROLLER,
-      ABI_CONTROLLER
-    );
-    const iResponse = await contractCONTROLLER
-      .connect(signer)
-      .getLastIntegralTerm();
-    setITerm(iResponse);
-  };
-
-  const getCdpCount = async (signer) => {
-    const contractCDPManager = new ethers.Contract(
-      address_CDPMANAGER,
-      ABI_CDPMANAGER
-    );
-    const countResponse = await contractCDPManager
-      .connect(signer)
-      .openCDPcount();
-    setCdpCount(countResponse);
-  };
+  
 
   useEffect(() => {
     FirebaseService.setUpNOITracking(setNOISupplyHistory);
@@ -215,17 +94,17 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
       );
       signer = provider.getSigner();
     }
-    getEthPrice(signer);
-    getTotalEth(signer);
-    getLR(signer);
-    getSF(signer);
-    getRedemptionRate(signer);
-    getRedemptionPrice(signer);
-    getMarketPrice(signer);
-    getNOISupply(signer);
-    getProportionalTerm(signer);
-    getIntegralTerm(signer);
-    getCdpCount(signer);
+    setEthPrice(await InfoService.getEthPrice(signer));
+    setTotalEth(await InfoService.getTotalEth(signer));
+    setLR(await InfoService.getLR(signer));
+    setSF(await InfoService.getSF(signer));
+    setRR(await InfoService.getRedemptionRate(signer));
+    setRedemptionPrice(await InfoService.getRedemptionPrice(signer));
+    setMarketPrice(await InfoService.getMarketPrice(signer));
+    setNOISupply(await InfoService.getNOISupply(signer));
+    setPTerm(await InfoService.getProportionalTerm(signer));
+    setITerm(await InfoService.getIntegralTerm(signer));
+    setCdpCount(await InfoService.getCdpCount(signer));
   };
 
   useEffect(() => {
