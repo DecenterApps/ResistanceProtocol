@@ -18,7 +18,7 @@ async function main() {
 
     // add balance so bot can get more from treasury
     const sendToBot = await owner.sendTransaction({
-        to: process.env.BOT_ACCOUNT,
+        to: process.env.UPDATE_BOT_ACCOUNT,
         value: ethers.utils.parseEther("0.001"),
     });
 

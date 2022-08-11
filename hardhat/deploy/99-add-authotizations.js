@@ -114,7 +114,7 @@ module.exports = async ({ getNamedAccounts }) => {
         TreasuryContractObj.address,
         "addAuthorization",
         ["address"],
-        [process.env.BOT_ACCOUNT]
+        [process.env.UPDATE_BOT_ACCOUNT]
     );
 };
 

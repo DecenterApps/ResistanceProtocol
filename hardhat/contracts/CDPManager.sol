@@ -443,6 +443,7 @@ contract CDPManager {
         cdpList[_cdpIndex].generatedDebt = 0;
 
         emit RepayCDP(cdpList[_cdpIndex].owner, _cdpIndex, amount);
+        emit CDPClose(cdpList[_cdpIndex].owner, _cdpIndex);
 
         closeCDP(_cdpIndex);
     }
