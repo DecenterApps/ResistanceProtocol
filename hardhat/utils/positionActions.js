@@ -5,13 +5,20 @@ async function openAndMintFromCDP(CDPManagerContractObj, account, collateral, de
     collateral = collateral.toString();
     debt = BigNumber(10).pow(18).mult(debt).toString();
 
-    const txOpenCDP = await CDPManagerContractObj.connect(account).openCDP(account.address, {value: ethers.utils.parseEther(collateral)});
+    // const txOpenCDP = await CDPManagerContractObj.connect(account).openCDP(account.address, {value: ethers.utils.parseEther(collateral)});
+    // await txOpenCDP.wait();
+    // const getCDPIndex = await CDPManagerContractObj.connect(account).cdpi();
+    // const cdpIndex = getCDPIndex.toString();
+
+    // const txmintFromCDPManager = await CDPManagerContractObj.connect(account).mintFromCDP(cdpIndex, debt);
+    // await txmintFromCDPManager.wait();
+    
+    const txOpenCDP = await CDPManagerContractObj.connect(account).openCDPandMint(account.address, debt,  {value: ethers.utils.parseEther(collateral)});
     await txOpenCDP.wait();
+
     const getCDPIndex = await CDPManagerContractObj.connect(account).cdpi();
     const cdpIndex = getCDPIndex.toString();
 
-    const txmintFromCDPManager = await CDPManagerContractObj.connect(account).mintFromCDP(cdpIndex, debt);
-    await txmintFromCDPManager.wait();
 
     return cdpIndex;
 }
