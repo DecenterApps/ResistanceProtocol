@@ -52,7 +52,7 @@ There are several agents in the simulation. They are divided into 2 main groups.
 | Whale instant price setters |
 | Whale instant rate setters |
 | Whale longterm price setters | 
-
+---
 ### Rate Trader
 
 Rate trader is an agent which swaps NOI/ETH when the redemption rate exceeds certain threshold. Each rate traders has percentage amount, a parameter that determines percent of their capital that they put for every trade. Also, it has Min/Max redemption rate, if the redemption rate is not in theese boundaries, Rate Trader is being activated.
@@ -60,3 +60,29 @@ Rate trader is an agent which swaps NOI/ETH when the redemption rate exceeds cer
 | Sell NOI | Buy NOI |
 | :---: | :---: |
 | Redemption rate < Min redemption rate and market price > redemption price | Redemption rate > Max redemption rate and market price < redemption price |
+---
+### Price Trader
+
+Price trader is an agent which swaps NOI/ETH when the relative difference between market and redemption price exceeds certain threshold. Each price traders has percentage amount, a parameter that determines percent of their capital that they put for every trade. Also, it has Max relative difference, if the absolute value of the gap is not in theese boundaries, Price Trader is being activated.
+
+| Sell NOI | Buy NOI |
+| :---: | :---: |
+| abs(Relative difference) < Max relative difference and market price > redemption price | abs(Relative difference) < Max relative difference and market price < redemption price |
+---
+### Random trader
+
+Just random.
+
+---
+### Noi Truster
+
+Noi Truster is an agent that waits for the opportunity to buy NOI when it's cheap, and then holds it forever.
+
+| Sell NOI | Buy NOI |
+| :---: | :---: |
+| - | abs(Relative difference) > Max relative difference and market price < redemption price |
+
+
+## Architecture
+
+![](documentation_images/architecture.png?raw=true "Architecture")

@@ -4,23 +4,22 @@ import csv
 
 from regression import *
 
-
 TWAP_LEN = 10
+SAMPLES = 3000
 
-time = np.arange(1000)
+time = np.arange(SAMPLES)
 
 def ETH_Dollar_value():
     
-    delta = np.random.random(1000)*50-25
+    delta = np.random.random(SAMPLES)*50-25
     init = 1000
-    out = np.zeros(1000)
-    twap = np.zeros(1000)
-    prediction = np.array([])
+    out = np.zeros(SAMPLES)
+    twap = np.zeros(SAMPLES)
     out[0] = init + delta[0]
     timestamp = 1
     twap[0] = out[0]
     twap_sum = out[0]
-    for i in range(1, 1000):
+    for i in range(1, SAMPLES):
         out[i] = out[i-1] + delta[i]
         twap_sum += out[i]
         timestamp += 1
@@ -28,17 +27,18 @@ def ETH_Dollar_value():
             twap_sum -= out[i-TWAP_LEN]
             timestamp = TWAP_LEN
         twap[i] = twap_sum / timestamp
+    
+    return out, twap
 
-    regression = svm_training(twap[:800])
-    arr = np.arange(1000)
+def get_prediction(twap_eth_dollar, training_ind, test_ind):
+    regression = svm_training(twap_eth_dollar[:training_ind])
+    arr = np.arange(test_ind)
     outcome = svm_prediction(regression, arr)
-    #prediction.append(outcome)
-    print("lolcina")
-
-    return out, twap, np.concatenate((prediction, outcome))
+    return outcome
 
 if __name__ == "__main__":
-    eth_dollar, twap_eth_dollar, prediction = ETH_Dollar_value()
+    eth_dollar, twap_eth_dollar = ETH_Dollar_value()
+    prediction = get_prediction(twap_eth_dollar, 1500, SAMPLES)
     with open('../../dataset/eth_dollar.csv', 'w') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(eth_dollar)
@@ -47,6 +47,7 @@ if __name__ == "__main__":
         writer.writerow(twap_eth_dollar)
     plt.figure()
     plt.plot(time, eth_dollar, time,  twap_eth_dollar, time, prediction)
+    plt.axvline(x = 1500, color = 'b', label = 'axvline - full height')
     plt.legend(['eth_dollar', 'twap_eth_dollar', 'prediction'])
     plt.title("ETH -> dollar")
     plt.xlabel("time")

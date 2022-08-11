@@ -45,27 +45,14 @@ class Graph:
             axis[0,0].plot(self.market_twap_prices, color='greenyellow')
             axis[0,0].legend(['market price', 'redemption price', 'market twap price'])
             axis[0, 0].set_title("Market price, Redemption price, Market twap price")
-        
-        # axis[0, 1].plot(self.pool_ratio)
-        # axis[0, 1].set_title("Pool ratio")
-
 
         axis[1, 0].plot(self.relative_gap_mp_rp)
         # axis[0,0].legend(['relative gap mp-rp'])
         axis[1, 0].set_title("Relative gap mp-rp")
-        
-        # axis[1, 1].plot(self.eth)
-        # axis[1, 1].plot(self.noi)
-        # axis[1, 1].set_title("Amount of tokens in pool")
-        # axis[1, 1].legend(['eth amount', 'noi amount'])
 
         axis[0, 1].plot(self.eth)
         axis[0, 1].set_title("Amount of eth in pool")
         axis[0, 1].legend(['eth amount'])
-
-        # axis[1, 1].plot(self.noi)
-        # axis[1, 1].set_title("Amount of noi in pool")
-        # axis[1, 1].legend(['noi amount'])
 
         axis[1, 1].plot(self.redemption_rate)
         arr_size = len(self.redemption_rate)

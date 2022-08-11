@@ -41,10 +41,9 @@ pbar = tqdm(total=SIMULATION_TIMESTAMPS)
 def update_agents(params, substep, state_history, previous_state, policy_input):
     global br, agents
     ret = agents
-    
-    pbar.update(1)
 
     ext_data.set_parameters(substep, previous_state)
+    ext_data.set_fresh_eth_prediction()
     price_station.get_fresh_mp(pool, ext_data)
     price_station.calculate_redemption_price(ext_data)
     timestamp_graph.add_to_graph(previous_state, price_station, pool)
@@ -69,6 +68,9 @@ def update_agents(params, substep, state_history, previous_state, policy_input):
                 br[i] += 1
                 break
             p -= nums[i] / total_sum
+    
+    pbar.update(1)
+
     return ('agents', ret)
 
 partial_state_update_blocks = [
