@@ -54,7 +54,7 @@ contract Liquidator{
         return isEligibleForLiquidation(cdp);
     }
 
-    function liquidateCDP(uint256 _cdpIndex) public payable{
+    function liquidateCDP(uint256 _cdpIndex) public {
         CDPManager cdpManager = CDPManager(cdpManagerContractAddress);
         CDPManager.CDP memory cdp = cdpManager.getOneCDP(_cdpIndex);
 

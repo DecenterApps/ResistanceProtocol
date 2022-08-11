@@ -7,10 +7,9 @@ error Treasury__NotEnoughFunds();
 error Treasury__TransactionFailed();
 error Treasury__UnauthorizedCDPManager();
 
-contract Treasury{
-
+contract Treasury {
     address public immutable owner;
-    mapping (address => bool) userAuthorized;
+    mapping(address => bool) userAuthorized;
 
     address CDPManagerContractAddress;
 
@@ -18,19 +17,20 @@ contract Treasury{
 
     event TreasuryReceiveNOI(uint256 _amount);
 
-
-    modifier onlyOwner {
+    modifier onlyOwner() {
         if (msg.sender != owner) revert Treasury__NotOwner();
         _;
     }
 
-    modifier onlyAuthorized {
-        if (userAuthorized[msg.sender] == false) revert Treasury__NotAuthorized();
+    modifier onlyAuthorized() {
+        if (userAuthorized[msg.sender] == false)
+            revert Treasury__NotAuthorized();
         _;
     }
 
-    modifier onlyCDPManagerContract(){
-        if(msg.sender != CDPManagerContractAddress) revert Treasury__UnauthorizedCDPManager();
+    modifier onlyCDPManagerContract() {
+        if (msg.sender != CDPManagerContractAddress)
+            revert Treasury__UnauthorizedCDPManager();
         _;
     }
 
@@ -38,8 +38,6 @@ contract Treasury{
         owner = _owner;
         userAuthorized[owner] = true;
     }
-
-
 
     function addAuthorization(address _to) public onlyOwner {
         userAuthorized[_to] = true;
@@ -49,8 +47,10 @@ contract Treasury{
         userAuthorized[_from] = false;
     }
 
-
-    function setCDPManagerContractAddress(address _CDPManagerContractAddress) public onlyOwner{
+    function setCDPManagerContractAddress(address _CDPManagerContractAddress)
+        public
+        onlyOwner
+    {
         CDPManagerContractAddress = _CDPManagerContractAddress;
     }
 
@@ -59,7 +59,7 @@ contract Treasury{
      * @param _amount amount of ETH requested
      */
     function getFunds(uint256 _amount) public onlyAuthorized {
-        if ( getBalanceOfTreasury() < _amount ) revert Treasury__NotEnoughFunds();
+        if (getBalanceOfTreasury() < _amount) revert Treasury__NotEnoughFunds();
 
         (bool sent, ) = payable(msg.sender).call{value: _amount}("");
         if (sent == false) revert Treasury__TransactionFailed();
@@ -69,12 +69,10 @@ contract Treasury{
         return address(this).balance;
     }
 
-
-    function receiveUnmintedNoi(uint256 _amount) public onlyCDPManagerContract{
+    function receiveUnmintedNoi(uint256 _amount) public onlyCDPManagerContract {
         unmintedNoiBalance += _amount;
         emit TreasuryReceiveNOI(_amount);
     }
 
     receive() external payable {}
-
 }
