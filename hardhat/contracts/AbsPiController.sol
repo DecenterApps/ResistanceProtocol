@@ -236,6 +236,14 @@ contract AbsPiController {
     }
 
     /*
+     * @notice returns last integral term
+     */
+    function getLastIntegralTerm() public view returns (int256) {
+        if (oll() == 0) return 0;
+        return deviationObservations[oll() - 1].integral;
+    }
+
+    /*
      * @notice returns number of deviation observations
      */
     function oll() public view returns (uint256) {

@@ -38,6 +38,8 @@ contract RateSetter {
 
     event ModifyParameters(bytes32 indexed _parameter, uint256 _data);
     event ModifyContract(bytes32 indexed _contract, address _newAddress);
+    event NewPrices(uint256 _marketPrice,uint256 _redemptionPrice);
+    event NewRedemptionRate(uint256 _value);
 
     // AUTH
 
@@ -116,6 +118,7 @@ contract RateSetter {
         );
 
         redemptionRate = validated;
+        emit NewRedemptionRate(redemptionRate);
 
         redemptionPrice = rmultiply(
             rpower(
@@ -125,6 +128,7 @@ contract RateSetter {
             ),
             redemptionPrice
         );
+        emit NewPrices(noiMarketPrice,redemptionPrice);
         redemptionPriceUpdateTime = block.timestamp;
 
         // set Eth/Redemption Rate
@@ -136,6 +140,14 @@ contract RateSetter {
     function getCpiData() public view returns (uint256) {
         uint256 data = cpiDataFeed.currPegPrice();
         return data;
+    }
+
+    function getRedemptionRate() public view returns (uint256){
+        return redemptionRate;
+    }
+
+    function getRedemptionPrice() public view returns (uint256){
+        return redemptionPrice;
     }
 
     function rpower(

@@ -2,7 +2,7 @@ const { getNamedAccounts, network, deployments, ethers } = require("hardhat");
 const { assert, expect } = require("chai");
 const BigNumber = require("big-number");
 const { takeSnapshot, revertToSnapshot } = require("../utils/snapshot");
-const { openAndMintFromCDP, repayAndCloseCDP } = require("../utils/positionActions");
+const { openAndMintFromCDP, repayAndCloseCDP, repayToCDP, getSFperSecond } = require("../utils/positionActions");
 
 describe("CDPManager", function () {
     const senderAccounts = [];
@@ -40,38 +40,18 @@ describe("CDPManager", function () {
 
     describe("Mint", function () {
         it("... mint tokens from valid user address", async () => {
-            const txOpenCDP = await CDPManagerContractObj.connect(senderAccounts[1]).openCDP(
-                senderAccounts[1].address,
-                {
-                    value: ethers.utils.parseEther("12"),
-                }
-            );
-            await txOpenCDP.wait();
-
+            
+            const cdpIndex = await openAndMintFromCDP(CDPManagerContractObj,senderAccounts[1],12,9999);
             const value = BigNumber(10).pow(18).mult(9999).toString();
 
-            const getCDPIndex = await CDPManagerContractObj.connect(senderAccounts[1]).cdpi();
-
-            const txmintFromCDPManager = await CDPManagerContractObj.connect(
-                senderAccounts[1]
-            ).mintFromCDP(getCDPIndex.toString(), value);
-            await txmintFromCDPManager.wait();
             const balance = await noiContractObj
                 .connect(senderAccounts[1])
                 .balanceOf(senderAccounts[1].address);
 
             assert.equal(value, balance.toString());
 
-            const txApprove = await noiContractObj
-                .connect(senderAccounts[1])
-                .approve(CDPManagerContractObj.address, value);
-            await txApprove.wait();
-
-            const txBurn = await CDPManagerContractObj.connect(senderAccounts[1]).repayToCDP(
-                getCDPIndex.toString(),
-                value
-            );
-            await txBurn.wait();
+            await repayToCDP(CDPManagerContractObj,noiContractObj,cdpIndex,senderAccounts[1],9999);
+            
         });
 
         it("... mint more than we can handle", async () => {
@@ -123,6 +103,17 @@ describe("CDPManager", function () {
 
             await expect(CDPManagerContractObj.connect(senderAccounts[2]).mintFromCDP(69, 1)).to.be
                 .reverted;
+        });
+
+        it("... mint max tokens from cdp", async () => {
+            
+            const cdpIndex = await openAndMintFromCDP(CDPManagerContractObj,senderAccounts[1],12,5000);
+
+            const maxMint = await CDPManagerContractObj.maxMintAmount(cdpIndex);
+
+            await expect(CDPManagerContractObj.connect(senderAccounts[1]).mintFromCDP(cdpIndex,maxMint.toString())).to.be.reverted;
+            const sfpfs = await getSFperSecond(CDPManagerContractObj, cdpIndex);
+            CDPManagerContractObj.connect(senderAccounts[1]).mintFromCDP(cdpIndex,(maxMint-2*sfpfs).toString());
         });
     });
 
@@ -257,4 +248,42 @@ describe("CDPManager", function () {
             await expect(CDPManagerContractObj.connect(senderAccounts[1]).withdrawCollateralFromCDP(cdpIndex,ethers.utils.parseEther("11"))).to.be.reverted;
         });
     });
+
+    describe("Positions for user", function () {
+
+        it("... getMyCDPs", async () => {
+            
+            const cdpIndex = await openAndMintFromCDP(CDPManagerContractObj,senderAccounts[1],12,1000);
+            const cdpIndex2 = await openAndMintFromCDP(CDPManagerContractObj,senderAccounts[1],15,1000);
+            let cdps = await CDPManagerContractObj.connect(senderAccounts[1]).getCDPsForAddress(senderAccounts[1].address);
+            assert.equal(cdps.length, 2);
+
+            const cdpIndex3 = await openAndMintFromCDP(CDPManagerContractObj,senderAccounts[1],19,1000);
+
+            await openAndMintFromCDP(CDPManagerContractObj,senderAccounts[2],30,10000);
+
+            await repayAndCloseCDP(CDPManagerContractObj,noiContractObj,cdpIndex,senderAccounts[1]);
+            await repayAndCloseCDP(CDPManagerContractObj,noiContractObj,cdpIndex2,senderAccounts[1]);
+
+            cdps = await CDPManagerContractObj.connect(senderAccounts[1]).getCDPsForAddress(senderAccounts[1].address);
+            assert.equal(cdps.length, 1);
+
+            await repayToCDP(CDPManagerContractObj,noiContractObj,cdpIndex3,senderAccounts[2],1200);
+            await repayAndCloseCDP(CDPManagerContractObj,noiContractObj,cdpIndex3,senderAccounts[1]);
+            
+            cdps = await CDPManagerContractObj.connect(senderAccounts[1]).getCDPsForAddress(senderAccounts[1].address);
+            assert.equal(cdps.length, 0);
+
+
+            const cdpIndex4 = await openAndMintFromCDP(CDPManagerContractObj,senderAccounts[1],2,1000);
+            const cdpIndex5 = await openAndMintFromCDP(CDPManagerContractObj,senderAccounts[1],5,1000);
+
+            cdps = await CDPManagerContractObj.connect(senderAccounts[1]).getCDPsForAddress(senderAccounts[1].address);
+            assert.equal(cdps.length, 2);
+            assert.equal(cdps[0].lockedCollateral.toString(),BigNumber(10).pow(18).mult(2).toString());
+        });
+
+    });
+
+    
 });

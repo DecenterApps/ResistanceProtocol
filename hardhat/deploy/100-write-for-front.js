@@ -16,6 +16,8 @@ module.exports = async ({ getNamedAccounts }) => {
     const RateSetterContractObj = await ethers.getContract("RateSetter", deployer);
     const EthTWAPFeedContractObj = await ethers.getContract("EthTwapFeed", deployer);
     const MarketTwapFeed = await ethers.getContract("MarketTwapFeed", deployer);
+    const AbsPIController = await ethers.getContract("AbsPiController", deployer);
+
 
     writeAbiAndAddress("MultiSigWallet", msw.address)
     writeAbiAndAddress("NOI", noiContract.address)
@@ -26,6 +28,7 @@ module.exports = async ({ getNamedAccounts }) => {
     writeAbiAndAddress("RateSetter", RateSetterContractObj.address)
     writeAbiAndAddress("EthTwapFeed", EthTWAPFeedContractObj.address)
     writeAbiAndAddress("MarketTwapFeed", MarketTwapFeed.address)
+    writeAbiAndAddress("AbsPiController",AbsPIController.address)
 
 
 };
