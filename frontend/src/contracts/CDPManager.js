@@ -407,6 +407,11 @@ export const ABI= [
         "components": [
           {
             "internalType": "uint256",
+            "name": "cdpIndex",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
             "name": "lockedCollateral",
             "type": "uint256"
           },
@@ -485,6 +490,11 @@ export const ABI= [
         "components": [
           {
             "internalType": "uint256",
+            "name": "cdpIndex",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
             "name": "lockedCollateral",
             "type": "uint256"
           },
@@ -529,6 +539,11 @@ export const ABI= [
     "outputs": [
       {
         "components": [
+          {
+            "internalType": "uint256",
+            "name": "cdpIndex",
+            "type": "uint256"
+          },
           {
             "internalType": "uint256",
             "name": "lockedCollateral",
@@ -630,6 +645,25 @@ export const ABI= [
     "name": "liquidatePosition",
     "outputs": [],
     "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_cdpIndex",
+        "type": "uint256"
+      }
+    ],
+    "name": "maxMintAmount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {

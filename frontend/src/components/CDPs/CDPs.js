@@ -4,18 +4,17 @@ import { Box, VStack, HStack, Image, Button, Tooltip } from "@chakra-ui/react";
 import { Chart as ChartJS, ArcElement, Tooltip as TP, Legend } from "chart.js";
 import { Pie } from "react-chartjs-2";
 import MyInputModal from "../MyInputModal/MyInputModal";
+import OpenCdpModal from "../OpenCdpModal/OpenCdpModal";
 import { FcInfo } from "react-icons/fc";
 import Footer from "../Footer/Footer";
-import FirebaseService from "../../services/FirebaseService";
 import { useWeb3React } from "@web3-react/core";
 import { ethers } from "ethers";
-import { ABI, address } from "../../contracts/CDPManager";
-import { ABI as ABI_NOI, address as address_NOI } from "../../contracts/NOI";
 import {
   ABI as ABI_ETH,
   address as address_ETH,
 } from "../../contracts/EthTwapFeed";
 import Decimal from "decimal.js";
+import CDPService from "../../services/CDPService";
 
 ChartJS.register(ArcElement, TP, Legend);
 
@@ -30,10 +29,12 @@ export default function CDPs({ bAnimation, setBAnimation }) {
   const [ethPrice, setEthPrice] = useState(0);
 
   const [openModal, setOpenModal] = useState(false);
+  const [openCDPModal, setOpenCDPModal] = useState(false);
   const labels = ["Minted", "Left"];
 
   const closeModal = () => {
     setOpenModal(false);
+    setOpenCDPModal(false);
   };
 
   const getEthPrice = async () => {
@@ -44,126 +45,51 @@ export default function CDPs({ bAnimation, setBAnimation }) {
     setEthPrice(ethResponse.div(10 ** 8).toString());
   };
 
-  const openCDP = (col) => {
-    const contractCDPManager = new ethers.Contract(address, ABI);
-    contractCDPManager.connect(library.getSigner()).openCDP(account, {
-      value: ethers.utils.parseEther(col.toString()),
-    });
-  };
-
-  const mintCDP = (amount) => {
-    const contractCDPManager = new ethers.Contract(address, ABI);
-    contractCDPManager
-      .connect(library.getSigner())
-      .mintFromCDP(selectedCDP, ethers.utils.parseEther(amount.toString()));
-  };
-
-  const repayCDP = async (amount) => {
-    const contractNOI = new ethers.Contract(address_NOI, ABI_NOI);
-    console.log(ethers.utils.parseEther(amount.toString()));
-    const txApprove = await contractNOI
-      .connect(library.getSigner())
-      .approve(address, ethers.utils.parseEther(amount.toString()));
-    await listenForTransactionMine(txApprove, library);
-    const contractCDPManager = new ethers.Contract(address, ABI);
-    const txRepay = await contractCDPManager
-      .connect(library.getSigner())
-      .repayToCDP(selectedCDP, ethers.utils.parseEther(amount.toString()));
-    await listenForTransactionMine(txRepay, library);
-  };
-
-  const closeCDP = (cdpId) => {
-    const contractCDPManager = new ethers.Contract(address, ABI);
-    contractCDPManager.connect(library.getSigner()).closeCDP(cdpId);
-  };
-
-  const repayAndClose = async (cdpId) => {
-    const contractNOI = new ethers.Contract(address_NOI, ABI_NOI);
-    const txApprove = await contractNOI
-      .connect(library.getSigner())
-      .approve(address, ethers.utils.parseEther("100000000000000000000000000000000"));
-    await listenForTransactionMine(txApprove, library);
-    const contractCDPManager = new ethers.Contract(address, ABI);
-    const txRepayAndClose = await contractCDPManager
-      .connect(library.getSigner())
-      .repayAndCloseCDP(cdpId);
-    await listenForTransactionMine(txRepayAndClose, library);
-    
-  };
-
-  const withdrawCol = (amount) => {
-    const contractCDPManager = new ethers.Contract(address, ABI);
-    contractCDPManager
-      .connect(library.getSigner())
-      .withdrawCollateralFromCDP(
-        selectedCDP,
-        ethers.utils.parseEther(amount.toString())
-      );
-  };
-
-  const boost = (amount) => {
-    const contractCDPManager = new ethers.Contract(address, ABI);
-    contractCDPManager
-      .connect(library.getSigner())
-      .transferCollateralToCDP(selectedCDP, {
-        value: ethers.utils.parseEther(amount.toString()),
-      });
-  };
-
-  function listenForTransactionMine(transactionResponse, provider) {
-    console.log(`Mining ${transactionResponse.hash}...`); // create a listener for the blockchain
-    return new Promise((resolve, reject) => {
-      // listen for this tx to finish
-      provider.once(transactionResponse.hash, (transactionReceipt) => {
-        console.log(
-          `Completed with ${transactionReceipt.confirmations} confirmations`
-        ); // we return when resolve or reject is called
-        resolve();
-      });
-    });
-  }
-
-  const modalCallback = (col) => {
+  const modalCallback = async (col, debt) => {
     switch (actionType) {
       case "OPEN": {
-        openCDP(col);
+        await CDPService.openCDP(col, debt, library, account);
         break;
       }
       case "REPAY": {
-        repayCDP(col);
+        await CDPService.repayCDP(col, library, selectedCDP);
         break;
       }
       case "MINT": {
-        mintCDP(col);
+        await CDPService.mintCDP(col, library, selectedCDP);
         break;
       }
       case "WITHDRAW": {
-        withdrawCol(col);
+        await CDPService.withdrawCol(col, library, selectedCDP);
         break;
       }
       case "BOOST": {
-        boost(col);
+        await CDPService.boost(col, library, selectedCDP);
+        break;
+      }
+      case "CLOSE": {
+        await CDPService.closeCDP(selectedCDP, library);
+        break;
+      }
+      case "REPAYANDCLOSE": {
+        await CDPService.repayAndClose(selectedCDP, library);
         break;
       }
       default:
         break;
     }
+    CDPService.loadCDPsForUser(account, library, setCdps);
   };
 
   useEffect(() => {
     async function fetchData() {
-      const tempCdps = await FirebaseService.loadCDPs(setCdps, account);
-      FirebaseService.setUpCDPs(tempCdps, setCdps, account);
+      await CDPService.loadCDPsForUser(account, library, setCdps);
     }
     fetchData();
     getEthPrice();
     setInterval(async () => {
       await getEthPrice();
     }, 5000 * 60);
-    /*const cdpsSorted = [...cdps].sort((c1, c2) => {
-      return c1.cr - c2.cr;
-    });
-    setCdps(cdpsSorted);*/
   }, []);
 
   useEffect(() => {}, [cdps]);
@@ -177,6 +103,11 @@ export default function CDPs({ bAnimation, setBAnimation }) {
         title={modalTitle}
         symbol={symbol}
       ></MyInputModal>
+      <OpenCdpModal
+        open={openCDPModal}
+        handleClose={closeModal}
+        doOnConfirm={modalCallback}
+      ></OpenCdpModal>
       <div className="dashboard animated bounceIn">
         <Box>
           <VStack spacing="7vh">
@@ -199,25 +130,31 @@ export default function CDPs({ bAnimation, setBAnimation }) {
                   />
                   <div>Total ETH locked in your CDPs</div>
                   <div className="bold-text">
-                    {ethers.utils.formatEther(
-                      cdps
-                        .reduce(
-                          (previousValue, currentValue) =>
-                            previousValue + new Decimal(currentValue["col"]),
-                          0
-                        )
-                        .toString()
-                        )}{" "}
+                    {cdps &&
+                      ethers.utils.formatEther(
+                        cdps
+                          .reduce(
+                            (previousValue, currentValue) =>
+                              new Decimal(previousValue).add(
+                                currentValue["col"]
+                              ),
+                            0
+                          )
+                          .toString()
+                      )}{" "}
                     ($
-                    {ethers.utils.formatEther(
-                      cdps
-                        .reduce(
-                          (previousValue, currentValue) =>
-                            previousValue + new Decimal(currentValue["col"]),
-                          0
-                        )
-                        .toString()
-                        ) * ethPrice}
+                    {cdps &&
+                      ethers.utils.formatEther(
+                        cdps
+                          .reduce(
+                            (previousValue, currentValue) =>
+                              new Decimal(previousValue).add(
+                                currentValue["col"]
+                              ),
+                            0
+                          )
+                          .toString()
+                      ) * ethPrice}
                     )
                   </div>
                 </VStack>
@@ -238,17 +175,20 @@ export default function CDPs({ bAnimation, setBAnimation }) {
                     height={30}
                     borderRadius="3px"
                   />
-                  <div>Minted NOI</div>
+                  <div>Total Debt</div>
                   <div className="bold-text">
-                    {/*ethers.utils.formatEther(
-                      cdps
-                        .reduce(
-                          (previousValue, currentValue) =>
-                            previousValue + new Decimal(currentValue["debt"]),
-                          0
-                        )
-                        .toString()
-                        )*/}
+                    {cdps &&
+                      ethers.utils.formatEther(
+                        cdps
+                          .reduce(
+                            (previousValue, currentValue) =>
+                              new Decimal(previousValue).add(
+                                currentValue["debt"]
+                              ),
+                            0
+                          )
+                          .toString()
+                      )}
                   </div>
                 </VStack>
               </Box>
@@ -270,15 +210,18 @@ export default function CDPs({ bAnimation, setBAnimation }) {
                   />
                   <div>Stability fee</div>
                   <div className="bold-text">
-                    {ethers.utils.formatEther(
-                      cdps
-                        .reduce(
-                          (previousValue, currentValue) =>
-                            previousValue + new Decimal(currentValue["sf"]),
-                          0
-                        )
-                        .toString()
-                    )}
+                    {cdps &&
+                      ethers.utils.formatEther(
+                        cdps
+                          .reduce(
+                            (previousValue, currentValue) =>
+                              new Decimal(previousValue).add(
+                                currentValue["sf"]
+                              ),
+                            0
+                          )
+                          .toString()
+                      )}
                   </div>
                 </VStack>
               </Box>
@@ -290,9 +233,7 @@ export default function CDPs({ bAnimation, setBAnimation }) {
                   className="selected-tlbr-btn raise open-btn"
                   onClick={() => {
                     setActionType("OPEN");
-                    setModalTitle("Open CDP");
-                    setSymbol("ETH");
-                    setOpenModal(true);
+                    setOpenCDPModal(true);
                   }}
                 >
                   Open CDP
@@ -310,17 +251,17 @@ export default function CDPs({ bAnimation, setBAnimation }) {
                             <VStack>
                               <div>Collateral locked</div>
                               <div>
-                                {
-                                  ethers.utils.formatEther((new Decimal(c.col.toString())).toString())
-                                }{" "}
+                                {ethers.utils.formatEther(
+                                  new Decimal(c.col.toString()).toString()
+                                )}{" "}
                                 ETH
                               </div>
                             </VStack>
                             <VStack>
-                              <div>Minted NOI</div>
+                              <div>Debt</div>
                               <div>
                                 {ethers.utils.formatEther(
-                                  (new Decimal(c.debt.toString())).toString()
+                                  new Decimal(c.debt.toString()).toString()
                                 )}{" "}
                               </div>
                             </VStack>
@@ -328,7 +269,9 @@ export default function CDPs({ bAnimation, setBAnimation }) {
                               <div>Stabillity fee</div>
                               <div>
                                 {c.sf !== undefined
-                                  ? ethers.utils.formatEther((new Decimal(c.sf.toString())).toString())
+                                  ? ethers.utils.formatEther(
+                                      new Decimal(c.sf.toString()).toString()
+                                    )
                                   : "Calculating..."}
                               </div>
                             </VStack>
@@ -345,7 +288,18 @@ export default function CDPs({ bAnimation, setBAnimation }) {
                                 datasets: [
                                   {
                                     label: "CDP Standing",
-                                    data: [1000, 5],
+                                    data: [
+                                      ethers.utils.formatEther(
+                                        new Decimal(
+                                          c.debt.toString()
+                                        ).toString()
+                                      ),
+                                      ethers.utils.formatEther(
+                                        new Decimal(
+                                          c.left.toString()
+                                        ).toString()
+                                      ),
+                                    ],
                                     borderColor: [
                                       "rgb(53, 162, 235)",
                                       "rgb(255, 99, 132)",
@@ -388,7 +342,9 @@ export default function CDPs({ bAnimation, setBAnimation }) {
                               <Button
                                 className="selected-tlbr-btn raise"
                                 onClick={() => {
-                                  repayAndClose(c.cdpId)
+                                  setActionType("REPAYANDCLOSE");
+                                  setSelectedCDP(c.cdpId);
+                                  modalCallback();
                                 }}
                               >
                                 Repay & Close
@@ -422,7 +378,9 @@ export default function CDPs({ bAnimation, setBAnimation }) {
                               <Button
                                 className="selected-tlbr-btn raise"
                                 onClick={() => {
-                                  closeCDP(c.cdpId);
+                                  setActionType("CLOSE");
+                                  setSelectedCDP(c.cdpId);
+                                  modalCallback();
                                 }}
                               >
                                 Close

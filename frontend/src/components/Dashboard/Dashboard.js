@@ -215,17 +215,17 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
       );
       signer = provider.getSigner();
     }
-    await getEthPrice(signer);
-    await getTotalEth(signer);
-    await getLR(signer);
-    await getSF(signer);
-    await getRedemptionRate(signer);
-    await getRedemptionPrice(signer);
-    await getMarketPrice(signer);
-    await getNOISupply(signer);
-    await getProportionalTerm(signer);
-    await getIntegralTerm(signer);
-    await getCdpCount(signer);
+    getEthPrice(signer);
+    getTotalEth(signer);
+    getLR(signer);
+    getSF(signer);
+    getRedemptionRate(signer);
+    getRedemptionPrice(signer);
+    getMarketPrice(signer);
+    getNOISupply(signer);
+    getProportionalTerm(signer);
+    getIntegralTerm(signer);
+    getCdpCount(signer);
   };
 
   useEffect(() => {
