@@ -5,6 +5,9 @@ pragma solidity >=0.8.0 <0.9.0;
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 error EthTwapFeed__TimeIntervalDidNotPass();
+error EthTwapFeed__NotMarketTwapFeed();
+error EthTwapFeed__NotAuthorized();
+error EthTwapFeed__NotOwner();
 
 contract EthTwapFeed {
     uint256 public ethTwapPrice = 0;
@@ -30,6 +33,28 @@ contract EthTwapFeed {
         _;
     }
 
+    modifier isOwner() {
+        if (msg.sender != owner) revert EthTwapFeed__NotOwner();
+        _;
+    }
+
+    mapping(address => bool) public authorizedAccounts;
+    address public immutable owner;
+
+    function addAuthorization(address account) external isOwner {
+        authorizedAccounts[account] = true;
+    }
+
+    function removeAuthorization(address account) external isOwner {
+        authorizedAccounts[account] = false;
+    }
+
+    modifier isAuthorized() {
+        if (authorizedAccounts[msg.sender] == false)
+            revert EthTwapFeed__NotAuthorized();
+        _;
+    }
+
     event UpdateValues(
         address indexed from,
         uint256 indexed ethCurrentPrice,
@@ -43,10 +68,12 @@ contract EthTwapFeed {
      * @param _ethPriceFeed sets the chainlink price feed oracle
      */
     constructor(
+        address _owner,
         uint256 _updateTimeInterval,
         uint256 _twapWindowSize,
         address _ethPriceFeed
     ) {
+        owner = _owner;
         lastUpdateTimestamp = block.timestamp;
 
         updateTimeInterval = _updateTimeInterval;
@@ -63,7 +90,12 @@ contract EthTwapFeed {
     /*
      * @notice update the cumulative price if minimum interval passed
      */
-    function update() public IntervalPassed {
+    function updateAndGetTwap()
+        public
+        IntervalPassed
+        isAuthorized
+        returns (uint256)
+    {
         uint256 timePassed = block.timestamp - lastUpdateTimestamp;
 
         uint256 nextCumulativeValue = prevCumulativeValue +
@@ -104,6 +136,7 @@ contract EthTwapFeed {
             tmpEthTwapPrice,
             block.timestamp
         );
+        return tmpEthTwapPrice;
     }
 
     /*
