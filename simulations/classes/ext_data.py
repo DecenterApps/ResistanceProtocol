@@ -28,7 +28,8 @@ class ExtData:
         self.previous_state = previous_state
 
     def set_fresh_eth_prediction(self):
-        self.eth_prediction = svm_prediction(np.array(self.eth_dollar))
+        self.eth_prediction = 0
+        # self.eth_prediction = svm_prediction(np.array(self.eth_dollar))
     
     def get_current_timestep(self):
         if self.substep == 1:
