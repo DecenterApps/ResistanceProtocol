@@ -70,5 +70,6 @@ module.exports = {
     approveAndLiquidatePosition,
     repayToCDP,
     repayAndCloseCDP,
-    expectToFailWithError
+    expectToFailWithError,
+    getSFperSecond
 }
