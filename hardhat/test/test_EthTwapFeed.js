@@ -9,8 +9,7 @@ describe("EthTwapFeed", function () {
     let snapshot;
     let EthTwapFeedShortInterval, EthTwapFeedLongInterval, EthPriceFeedMock;
 
-    async function update(delayTime, newPrice) {
-        await delay(delayTime);
+    async function update(newPrice) {
 
         const setNewPricetx = await EthPriceFeedMock.setPrice(newPrice);
         await setNewPricetx.wait();
@@ -65,19 +64,19 @@ describe("EthTwapFeed", function () {
         await expect(EthTwapFeedLongInterval.update()).to.be.reverted;
     });
     it("... dampen aggressive spikes (wale attacks)", async () => {
-        await update(1000, "120000000000");
-        await update(1000, "130000000000");
-        await update(1000, "240000000000");
-        await update(1000, "110000000000");
-        await update(1000, "130000000000");
+        await update("120000000000");
+        await update("130000000000");
+        await update("240000000000");
+        await update("110000000000");
+        await update("130000000000");
 
         const twapUpper = (await EthTwapFeedShortInterval.ethTwapPrice()).toString();
 
         expect(Number(twapUpper)).to.be.approximately(150000000000, 20000000000);
-        await update(1000, "120000000000");
-        await update(1000, "40000000000");
-        await update(1000, "110000000000");
-        await update(1000, "120000000000");
+        await update("120000000000");
+        await update("40000000000");
+        await update("110000000000");
+        await update("120000000000");
 
         const twapLower = (await EthTwapFeedShortInterval.ethTwapPrice()).toString();
 
