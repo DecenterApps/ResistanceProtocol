@@ -24,8 +24,8 @@ class Random_Trader(Trader):
         self.perc_amount = np.random.random()
         return True
 
-def update_random_trader(agents, price_station: PriceStation, pool: Pool, eth_data: ETHData):
-    update_trader(agents, price_station, pool, eth_data, 'random_trader', RANDOM_TRADER)
+def update_random_trader(agents, price_station: PriceStation, pool: Pool, ext_data: ExtData):
+    update_trader(agents, price_station, pool, ext_data, 'random_trader', RANDOM_TRADER)
 
 def create_new_random_trader(name, eth_amount, noi_amount):
     return Random_Trader(name, eth_amount, noi_amount)

@@ -1,11 +1,19 @@
-class ETHData:
+from utils.generate_data.regression import svm_prediction
+import numpy as np
+
+class ExtData:
     def __init__(self):
         self.eth_dollar = []
+        self.cpi_value = []
         self.substep = 0
         self.previous_state = {}
+        self.eth_prediction = 0
     
     def get_eth_value(self):
         return self.eth_dollar[self.get_current_timestep()]
+    
+    def get_cpi_value(self):
+        return self.cpi_value[self.get_current_timestep()]
     
     #for amount of eth, returns eth value in usd
     def get_eth_value_for_amount(self, eth_amount):
@@ -18,6 +26,9 @@ class ETHData:
     def set_parameters(self, substep, previous_state):
         self.substep = substep
         self.previous_state = previous_state
+
+    def set_fresh_eth_prediction(self):
+        self.eth_prediction = svm_prediction(np.array(self.eth_dollar))
     
     def get_current_timestep(self):
         if self.substep == 1:
