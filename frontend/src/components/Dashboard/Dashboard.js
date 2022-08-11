@@ -90,6 +90,7 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
   const [noiSupply, setNOISupply] = useState(0);
   const [pTerm, setPTerm] = useState(0);
   const [iTerm, setITerm] = useState(0);
+  const [cdpCount, setCdpCount] = useState(0);
   const [noiSupplyHistory, setNOISupplyHistory] = useState([]);
   const [redemptionRateHistory, setRedemptionRateHistory] = useState([]);
   const [redemptionPriceHistory, setRedemptionPriceHistory] = useState([]);
@@ -186,6 +187,17 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
     setITerm(iResponse);
   };
 
+  const getCdpCount = async (signer) => {
+    const contractCDPManager = new ethers.Contract(
+      address_CDPMANAGER,
+      ABI_CDPMANAGER
+    );
+    const countResponse = await contractCDPManager
+      .connect(signer)
+      .openCDPcount();
+    setCdpCount(countResponse);
+  };
+
   useEffect(() => {
     FirebaseService.setUpNOITracking(setNOISupplyHistory);
     FirebaseService.setUpMPTracking(setMarketPriceHistory);
@@ -213,6 +225,7 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
     await getNOISupply(signer);
     await getProportionalTerm(signer);
     await getIntegralTerm(signer);
+    await getCdpCount(signer);
   };
 
   useEffect(() => {
@@ -297,7 +310,7 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
                   borderRadius="3px"
                 />
                 <div>Active CDPs</div>
-                <div className="bold-text">TO DO</div>
+                <div className="bold-text">{cdpCount.toString()}</div>
               </VStack>
             </Box>
           </HStack>
@@ -391,19 +404,34 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
                     </VStack>
                   </Box>
                 </HStack>
-                <Box className="div-indiv3-line2 ">
-                  <div className="div-info ">
-                    <Tooltip label="TO DO: WRITE INFO" placement="right">
-                      <div>
-                        <FcInfo></FcInfo>
-                      </div>
-                    </Tooltip>
-                  </div>
-                  <VStack>
-                    <div>NOI in treasury</div>
-                    <div className="bold-text">TO DO</div>
-                  </VStack>
-                </Box>
+                <HStack spacing="2vw">
+                  <Box className="div-indiv2-line2 ">
+                    <div className="div-info ">
+                      <Tooltip label="TO DO: WRITE INFO" placement="right">
+                        <div>
+                          <FcInfo></FcInfo>
+                        </div>
+                      </Tooltip>
+                    </div>
+                    <VStack>
+                      <div>NOI surplus</div>
+                      <div className="bold-text">TO DO</div>
+                    </VStack>
+                  </Box>
+                  <Box className="div-indiv2-line2 ">
+                    <div className="div-info ">
+                      <Tooltip label="TO DO: WRITE INFO" placement="right">
+                        <div>
+                          <FcInfo></FcInfo>
+                        </div>
+                      </Tooltip>
+                    </div>
+                    <VStack>
+                      <div>NOI in treasury</div>
+                      <div className="bold-text">TO DO</div>
+                    </VStack>
+                  </Box>
+                </HStack>
               </VStack>
             </Box>
           </HStack>
@@ -534,14 +562,14 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
                     {
                       fill: true,
                       label: "Market price",
-                      data: marketPriceHistory.map((e)=> e["price"]),
+                      data: marketPriceHistory.map((e) => e["price"]),
                       borderColor: "rgb(53, 162, 235)",
                       backgroundColor: "rgba(53, 162, 235, 0.5)",
                     },
                     {
                       fill: true,
                       label: "Redemption price",
-                      data: redemptionPriceHistory.map((e)=> e["price"]),
+                      data: redemptionPriceHistory.map((e) => e["price"]),
                       borderColor: "rgb(255, 99, 132)",
                       backgroundColor: "rgba(255, 99, 132, 0.5)",
                     },

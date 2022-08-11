@@ -42,11 +42,6 @@ export const ABI= [
   },
   {
     "inputs": [],
-    "name": "CDPManager__NotOwner",
-    "type": "error"
-  },
-  {
-    "inputs": [],
     "name": "CDPManager__OnlyOwnerAuthorization",
     "type": "error"
   },
@@ -401,6 +396,52 @@ export const ABI= [
   {
     "inputs": [
       {
+        "internalType": "address",
+        "name": "_address",
+        "type": "address"
+      }
+    ],
+    "name": "getCDPsForAddress",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "lockedCollateral",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "generatedDebt",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "accumulatedFee",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "updatedTime",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct CDPManager.CDP[]",
+        "name": "",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "uint256",
         "name": "_cdpIndex",
         "type": "uint256"
@@ -431,6 +472,46 @@ export const ABI= [
         "internalType": "uint256",
         "name": "",
         "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getMyCDPs",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "lockedCollateral",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "generatedDebt",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "accumulatedFee",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "updatedTime",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct CDPManager.CDP[]",
+        "name": "",
+        "type": "tuple[]"
       }
     ],
     "stateMutability": "view",
@@ -622,6 +703,43 @@ export const ABI= [
       }
     ],
     "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_user",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "openCDPandMint",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "openCDPcount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
