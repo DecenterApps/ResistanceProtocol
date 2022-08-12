@@ -16,7 +16,7 @@ You can also call the scripts generate_eth_value.py and generate_cpi_value.py in
 
 There are 1000 timestamps, and the duration of one timestamp is approximately 3 hours, so that means the simulation simulates the period of around 4 months.
 
-## Running the simulation
+# Running the simulation
 
 To run the simulation, execute the script sim1.py.
 To view and change quantity and parameters of different agents, see file utils/constants.py.
@@ -35,11 +35,11 @@ full_graph.png(1) shows data after every transaction, and timestamp_graph.png(2)
 
 Timestamp graph is convenient to see the market price trend, and full graph is useful to see how the market reacts to sudden changes of the market price(from malicious whales).
 
-## Calculation of NOI market price
+# Calculation of NOI market price
 
 Market price is mocked with ETH/NOI pool. Its size can be modified in constants file.
 
-## Agents
+# Agents
 
 There are several agents in the simulation. They are divided into 2 main groups.
 
@@ -53,7 +53,7 @@ There are several agents in the simulation. They are divided into 2 main groups.
 | Whale instant rate setters |
 | Whale longterm price setters | 
 ---
-### Rate Trader
+## Rate Trader
 
 Rate trader is an agent which swaps NOI/ETH when the redemption rate exceeds certain threshold. Each rate traders has percentage amount, a parameter that determines percent of their capital that they put for every trade. Also, it has Min/Max redemption rate, if the redemption rate is not in theese boundaries, Rate Trader is being activated.
 
@@ -61,7 +61,7 @@ Rate trader is an agent which swaps NOI/ETH when the redemption rate exceeds cer
 | :---: | :---: |
 | Redemption rate < Min redemption rate and market price > redemption price | Redemption rate > Max redemption rate and market price < redemption price |
 ---
-### Price Trader
+## Price Trader
 
 Price trader is an agent which swaps NOI/ETH when the relative difference between market and redemption price exceeds certain threshold. Each price traders has percentage amount, a parameter that determines percent of their capital that they put for every trade. Also, it has Max relative difference, if the absolute value of the gap is not in theese boundaries, Price Trader is being activated.
 
@@ -69,12 +69,12 @@ Price trader is an agent which swaps NOI/ETH when the relative difference betwee
 | :---: | :---: |
 | abs(Relative difference) < Max relative difference and market price > redemption price | abs(Relative difference) < Max relative difference and market price < redemption price |
 ---
-### Random trader
+## Random trader
 
 Just random.
 
 ---
-### Noi Truster
+## Noi Truster
 
 Noi Truster is an agent that waits for the opportunity to buy NOI when it's cheap, and then holds it forever.
 
@@ -82,7 +82,16 @@ Noi Truster is an agent that waits for the opportunity to buy NOI when it's chea
 | :---: | :---: |
 | - | abs(Relative difference) > Max relative difference and market price < redemption price |
 
+---
+## Whale Instant Price Setter
 
-## Architecture
+Whale Instant Price Setter tries to manipulate the market price buy buying or selling all NOI at once, and pushing market price even further from the redemption price. This trader is activated when relative difference between market and redemption price exceeds certain threshold.
+
+| Sell NOI | Buy NOI |
+| :---: | :---: |
+| abs(Relative difference) > Max relative difference and market price < redemption price | abs(Relative difference) > Max relative difference and market price > redemption price |
+
+
+# Architecture
 
 ![](documentation_images/architecture.png?raw=true "Architecture")
