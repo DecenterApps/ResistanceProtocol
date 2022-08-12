@@ -2,6 +2,11 @@ export const ABI= [
   {
     "inputs": [
       {
+        "internalType": "address",
+        "name": "_owner",
+        "type": "address"
+      },
+      {
         "internalType": "uint256",
         "name": "_updateTimeInterval",
         "type": "uint256"
@@ -19,6 +24,16 @@ export const ABI= [
     ],
     "stateMutability": "nonpayable",
     "type": "constructor"
+  },
+  {
+    "inputs": [],
+    "name": "EthTwapFeed__NotAuthorized",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "EthTwapFeed__NotOwner",
+    "type": "error"
   },
   {
     "inputs": [],
@@ -55,6 +70,38 @@ export const ABI= [
     ],
     "name": "UpdateValues",
     "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
+    ],
+    "name": "addAuthorization",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "authorizedAccounts",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
   },
   {
     "inputs": [],
@@ -97,6 +144,32 @@ export const ABI= [
   },
   {
     "inputs": [],
+    "name": "owner",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
+    ],
+    "name": "removeAuthorization",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "twapWindowSize",
     "outputs": [
       {
@@ -110,8 +183,14 @@ export const ABI= [
   },
   {
     "inputs": [],
-    "name": "update",
-    "outputs": [],
+    "name": "updateAndGetTwap",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
     "stateMutability": "nonpayable",
     "type": "function"
   },
@@ -129,4 +208,4 @@ export const ABI= [
     "type": "function"
   }
 ]
-export const address= "0xb932C8342106776E73E39D695F3FFC3A9624eCE0"
+export const address= "0x75c68e69775fA3E9DD38eA32E554f6BF259C1135"
