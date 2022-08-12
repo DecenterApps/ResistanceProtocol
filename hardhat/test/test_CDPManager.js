@@ -227,6 +227,7 @@ describe("CDPManager", function () {
         it("... repay and close CDP", async () => {
             
             const cdpIndex = await openAndMintFromCDP(CDPManagerContractObj,senderAccounts[1],12,1000);
+            await openAndMintFromCDP(CDPManagerContractObj,senderAccounts[1],12,1000);
             const txRepayClose = await repayAndCloseCDP(CDPManagerContractObj,noiContractObj,cdpIndex,senderAccounts[1]);
             await txRepayClose.wait();
         });

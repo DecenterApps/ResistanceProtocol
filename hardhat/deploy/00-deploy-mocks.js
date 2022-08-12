@@ -3,7 +3,7 @@ const { network } = require("hardhat");
 const DECIMALS = "8";
 const INITIAL_ETH_PRICE = "100000000000";
 
-const INITIAL_NOI_TOKENS = "100000000";
+const INITIAL_NOI_TOKENS = "150000000";
 const INITIAL_DAI_TOKENS = "100000000";
 
 const INITIAL_CPI = "1048699183321964674";

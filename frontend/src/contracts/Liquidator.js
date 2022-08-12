@@ -17,6 +17,16 @@ export const ABI= [
   },
   {
     "inputs": [],
+    "name": "Liquidator__SendToTreasuryFailed",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "Liquidator__SendToUserFailed",
+    "type": "error"
+  },
+  {
+    "inputs": [],
     "name": "Parameters_NotAuthorized",
     "type": "error"
   },

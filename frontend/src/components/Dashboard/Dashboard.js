@@ -37,7 +37,7 @@ import { useWeb3React } from "@web3-react/core";
 import { ethers } from "ethers";
 import Decimal from "decimal.js";
 import FirebaseService from "../../services/FirebaseService";
-import InfoService from '../../services/InfoService'
+import InfoService from "../../services/InfoService";
 
 ChartJS.register(
   CategoryScale,
@@ -53,7 +53,15 @@ ChartJS.register(
 
 export const options = {
   responsive: true,
-  plugins: {},
+  plugins: {
+    tooltips: {
+      callbacks: {
+        label: function (tooltipItem, data) {
+          return "dsad";
+        },
+      },
+    },
+  },
 };
 
 export default function Dashboard({ bAnimation, setBAnimation }) {
@@ -74,8 +82,6 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
   const [redemptionRateHistory, setRedemptionRateHistory] = useState([]);
   const [redemptionPriceHistory, setRedemptionPriceHistory] = useState([]);
   const [marketPriceHistory, setMarketPriceHistory] = useState([]);
-
-  
 
   useEffect(() => {
     FirebaseService.setUpNOITracking(setNOISupplyHistory);
@@ -221,7 +227,11 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
                   <VStack>
                     <div>Redemption rate</div>
                     <div className="bold-text">
-                      {new Decimal(rr.toString()).div(10 ** 27).toString()}%
+                      {new Decimal(rr.toString())
+                        .div(10 ** 27)
+                        .sub(1)
+                        .toString()}
+                      %
                     </div>
                     <div>
                       <b>pRate</b>:
@@ -403,7 +413,9 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
                     {
                       fill: true,
                       label: "NOI issued",
-                      data: noiSupplyHistory.map((e) => e["supply"]),
+                      data: noiSupplyHistory.map((e) =>
+                        new Decimal(e["supply"]).div(10 ** 18).toString()
+                      ),
                       borderColor: "rgb(53, 162, 235)",
                       backgroundColor: "rgba(53, 162, 235, 0.5)",
                     },
@@ -420,8 +432,10 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
                   datasets: [
                     {
                       label: "Redemption rate",
-                      data: redemptionRateHistory.map(
-                        (e) => e["redemptionRate"]
+                      data: redemptionRateHistory.map((e) =>
+                        new Decimal(e["redemptionRate"])
+                          .div(10 ** 27)
+                          .toString()
                       ),
                       backgroundColor: "rgba(53, 162, 235, 0.5)",
                     },
@@ -441,14 +455,18 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
                     {
                       fill: true,
                       label: "Market price",
-                      data: marketPriceHistory.map((e) => new Decimal(e["price"]).div(10**8).toString()),
+                      data: marketPriceHistory.map((e) =>
+                        new Decimal(e["price"]).div(10 ** 8).toString()
+                      ),
                       borderColor: "rgb(53, 162, 235)",
                       backgroundColor: "rgba(53, 162, 235, 0.5)",
                     },
                     {
                       fill: true,
                       label: "Redemption price",
-                      data: redemptionPriceHistory.map((e) => new Decimal(e["price"]).div(10**27).toString()),
+                      data: redemptionPriceHistory.map((e) =>
+                        new Decimal(e["price"]).div(10 ** 27).toString()
+                      ),
                       borderColor: "rgb(255, 99, 132)",
                       backgroundColor: "rgba(255, 99, 132, 0.5)",
                     },

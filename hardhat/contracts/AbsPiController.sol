@@ -291,7 +291,7 @@ contract AbsPiController {
         }
         int256 proportionalTerm = int(_redemptionPrice) -
             int(_marketPrice) *
-            int(10**9);
+            int(10**19);
         updateDeviationHistory(proportionalTerm, _accumulatedLeak);
         lastUpdateTime = block.timestamp;
         int256 piOutput = getGainAdjustedPIOutput(
