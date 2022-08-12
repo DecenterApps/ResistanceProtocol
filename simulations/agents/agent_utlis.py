@@ -14,55 +14,82 @@ def get_agents_dict():
             'num': RATE_TRADER.NUM,
             'create': create_rate_traders,
             'update': update_rate_trader,
-            'graph': [],
+            'graph': {
+                'eth': [],
+                'noi': [],
+            },
         },
         'price_trader': {
             'num': PRICE_TRADER.NUM,
             'create': create_price_traders,
             'update': update_price_trader,
-            'graph': [],
+            'graph': {
+                'eth': [],
+                'noi': [],
+            },
         },
         'leverager': {
             'num': LEVERAGER.NUM,
             'create': create_leveragers,
             'update': update_leverager,
-            'graph': [],
+            'graph': {
+                'eth': [],
+                'noi': [],
+            },
         },
         'safe_owner': {
             'num': SAFE_OWNER.NUM,
             'create': create_safe_owners,
             'update': update_safe_owner,
-            'graph': [],
+            'graph': {
+                'eth': [],
+                'noi': [],
+            },
         },
         'whale_instant_price_setter': {
             'num': WHALE_INSTANT_PRICE_SETTER.NUM,
             'create': create_whale_instant_price_setters,
             'update': update_whale_instant_price_setter,
-            'graph': [],
+            'graph': {
+                'eth': [],
+                'noi': [],
+            },
         },
         'whale_instant_rate_setter': {
             'num': WHALE_INSTANT_RATE_SETTER.NUM,
             'create': create_whale_instant_rate_setters,
             'update': update_whale_instant_rate_setter,
-            'graph': [],
+            'graph': {
+                'eth': [],
+                'noi': [],
+            },
         },
         'noi_truster': {
             'num': NOI_TRUSTER.NUM,
             'create': create_noi_trusters,
             'update': update_noi_truster,
-            'graph': [],
+            'graph': {
+                'eth': [],
+                'noi': [],
+            },
         },
         'random_trader': {
             'num': RANDOM_TRADER.NUM,
             'create': create_random_traders,
             'update': update_random_trader,
-            'graph': [],
+            'graph': {
+                'eth': [],
+                'noi': [],
+            },
         },
         'whale_longterm_price_setter': {
             'num': WHALE_LONGTERM_PRICE_SETTER.NUM,
             'create': create_whale_longterm_price_setters,
             'update': update_whale_longterm_price_setter,
-            'graph': [],
+            'graph': {
+                'eth': [],
+                'noi': [],
+            },
         }
     }
 
@@ -81,8 +108,10 @@ class Agent_Utils:
 
     def calculate_all_amounts(self, previous_state):
         for i in range(len(names)):
-            eth = calculate_agents_amount(previous_state, names[i], nums[i])
-            self.agents_dict[names[i]]['graph'].append(eth)
+            eth, noi = calculate_agents_amount(previous_state, names[i], nums[i])
+            self.agents_dict[names[i]]['graph']['eth'].append(eth)
+            self.agents_dict[names[i]]['graph']['noi'].append(noi)
+
     
     def create_agents(self, agents):
         for i in range(len(names)):
@@ -90,12 +119,13 @@ class Agent_Utils:
 
 def calculate_agents_amount(previous_state, agent_name, num):
     eth_sum = 0
+    noi_sum = 0
     for i in range(num):
         name = agent_name + str(i)
         agent = previous_state['agents'][name]
         eth_sum += agent.eth
+        noi_sum += agent.noi
         if isinstance(agent, CDP_Holder) and agent.opened_position:
+            noi_sum += agent.cdp_position.debt_noi
             eth_sum += agent.cdp_position.collateral_eth
-        # if isinstance(agent, Whale_Longterm_Price_Setter):
-        #     eth_sum += agent.noi/ONE_ETH
-    return eth_sum
+    return eth_sum, noi_sum

@@ -1,4 +1,4 @@
-from classes.eth_data import ETHData
+from classes.ext_data import ExtData
 from typing import Tuple
 
 NUM_BATCHES = 1
@@ -9,7 +9,7 @@ class Pool:
         self.eth = eth_amount
     
     # returns eth and noi amount of how much the pool has been changed(absolute value)
-    def put_eth_get_noi(self, eth_add, price_station, eth_data: ETHData) -> Tuple[float, float]:
+    def put_eth_get_noi(self, eth_add, price_station, ext_data: ExtData) -> Tuple[float, float]:
         if eth_add < 0:
             assert False, "eth_add must be positive"
         noi_sum = 0
@@ -21,11 +21,11 @@ class Pool:
             self.noi -= noi_val
             noi_sum += noi_val
 
-        price_station.update_mp(self, eth_data)
+        price_station.update_mp(self, ext_data)
         return eth_add, noi_sum
 
     # returns eth and noi amount of how much the pool has been changed(absolute value)
-    def put_noi_get_eth(self, noi_add, price_station, eth_data: ETHData) -> Tuple[float, float]:
+    def put_noi_get_eth(self, noi_add, price_station, ext_data: ExtData) -> Tuple[float, float]:
         if noi_add < 0:
             assert False, "noi_add must be positive"
         eth_sum = 0
@@ -37,7 +37,7 @@ class Pool:
             self.eth -= eth_val
             eth_sum += eth_val
 
-        price_station.update_mp(self, eth_data)
+        price_station.update_mp(self, ext_data)
         return eth_sum, noi_add
     
     #given the resulting eth, calculates how much noi should agent put into the pool

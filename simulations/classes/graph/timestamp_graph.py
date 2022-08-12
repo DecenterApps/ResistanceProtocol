@@ -17,16 +17,21 @@ class Timestamp_Graph(Graph):
 
         self.agent_utils.calculate_all_amounts(previous_state)
     
-    def plot(self):
-        Graph.plotGraph1(self, 'images/timestamp_graph.png')
-        self.plotGraph2()
+    def plot(self, ext_data: ExtData):
+        Graph.plotGraph1(self, 'images/timestamp_graph.png', ext_data, 'timestamp_graph')
+        self.plot_agents_balance()
 
-    def plotGraph2(self):
+
+    def plot_agents_balance(self):
         cnt = len(self.agent_utils.names)
-        figure, axis = plt.subplots(cnt, 1, figsize=(8,12))
-        for i in range(cnt):
-            axis[i].plot(self.agent_balances[self.agent_utils.names[i]])
-            axis[i].set_title(self.agent_utils.names[i])
+        figure, axis = plt.subplots(cnt, 2, figsize=(12,12))
+        self.plot_axis(axis, 0, cnt, 'eth')
+        self.plot_axis(axis, 1, cnt, 'noi')
         plt.tight_layout()
 
         plt.savefig('images/agents.png')
+
+    def plot_axis(self, axis, index, cnt, token_name):
+        for i in range(cnt):
+            axis[i][index].plot(self.agent_balances[self.agent_utils.names[i]][token_name])
+            axis[i][index].set_title(self.agent_utils.names[i] + "_" + token_name)

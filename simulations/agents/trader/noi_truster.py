@@ -17,8 +17,8 @@ class Noi_Truster(Trader):
     def buy_eth_condition(self, price_station):
         return False
 
-def update_noi_truster(agents, price_station: PriceStation, pool: Pool, eth_data: ETHData):
-    update_trader(agents, price_station, pool, eth_data, 'noi_truster', NOI_TRUSTER)
+def update_noi_truster(agents, price_station: PriceStation, pool: Pool, ext_data: ExtData):
+    update_trader(agents, price_station, pool, ext_data, 'noi_truster', NOI_TRUSTER)
 
 def create_new_noi_truster(name, eth_amount, noi_amount):
     return Noi_Truster(name, eth_amount, noi_amount, get_noi_truster_perc_amount(), get_noi_truster_relative_gap())

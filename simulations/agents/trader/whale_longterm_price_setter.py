@@ -74,8 +74,8 @@ class Whale_Longterm_Price_Setter(Trader):
             self.perc_amount = (self.max_val * q) / self.noi
         return True
 
-def update_whale_longterm_price_setter(agents, price_station: PriceStation, pool: Pool, eth_data: ETHData):
-    update_trader(agents, price_station, pool, eth_data, 'whale_longterm_price_setter', WHALE_LONGTERM_PRICE_SETTER)
+def update_whale_longterm_price_setter(agents, price_station: PriceStation, pool: Pool, ext_data: ExtData):
+    update_trader(agents, price_station, pool, ext_data, 'whale_longterm_price_setter', WHALE_LONGTERM_PRICE_SETTER)
 
 def create_new_whale_longterm_price_setter(name, eth_amount, noi_amount, target_perc, period):
     return Whale_Longterm_Price_Setter(name, eth_amount, noi_amount, target_perc, period)

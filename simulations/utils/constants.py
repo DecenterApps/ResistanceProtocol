@@ -2,9 +2,9 @@
 ONE_ETH = 500
 
 class PRICE_TRADER:
-    NUM = 100
+    NUM = 300
 
-    ETH_AMOUNT = 1
+    ETH_AMOUNT = 4
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
 
     #percentage of traders resource when trading
@@ -13,14 +13,14 @@ class PRICE_TRADER:
     SAFE = 1 - MODERATE - RISKY
 
     # relative difference between redemption price and market price when trader is activated
-    BOUND_HIGH = 0.3
+    BOUND_HIGH = 0.5
     BOUND_MID = 0.2
     BOUND_LOW = 1 - BOUND_HIGH - BOUND_MID
 
 class RATE_TRADER:
-    NUM = 0
+    NUM = 200
 
-    ETH_AMOUNT = 1
+    ETH_AMOUNT = 2
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
 
     #percentage of traders resource when trading
@@ -31,12 +31,12 @@ class RATE_TRADER:
     # redemption rate when trader is activated
     # high - high activity
     # low - low activity
-    RR_HIGH = 0.4
+    RR_HIGH = 0.2
     RR_MID = 0.25
     RR_LOW = 1 - RR_HIGH - RR_MID
 
 class LEVERAGER:
-    NUM = 400
+    NUM = 200
 
     ETH_AMOUNT = 4
 
@@ -65,9 +65,9 @@ class LEVERAGER:
     RELATIVE_GAP_SAFE = 0.5
 
 class SAFE_OWNER:
-    NUM = 100
+    NUM = 200
 
-    ETH_AMOUNT = 5
+    ETH_AMOUNT = 2
 
     RISKY = 0.2
     MODERATE = 0.3
@@ -94,9 +94,9 @@ class SAFE_OWNER:
     RELATIVE_GAP_SAFE = 0.5
 
 class WHALE_INSTANT_PRICE_SETTER:
-    NUM = 0
+    NUM = 1
 
-    ETH_AMOUNT = 75
+    ETH_AMOUNT = 50
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
 
     # relative difference between redemption price and market price when whale is activated
@@ -107,7 +107,7 @@ class WHALE_INSTANT_PRICE_SETTER:
 class WHALE_INSTANT_RATE_SETTER:
     NUM = 0
 
-    ETH_AMOUNT = 75
+    ETH_AMOUNT = 30
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
 
     # relative difference between redemption price and market price when whale is activated
@@ -132,15 +132,15 @@ class NOI_TRUSTER:
     BOUND_LOW = 1 - BOUND_HIGH - BOUND_MID
 
 class RANDOM_TRADER:
-    NUM = 10
+    NUM = 100
 
     ETH_AMOUNT = 2
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
 
 class WHALE_LONGTERM_PRICE_SETTER:
-    NUM = 1
+    NUM = 0
 
-    ETH_AMOUNT = 300
+    ETH_AMOUNT = 20
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
 
     # targetted difference between redemption price and market price
@@ -158,12 +158,21 @@ class POOL:
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
 
 class REDEMPTION_RATES:
+    MIN_RR = (1 + 1e-8*(-0.08), 1 + 1e-8*0.08)
     LOW_RR = (1 + 1e-8*(-0.2), 1 + 1e-8*0.2)
     MID_RR = (1 + 1e-8*(-0.5), 1 + 1e-8*0.5)
     HIGH_RR = (1 + 1e-8*(-0.9), 1 + 1e-8*0.9)
+
+class PID_CONTROLLER:
+    TIME_STEP = 10000
+    NEGATIVE_RATE_LIMIT = 0.99
 
 MONTE_CARLO_SIMULATIONS = 1
 
 LIQUIDATION_RATIO = 1.2
 
 INF = 10000000000
+
+TWAP_TIMESTAMPS = 100
+
+SIMULATION_TIMESTAMPS = 999

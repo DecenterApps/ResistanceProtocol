@@ -20,8 +20,8 @@ class Whale_Instant_Rate_Setter(Trader):
     def buy_eth_condition(self, price_station):
         return price_station.rr > self.rr_high and self.noi > 0.001
 
-def update_whale_instant_rate_setter(agents, price_station: PriceStation, pool: Pool, eth_data: ETHData):
-    update_trader(agents, price_station, pool ,eth_data, 'whale_instant_rate_setter', WHALE_INSTANT_RATE_SETTER)
+def update_whale_instant_rate_setter(agents, price_station: PriceStation, pool: Pool, ext_data: ExtData):
+    update_trader(agents, price_station, pool ,ext_data, 'whale_instant_rate_setter', WHALE_INSTANT_RATE_SETTER)
 
 def create_new_whale_instant_rate_setter(name, eth_amount, noi_amount):
     return Whale_Instant_Rate_Setter(name, eth_amount, noi_amount, get_whale_instant_rate_setter_relative_gap())
