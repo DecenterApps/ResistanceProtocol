@@ -72,6 +72,12 @@ class LEVERAGER:
     # how much does predicted price affect leverager's decision
     PREDICTION_STRENGTH = 0.5
 
+    # percent of leveragers that have high/mid/low threshold
+    # prediction threshold is relative difference between current eth price and predicted eth price when leverager is activated
+    PREDICTION_THRESHOLD_HIGH = 0.3
+    PREDICTION_THRESHOLD_MID = 0.15
+    PREDICTION_THRESHOLD_LOW = 0.09
+
 
 class SAFE_OWNER:
     NUM = 200
@@ -109,6 +115,14 @@ class SAFE_OWNER:
 
     # how much does predicted price affect safe owner's decision
     PREDICTION_STRENGTH = 0.5
+
+    # percent of safe owners that have high/mid/low threshold
+    # prediction threshold is relative difference between current eth price and predicted eth price when safe owner is activated
+    PREDICTION_THRESHOLD_HIGH = 0.3
+    PREDICTION_THRESHOLD_MID = 0.15
+    PREDICTION_THRESHOLD_LOW = 0.09
+
+    
 
 class WHALE_INSTANT_PRICE_SETTER:
     NUM = 1

@@ -6,7 +6,7 @@ if __name__ == "__main__":
     ether_data = []
     ether_data_high = []
     ether_data_low = []
-    with open('../dataset/historic_ether_price.csv', mode='r') as csvfile:
+    with open('../../dataset/historic_ether_price.csv', mode='r') as csvfile:
         csv_reader = csv.DictReader(csvfile)
         line_count = 0
         for row in csv_reader:
@@ -24,7 +24,7 @@ if __name__ == "__main__":
             value = random.random()*(ether_data_high[i] - ether_data_low[i]) + ether_data_low[i]
             ether.append(value)
 
-    with open('../dataset/ether_data.csv', mode='w') as csvfile:
+    with open('../../dataset/ether_data.csv', mode='w') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(ether)
 
@@ -32,4 +32,4 @@ if __name__ == "__main__":
     plt.figure()
     plt.plot(ether)
     plt.title("ETHER")
-    plt.savefig("../documentation_images/real_world_ether.png")
+    plt.savefig("../../images/real_world_ether.png")

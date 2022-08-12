@@ -5,7 +5,8 @@ import csv
 from regression import *
 
 TWAP_LEN = 10
-SAMPLES = 3000
+SAMPLES = 1000
+TRAIN = 500
 
 time = np.arange(SAMPLES)
 
@@ -38,7 +39,7 @@ def get_prediction(twap_eth_dollar, training_ind, test_ind):
 
 if __name__ == "__main__":
     eth_dollar, twap_eth_dollar = ETH_Dollar_value()
-    prediction = get_prediction(twap_eth_dollar, 1500, SAMPLES)
+    prediction = get_prediction(twap_eth_dollar, TRAIN, SAMPLES)
     with open('../../dataset/eth_dollar.csv', 'w') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(eth_dollar)
@@ -47,7 +48,7 @@ if __name__ == "__main__":
         writer.writerow(twap_eth_dollar)
     plt.figure()
     plt.plot(time, eth_dollar, time,  twap_eth_dollar, time, prediction)
-    plt.axvline(x = 1500, color = 'b', label = 'axvline - full height')
+    plt.axvline(x = TRAIN, color = 'b', label = 'axvline - full height')
     plt.legend(['eth_dollar', 'twap_eth_dollar', 'prediction'])
     plt.title("ETH -> dollar")
     plt.xlabel("time")
