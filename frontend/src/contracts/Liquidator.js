@@ -80,7 +80,7 @@ export const ABI= [
     ],
     "name": "liquidateCDP",
     "outputs": [],
-    "stateMutability": "payable",
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -166,4 +166,4 @@ export const ABI= [
     "type": "receive"
   }
 ]
-export const address= "0x987e855776C03A4682639eEb14e65b3089EE6310"
+export const address= "0x7580708993de7CA120E957A62f26A5dDD4b3D8aC"

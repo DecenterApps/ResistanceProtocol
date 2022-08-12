@@ -441,14 +441,14 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
                     {
                       fill: true,
                       label: "Market price",
-                      data: marketPriceHistory.map((e) => e["price"]),
+                      data: marketPriceHistory.map((e) => new Decimal(e["price"]).div(10**8).toString()),
                       borderColor: "rgb(53, 162, 235)",
                       backgroundColor: "rgba(53, 162, 235, 0.5)",
                     },
                     {
                       fill: true,
                       label: "Redemption price",
-                      data: redemptionPriceHistory.map((e) => e["price"]),
+                      data: redemptionPriceHistory.map((e) => new Decimal(e["price"]).div(10**27).toString()),
                       borderColor: "rgb(255, 99, 132)",
                       backgroundColor: "rgba(255, 99, 132, 0.5)",
                     },

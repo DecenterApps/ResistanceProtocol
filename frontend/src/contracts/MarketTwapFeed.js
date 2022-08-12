@@ -15,6 +15,16 @@ export const ABI= [
         "internalType": "address",
         "name": "_lendingPool",
         "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_ethTwapFeed",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_rateSetter",
+        "type": "address"
       }
     ],
     "stateMutability": "nonpayable",
@@ -155,4 +165,4 @@ export const ABI= [
     "type": "function"
   }
 ]
-export const address= "0xE8F7d98bE6722d42F29b50500B0E318EF2be4fc8"
+export const address= "0x4593ed9CbE6003e687e5e77368534bb04b162503"

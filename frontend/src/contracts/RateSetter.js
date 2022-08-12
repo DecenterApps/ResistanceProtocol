@@ -18,16 +18,6 @@ export const ABI= [
       },
       {
         "internalType": "address",
-        "name": "_ethTwapFeed",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "_marketTwapFeed",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
         "name": "_cpiDataFeed",
         "type": "address"
       }
@@ -37,7 +27,12 @@ export const ABI= [
   },
   {
     "inputs": [],
-    "name": "CDPManager__NotOwner",
+    "name": "RateSetter__NotAuthorized",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "RateSetter__NotOwner",
     "type": "error"
   },
   {
@@ -134,6 +129,38 @@ export const ABI= [
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
+    ],
+    "name": "addAuthorization",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "authorizedAccounts",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "getCpiData",
     "outputs": [
@@ -224,6 +251,19 @@ export const ABI= [
   {
     "inputs": [
       {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
+    ],
+    "name": "removeAuthorization",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "uint256",
         "name": "x",
         "type": "uint256"
@@ -275,7 +315,18 @@ export const ABI= [
     "type": "function"
   },
   {
-    "inputs": [],
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_ethTwapPrice",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_noiMarketPrice",
+        "type": "uint256"
+      }
+    ],
     "name": "updatePrices",
     "outputs": [],
     "stateMutability": "nonpayable",
@@ -289,4 +340,4 @@ export const ABI= [
     "type": "function"
   }
 ]
-export const address= "0x2c8ED11fd7A058096F2e5828799c68BE88744E2F"
+export const address= "0x975Ab64F4901Af5f0C96636deA0b9de3419D0c2F"

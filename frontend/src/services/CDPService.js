@@ -57,6 +57,7 @@ const getCRs = async (library, cdps, setCDPs) => {
 
 const mintCDP = async (amount, library, selectedCDP) => {
   const contractCDPManager = new ethers.Contract(address, ABI);
+  console.log(ethers.utils.parseEther(amount.toString()))
   const txMint = await contractCDPManager
     .connect(library.getSigner())
     .mintFromCDP(selectedCDP, ethers.utils.parseEther(amount.toString()));
