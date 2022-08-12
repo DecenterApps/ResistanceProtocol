@@ -19,7 +19,6 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     }
 
     let ethTwapFeedAddress = (await ethers.getContract("EthTwapFeed", deployer)).address;
-    let marketTwapFeedAddress = (await ethers.getContract("MarketTwapFeed", deployer)).address;
 
     const multiSigWalletAddress = (await ethers.getContract("MultiSigWallet", deployer)).address;
 
@@ -35,8 +34,6 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
             multiSigWalletAddress,
             cdpManager.address,
             absPiController.address,
-            ethTwapFeedAddress,
-            marketTwapFeedAddress,
             cpiDataFeedAddress,
         ],
         log: true,
@@ -51,8 +48,6 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
             multiSigWalletAddress,
             cdpManager.address,
             absPiController.address,
-            ethTwapFeedAddress,
-            marketTwapFeedAddress,
             cpiDataFeedAddress,
         ]);
     }

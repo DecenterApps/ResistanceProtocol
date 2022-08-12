@@ -4,9 +4,12 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
+import "./RateSetter.sol";
+import "./EthTwapFeed.sol";
+
 error MarketTwapFeed__TimeIntervalDidNotPass();
 
-abstract contract LengingPoolLike {
+abstract contract LendingPoolLike {
     function getReserves()
         public
         view
@@ -25,7 +28,10 @@ contract MarketTwapFeed {
 
     // hardcode Chainlink NOI/USD Price Feed
     AggregatorV3Interface public daiPriceFeed;
-    LengingPoolLike private lengingPool;
+    LendingPoolLike private lendingPool;
+    EthTwapFeed private ethTwapFeed;
+    RateSetter private rateSetter;
+
     uint256 private lastUpdateTimestamp;
     uint256 private prevCumulativeValue = 0;
     uint256 private prevPrice;
@@ -59,7 +65,9 @@ contract MarketTwapFeed {
     constructor(
         uint256 _updateTimeInterval,
         uint256 _twapWindowSize,
-        address _lendingPool
+        address _lendingPool,
+        address _ethTwapFeed,
+        address _rateSetter
     ) {
         lastUpdateTimestamp = block.timestamp;
 
@@ -69,7 +77,9 @@ contract MarketTwapFeed {
 
         updateTimeInterval = _updateTimeInterval;
         twapWindowSize = _twapWindowSize + 1;
-        lengingPool = LengingPoolLike(_lendingPool);
+        lendingPool = LendingPoolLike(_lendingPool);
+        ethTwapFeed = EthTwapFeed(_ethTwapFeed);
+        rateSetter = RateSetter(_rateSetter);
 
         // set initial stuff
         snapshotHistory.push(Snapshot(0, block.timestamp));
@@ -116,6 +126,13 @@ contract MarketTwapFeed {
         uint256 marketPrice = getMarketPrice();
         prevPrice = marketPrice;
         lastUpdateTimestamp = block.timestamp;
+
+        //update ethTwapFeed Contract
+        uint256 ethTwap = ethTwapFeed.updateAndGetTwap();
+
+        //update prices in rateSetter
+        rateSetter.updatePrices(ethTwap, tmpMarketTwapPrice);
+
         emit UpdateValues(
             msg.sender,
             marketPrice,
@@ -135,7 +152,7 @@ contract MarketTwapFeed {
      * @notice calculate the market price
      */
     function getMarketPrice() public view returns (uint256) {
-        (uint256 noiCount, uint256 daiCount, ) = lengingPool.getReserves();
+        (uint256 noiCount, uint256 daiCount, ) = lendingPool.getReserves();
 
         uint256 daiPrice = getDaiPrice();
 

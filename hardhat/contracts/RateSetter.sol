@@ -6,8 +6,6 @@ import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 import "./CDPManager.sol";
 import "./AbsPiController.sol";
-import "./EthTwapFeed.sol";
-import "./MarketTwapFeed.sol";
 
 abstract contract CPITrackerOracle {
     function currPegPrice() external view virtual returns (uint256);
@@ -15,6 +13,8 @@ abstract contract CPITrackerOracle {
 
 error RateSetter__UnknownParameter();
 error RateSetter__UnknownContract();
+error RateSetter__NotOwner();
+error RateSetter__NotAuthorized();
 
 contract RateSetter {
     address public immutable owner;
@@ -30,8 +30,6 @@ contract RateSetter {
     CDPManager private CDPManager_CONTRACT;
     AbsPiController private AbsPiController_CONTRACT;
 
-    EthTwapFeed private ethTwapFeed;
-    MarketTwapFeed private marketTwapFeed;
     CPITrackerOracle private cpiDataFeed;
 
     // EVENTS
@@ -42,7 +40,23 @@ contract RateSetter {
     // AUTH
 
     modifier isOwner() {
-        if (owner != msg.sender) revert CDPManager__NotOwner();
+        if (owner != msg.sender) revert RateSetter__NotOwner();
+        _;
+    }
+
+    mapping(address => bool) public authorizedAccounts;
+
+    function addAuthorization(address account) external isOwner {
+        authorizedAccounts[account] = true;
+    }
+
+    function removeAuthorization(address account) external isOwner {
+        authorizedAccounts[account] = false;
+    }
+
+    modifier isAuthorized() {
+        if (authorizedAccounts[msg.sender] == false)
+            revert RateSetter__NotAuthorized();
         _;
     }
 
@@ -67,18 +81,22 @@ contract RateSetter {
     function modifyContracts(bytes32 _contract, address _newAddress) external isOwner {
         if (_contract == "CDPManager") CDPManager_CONTRACT = CDPManager(_newAddress);
         else if (_contract == "AbsPiController") AbsPiController_CONTRACT = AbsPiController(_newAddress);
-        else if (_contract == "EthTwapFeed") ethTwapFeed = EthTwapFeed(_newAddress);
         else if (_contract == "CPITrackerOracle") cpiDataFeed= CPITrackerOracle(_newAddress);
         else revert RateSetter__UnknownContract();
         emit ModifyContract(_contract, _newAddress);
     }
 
+    /*
+     * @param _owner owner of the contract
+     * @param _cdpManager contract address
+     * @param _AbsPiController PI controller address
+     * @param _marketTwapFeed market contract address
+     * @param _cpiDataFeed external cpiDataFeed contract address
+     */
     constructor(
         address _owner,
         address _cdpManager,
         address _AbsPiController,
-        address _ethTwapFeed,
-        address _marketTwapFeed,
         address _cpiDataFeed
     ) {
         owner = _owner;
@@ -86,9 +104,6 @@ contract RateSetter {
         AbsPiController_CONTRACT = AbsPiController(_AbsPiController);
         redemptionPrice = (314 * RAY) / 100;
         redemptionRate = RAY;
-
-        ethTwapFeed = EthTwapFeed(_ethTwapFeed);
-        marketTwapFeed = MarketTwapFeed(_marketTwapFeed);
 
         cpiDataFeed = CPITrackerOracle(_cpiDataFeed);
 
@@ -98,19 +113,15 @@ contract RateSetter {
     /*
      * @notice updates rates with values gathered from PI controllers
      */
-    function updatePrices() public {
-        // gather rate from market/redemption controller
-        //uint256 noiMarketPrice = 5 * 10**18; // should get it from oracle
+    function updatePrices(uint256 _ethTwapPrice, uint256 _noiMarketPrice) public isAuthorized{
 
-        uint256 noiMarketPrice = marketTwapFeed.getTwap();
-
-        ethPrice = ethTwapFeed.getTwap();
+        ethPrice = _ethTwapPrice;
 
         // reward caller
         uint256 tlv = AbsPiController_CONTRACT.tlv();
         uint256 iapcr = rpower(AbsPiController_CONTRACT.pscl(), tlv, RAY);
         uint256 validated = AbsPiController_CONTRACT.computeRate(
-            noiMarketPrice,
+            _noiMarketPrice,
             redemptionPrice,
             iapcr
         );
