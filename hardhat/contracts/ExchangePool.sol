@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0 <0.9.0;
-import "./interfaces/Interfaces-ExchangePool.sol";
+import "./interfaces/IERC20.sol";
+import "./interfaces/IFactory.sol";
+import "./interfaces/IPool.sol";
+import "./interfaces/IRouter.sol";
 import "hardhat/console.sol";
 
 contract ExchangePool {
