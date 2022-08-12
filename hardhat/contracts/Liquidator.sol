@@ -6,9 +6,10 @@ import "./Parameters.sol";
 import "./CDPManager.sol";
 import "./NOI.sol";
 
-import "hardhat/console.sol";
-
 error Liquidator__CDPNotEligibleForLiquidation();
+
+error Liquidator__SendToTreasuryFailed();
+error Liquidator__SendToUserFailed();
 
 contract Liquidator{
 
@@ -52,8 +53,6 @@ contract Liquidator{
         if(!isEligibleForLiquidation(_cdpIndex)) 
             revert Liquidator__CDPNotEligibleForLiquidation();
 
-        cdpManager.liquidatePosition(_cdpIndex, msg.sender);
-
         uint256 ethRp = CDPManager(cdpManagerContractAddress).ethRp();
         uint256 rpEth = (EIGHTEEN_DECIMAL_NUMBER * EIGHTEEN_DECIMAL_NUMBER) / ethRp;
 
@@ -64,17 +63,20 @@ contract Liquidator{
         uint256 treasuryPart = (total-totalDebt*rpEth/EIGHTEEN_DECIMAL_NUMBER)*treasuryPercent/100;
         uint256 liquidatorPart = total-treasuryPart;
 
+        cdpManager.liquidatePosition(_cdpIndex, msg.sender);
+
         // send part to the Treasury
         (bool sentTreasury, ) = payable(treasuryContractAddress).call{
             value: treasuryPart
         }("");
-        if(sentTreasury == false) revert();
+        if(sentTreasury == false) revert Liquidator__SendToTreasuryFailed();
         
         // send part to the user that started liquidation 
         (bool sentLiquidator, ) = payable(msg.sender).call{
             value: liquidatorPart
         }("");
-        if(sentLiquidator == false) revert();
+        if(sentLiquidator == false) revert Liquidator__SendToUserFailed();
+
 
         emit LiquidateCDP(_cdpIndex,cdp.lockedCollateral,cdp.generatedDebt,msg.sender);
     }
