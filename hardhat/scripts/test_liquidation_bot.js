@@ -21,7 +21,7 @@ async function OpenCDP() {
 async function MintCDP(index) {
     const txmintFromCDPManager = await CDPManagerContractObj.connect(
         senderAccounts[1]
-    ).mintFromCDP(index, "1000");
+    ).mintFromCDP(index,  ethers.utils.parseEther("8000"));
     await txmintFromCDPManager.wait();
 }
 
@@ -46,14 +46,15 @@ async function main() {
     CDPManagerContractObj = await ethers.getContract("CDPManager", deployer);
 
     EthPriceFeedMock = await ethers.getContract("EthPriceFeedMock", deployer);
-
-    SetEthPrice("120000000000")
     
     senderAccounts.push((await ethers.getSigners())[1]);
     senderAccounts.push((await ethers.getSigners())[2]);
     senderAccounts.push((await ethers.getSigners())[3]);
     senderAccounts.push((await ethers.getSigners())[4]);
     
+
+    SetEthPrice("1000")
+
     const cdp1 = await OpenCDP();
     const cdp2 = await OpenCDP();
 
@@ -63,12 +64,12 @@ async function main() {
 
     await MintCDP(cdp2)
 
-    SetEthPrice("12000000000")
-    SetEthPrice("1200000000")
+    // SetEthPrice("12000000000")
+    // SetEthPrice("1200000000")
 
     await CloseCDP(cdp3);
 
-    SetEthPrice("10000")
+    // SetEthPrice("10000")
 }
 
 main().catch((error) => {

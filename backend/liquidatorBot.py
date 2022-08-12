@@ -1,4 +1,5 @@
 from asyncio import constants
+from distutils import dep_util
 from logging import lastResort
 from web3 import Web3
 from apscheduler.schedulers.background import BackgroundScheduler, BlockingScheduler
@@ -13,6 +14,7 @@ eventLoopInterval = 2
 
 minimumBalance = 100000000000000000  # 0.1 ETH
 
+FeeChangeRate = 0.02
 
 lastBlock = -1
 
@@ -46,7 +48,7 @@ marketTwapFeed = web3.eth.contract(
 def liquidateCDP(cdpIndex, amount):
     print("Approving Coins...")
     try:
-        approve_tx = noiContract.functions.approve(liquidatorContract.address, amount).buildTransaction(
+        approve_tx = noiContract.functions.approve(cdpManagerContract.address, amount).buildTransaction(
             {
                 'from': account_from['address'],
                 'nonce': web3.eth.get_transaction_count(account_from['address']),
@@ -60,6 +62,7 @@ def liquidateCDP(cdpIndex, amount):
             f'Approving successful with hash: {tx_receipt.transactionHash.hex()}')
     except:
         print('Failed to approve amount!')
+        return
 
     print(f'Liquidating CDP...')
     try:
@@ -78,21 +81,28 @@ def liquidateCDP(cdpIndex, amount):
         tx_receipt = web3.eth.wait_for_transaction_receipt(tx_hash)
         print(
             f'Liquidation successful with hash: { tx_receipt.transactionHash.hex() }')
+        balance = web3.eth.get_balance(account_from['address'])
+        print(f'New Bot Wallet Balance: {web3.fromWei(balance, "ether")} ETH')
     except:
         print('Tx failed')
 
-    balance = web3.eth.get_balance(account_from['address'])
-    print(f'Bot Wallet Balance: {web3.fromWei(balance, "ether")} ETH')
-
 
 def checkCDPsForLiquidation():
-
+    global FeeChangeRate
+    print("Checking CDPs for liquidation...")
     for cdpKey in CDPList:
         cdpIndex = CDPList[cdpKey]['_cdpIndex']
-        status = liquidatorContract.functions.isEligibleForLiquidation(cdpIndex).call()
+        status = liquidatorContract.functions.isEligibleForLiquidation(
+            cdpIndex).call()
         if status == True:
-            debtToPay = cdpManagerContract.functions.getDebtWithSF(cdpIndex).call()
+            print("Liquidating cdp with index " + str(cdpIndex))
+            debtToPay = cdpManagerContract.functions.getDebtWithSF(
+                cdpIndex).call()
+            print(debtToPay)
+            debtToPay = int(debtToPay) + int(debtToPay*FeeChangeRate)
+            print(debtToPay)
             liquidateCDP(cdpIndex, debtToPay)
+
 
 def fetchEvents():
     global lastBlock
@@ -109,9 +119,10 @@ def fetchEvents():
     UpdateValuesEvent = marketTwapFeed.events.UpdateValues.createFilter(
         fromBlock=lastBlock)
 
-    events = CDPOpenEvent.get_all_entries() + CDPCloseEvent.get_all_entries() + UpdateValuesEvent.get_all_entries()
+    events = CDPOpenEvent.get_all_entries() + CDPCloseEvent.get_all_entries() + \
+        UpdateValuesEvent.get_all_entries()
 
-    eventsSorted = sorted(events, key=lambda d: d['blockNumber']) 
+    eventsSorted = sorted(events, key=lambda d: d['blockNumber'])
 
     for event in eventsSorted:
         lastBlock = event['blockNumber']
@@ -128,8 +139,6 @@ def fetchEvents():
             del CDPList[indx]
         elif event['event'] == 'UpdateValues':
             checkCDPsForLiquidation()
-
-
 
 
 if __name__ == "__main__":
