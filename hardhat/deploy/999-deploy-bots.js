@@ -66,16 +66,6 @@ async function prepare_liquidation_bot() {
       ethers.utils.parseEther("100000")
     );
     await mintTx.wait();
-  
-    console.log("Bot Balance:");
-    console.log(
-      "ETH: ",
-      
-    );
-    console.log(
-      "NOI: ",
-      ethers.utils.formatEther(await NOI.balanceOf(botSigner.address))
-    );
 
     const LiquidationBotBalance = ethers.utils.formatEther(await provider.getBalance(botSigner.address))
     const LiquidationBotBalanceNOI = ethers.utils.formatEther(await NOI.balanceOf(botSigner.address))
