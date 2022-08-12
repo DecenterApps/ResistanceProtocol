@@ -29,4 +29,4 @@ if __name__ == "__main__":
     plt.title("CPI value per timestamp")
     plt.xlabel("time")
     plt.ylabel("Value of CPI")
-    plt.savefig("../../images/cpi_value.png")
+    plt.savefig("../../images/external_data/artificial/cpi_value.png")

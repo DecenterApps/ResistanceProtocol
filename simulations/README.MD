@@ -2,10 +2,15 @@
 
 ## Creating external data
 
-Files /dataset/historic_ether_price.csv and /dataset/historic_cpi_data.csv are real world ether price and cpi data. To use these two files run scripts /utils/ether_data_extractor.py and /utils/cpi_data_extractor.py.
-These two scripts will make two files /dataset/ether_data.csv and /dataset/cpi_data.csv, in the format needed in simulation.
-If you prefer artificial data you can follow next steps. 
-To create /dataset folder with cpi values and eth/usd market price, run script utils/generate_data/generate_data.py
+Before executing the simulation, external data needs to be created. External data are ETH/USD price and CPI values. NOI market does not affect these values, so they are created independently.
+
+### Historical data
+
+Files /dataset/historical/ether_price.csv and /dataset/historical/cpi_data.csv are real world ether price and cpi data. To use these two files, execute the script **/utils/historical_data/generate_historical_data.py**. This script will make two files /dataset/ether_data.csv and /dataset/cpi_data.csv, in the format needed in simulation, and plot 2 graphs in /images/external_data/historical/ folder.
+
+### Artificial data
+
+To create /dataset folder with cpi values and eth/usd market price, run script **utils/artificial_data/generate_artificial_data.py**.
 This will create 2 files in /dataset folder which will be needed when starting the simulation. Also, you will have 2 plots in /images folder to view the data.
 You can also call the scripts generate_eth_value.py and generate_cpi_value.py independently.
 

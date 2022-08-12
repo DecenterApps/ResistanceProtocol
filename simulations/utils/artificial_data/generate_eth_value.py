@@ -43,7 +43,7 @@ if __name__ == "__main__":
     with open('../../dataset/eth_dollar.csv', 'w') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(eth_dollar)
-    with open('../../dataset/twap_eth_dollar.csv', 'w') as csvfile:
+    with open('../../dataset/simulation_data/eth_dollar.csv', 'w') as csvfile:  #twap eth price
         writer = csv.writer(csvfile)
         writer.writerow(twap_eth_dollar)
     plt.figure()
@@ -53,4 +53,5 @@ if __name__ == "__main__":
     plt.title("ETH -> dollar")
     plt.xlabel("time")
     plt.ylabel("Value of ETH")
-    plt.savefig("../../images/eth_dollar.png")
+    plt.savefig("../../images/external_data/artificial/eth_dollar.png")
+    plt.savefig("../../images/simulation_data/eth_dollar.png")
