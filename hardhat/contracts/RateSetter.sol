@@ -104,7 +104,7 @@ contract RateSetter {
         owner = _owner;
         CDPManager_CONTRACT = CDPManager(_cdpManager);
         AbsPiController_CONTRACT = AbsPiController(_AbsPiController);
-        redemptionPrice = (314 * RAY) / 100;
+        redemptionPrice = (100 * RAY) / 100;
         redemptionRate = RAY;
 
         cpiDataFeed = CPITrackerOracle(_cpiDataFeed);
@@ -119,7 +119,7 @@ contract RateSetter {
 
         ethPrice = _ethTwapPrice;
 
-        // reward caller
+        // reward caller 
         uint256 tlv = AbsPiController_CONTRACT.tlv();
         uint256 iapcr = rpower(AbsPiController_CONTRACT.pscl(), tlv, RAY);
         uint256 validated = AbsPiController_CONTRACT.computeRate(
@@ -140,10 +140,12 @@ contract RateSetter {
             redemptionPrice
         );
         emit NewPrices(_noiMarketPrice, redemptionPrice);
+
         redemptionPriceUpdateTime = block.timestamp;
 
         // set Eth/Redemption Rate
         CDPManager_CONTRACT.setEthRp(_ethTwapPrice *(10**19)* EIGHTEEN_DECIMAL_NUMBER / redemptionPrice);
+
     }
 
     function updateRatesInternal() public {}
