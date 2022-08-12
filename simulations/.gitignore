@@ -2,6 +2,7 @@ dataset/*
 images/
 
 !dataset/historic_cpi_data.csv
+!dataset/historic_ether_price.csv
 
 __pycache__/
 
