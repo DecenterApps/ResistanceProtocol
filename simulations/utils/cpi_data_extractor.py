@@ -1,4 +1,3 @@
-import numpy as np
 import csv
 
 if __name__ == "__main__":
@@ -25,7 +24,7 @@ if __name__ == "__main__":
         for j in range(28*12):
             cpi.append(cpi[-1]*relative_change**(1/pow))
 
-    with open('../dataset/cpi_data.csv', mode='w') as csvfile:
+    with open('../dataset/real_cpi_value.csv', mode='w') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(cpi)
     
