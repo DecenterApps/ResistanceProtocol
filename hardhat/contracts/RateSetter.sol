@@ -139,11 +139,11 @@ contract RateSetter {
             ),
             redemptionPrice
         );
-        emit NewPrices(noiMarketPrice,redemptionPrice);
+        emit NewPrices(_noiMarketPrice, redemptionPrice);
         redemptionPriceUpdateTime = block.timestamp;
 
         // set Eth/Redemption Rate
-        CDPManager_CONTRACT.setEthRp(ethPrice * EIGHTEEN_DECIMAL_NUMBER / redemptionPrice);
+        CDPManager_CONTRACT.setEthRp(_ethTwapPrice * EIGHTEEN_DECIMAL_NUMBER / redemptionPrice);
     }
 
     function updateRatesInternal() public {}
