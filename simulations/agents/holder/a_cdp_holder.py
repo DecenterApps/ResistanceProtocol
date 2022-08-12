@@ -4,15 +4,14 @@ import random
  
 class CDP_Holder(ABC):
 
-    def __init__(self, name, eth, perc_amount, initial_cr, repay_cr, boost_cr, relative_gap):
+    def __init__(self, name, eth, CONST):
         self.name = name
-        self.relative_gap = relative_gap
+        self.relative_gap = get_holder_relative_gap(CONST)
+        self.perc_amount = get_holder_perc_amount(CONST)
+        self.prediciton = get_holder_prediction(CONST)
         self.eth = eth
         self.noi = 0
-        self.perc_amount = perc_amount
-        self.initial_cr = initial_cr
-        self.repay_cr = repay_cr
-        self.boost_cr = boost_cr
+        self.initial_cr, self.repay_cr, self.boost_cr = get_collateral_ratios(CONST)
         self.opened_position = False
         self.cdp_position: CDP_Position = None
     
@@ -104,3 +103,21 @@ def get_holder_relative_gap(CONST):
     if p < CONST.RELATIVE_GAP_MODERATE:
         return 0.05
     return 0.1
+
+def get_holder_prediction(CONST):
+    p = np.random.random()
+    if p < CONST.PREDICTION_FAR:
+        return 100
+    p -= CONST.PREDICTION_FAR
+    if p < CONST.PREDICTION_MID:
+        return 50
+    p -= CONST.PREDICTION_MID
+    return 25
+
+# returns initial collateral ratio, repayment ratio and boost ratio of a cdp holder
+def get_collateral_ratios(CONST):
+    diff, cr = get_holder_values(CONST)
+    init_cr = cr
+    repay_cr = max(LIQUIDATION_RATIO, cr - diff)
+    boost_cr = cr + diff
+    return init_cr, repay_cr, boost_cr

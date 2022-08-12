@@ -20,10 +20,7 @@ def update_safe_owner(agents, price_station: PriceStation, pool: Pool, ext_data:
     update_holder(agents, price_station, pool, ext_data, 'safe_owner', SAFE_OWNER)
 
 def create_new_safe_owner(name, eth_amount):
-    diff, cr = get_holder_values(SAFE_OWNER)
-    perc_amount = get_holder_perc_amount(SAFE_OWNER)
-    relative_gap = get_holder_relative_gap(SAFE_OWNER)
-    return Safe_Owner(name, eth_amount, perc_amount, cr, max(LIQUIDATION_RATIO, cr - diff), cr + diff, relative_gap)
+    return Safe_Owner(name, eth_amount, SAFE_OWNER)
 
 def create_safe_owners(agents):
     for i in range(SAFE_OWNER.NUM):

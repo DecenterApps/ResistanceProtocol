@@ -64,6 +64,15 @@ class LEVERAGER:
     RELATIVE_GAP_MODERATE = 0.25
     RELATIVE_GAP_SAFE = 0.5
 
+    #how far in the future does the leverager look
+    PREDICTION_FAR = 0.2
+    PREDICTION_MID = 0.3
+    PREDICTION_LOW = 1 - PREDICTION_FAR - PREDICTION_MID
+
+    # how much does predicted price affect leverager's decision
+    PREDICTION_STRENGTH = 0.5
+
+
 class SAFE_OWNER:
     NUM = 200
 
@@ -92,6 +101,14 @@ class SAFE_OWNER:
     RELATIVE_GAP_RISKY = 0.5
     RELATIVE_GAP_MODERATE = 0.25
     RELATIVE_GAP_SAFE = 0.5
+
+    #how far in the future does the safe owner's look
+    PREDICTION_FAR = 0.2
+    PREDICTION_MID = 0.3
+    PREDICTION_LOW = 1 - PREDICTION_FAR - PREDICTION_MID
+
+    # how much does predicted price affect safe owner's decision
+    PREDICTION_STRENGTH = 0.5
 
 class WHALE_INSTANT_PRICE_SETTER:
     NUM = 1
@@ -166,6 +183,9 @@ class REDEMPTION_RATES:
 class PID_CONTROLLER:
     TIME_STEP = 10000
     NEGATIVE_RATE_LIMIT = 0.99
+
+class PREDICTION:
+    TRAIN_INTERVAL = 200
 
 MONTE_CARLO_SIMULATIONS = 1
 
