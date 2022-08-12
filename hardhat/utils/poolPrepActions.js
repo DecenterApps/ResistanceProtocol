@@ -1,6 +1,10 @@
 const BigNumber = require('big-number');
 
-async function openCDP_and_mintNOI(CDPManagerContractObj, account, collateral, debt){
+function normalize(amount){
+    return BigInt(amount.toString()) / (BigInt((BigNumber(10).pow(18)).toString()));
+}
+
+async function getNOI(CDPManagerContractObj, account, collateral, debt){
 
     collateral = collateral.toString();
     debt = BigNumber(10).pow(18).mult(debt).toString();
@@ -16,15 +20,17 @@ async function openCDP_and_mintNOI(CDPManagerContractObj, account, collateral, d
     return cdpIndex;
 }
 
-async function getDaiFromWethPool(DAIContractObj, RouterContractObj, ExchangePoolContractObj, account, amountDAI, amountETH){
-    const txAuthorizeRouter = await DAIContractObj.connect(account).approve(RouterContractObj.address, amountDAI);
-    await txAuthorizeRouter.wait();
-        
-    const txGetDaiFromUniPool = await ExchangePoolContractObj.connect(account).getDAI(amountDAI,{value: ethers.utils.parseEther(amountETH)});
+async function getDAI(DAIContractObj, RouterContractObj, account, amountETH, amountDAI, wethAddr){
+    const tokenAddrs = [wethAddr, DAIContractObj.address];
+    const txGetDaiFromUniPool = await RouterContractObj.connect(account).swapETHForExactTokens(
+        new BigNumber(10).pow(18).mult(amountDAI).toString(), tokenAddrs, account.address, new BigNumber(2).pow(256).minus(1).toString(),{value: ethers.utils.parseEther(amountETH.toString())}
+    );
     await txGetDaiFromUniPool.wait();
 }
 
 async function provideLiquidity(DAIContractObj, NOIContractObj, ExchangePoolContractObj, account, amountNOI, amountDAI){
+    amountDAI = new BigNumber(10).pow(18).mult(amountDAI).toString();
+    amountNOI = new BigNumber(10).pow(18).mult(amountNOI).toString();
     //give pool the allowance of amountNOI/amountDAI
     const txApproveNoiExPool = await NOIContractObj.connect(account).approve(ExchangePoolContractObj.address, amountNOI);
     await txApproveNoiExPool.wait();
@@ -42,8 +48,9 @@ async function provideLiquidity(DAIContractObj, NOIContractObj, ExchangePoolCont
         if(e.topics[0]==ethers.utils.id("LiquidityProvided(address,uint256)"))
             event = e;
     }
+
     //returns the amount of LP Tokens received for the liquidity provision
-    return parseInt(event.data.slice(66,133),16);
+    return BigInt("0x" + event.data.slice(66,130));
 }
 
 async function removeLiquidity(PairContractObj, ExchangePoolContractObj, account, amountLPTokens){
@@ -53,10 +60,32 @@ async function removeLiquidity(PairContractObj, ExchangePoolContractObj, account
     await txRemoveLiq.wait();
 } 
 
+async function swapNoiForDai(ExchangePoolContractObj, NOIContractObj, account, noiAmount){
+    noiAmount = BigNumber(10).pow(18).mult(noiAmount).toString();
+
+    const txApproveNOI = await NOIContractObj.connect(account).approve(ExchangePoolContractObj.address,noiAmount);
+    await txApproveNOI.wait();
+    
+    const txSwap = await ExchangePoolContractObj.connect(account).exchangeNoiForDai(noiAmount);
+    await txSwap.wait();
+}
+
+async function swapDaiForNoi(ExchangePoolContractObj, DAIContractObj, account, daiAmount){
+    daiAmount = BigNumber(10).pow(18).mult(daiAmount).toString();
+
+    const txApproveNOI = await DAIContractObj.connect(account).approve(ExchangePoolContractObj.address,daiAmount);
+    await txApproveNOI.wait();
+
+    const txSwap = await ExchangePoolContractObj.connect(account).exchangeDaiForNoi(daiAmount);
+    await txSwap.wait();
+}
 
 module.exports = {
-    openCDP_and_mintNOI,
-    getDaiFromWethPool,
+    normalize,
+    getNOI,
+    getDAI,
     provideLiquidity,
-    removeLiquidity
+    removeLiquidity,
+    swapNoiForDai,
+    swapDaiForNoi
 }

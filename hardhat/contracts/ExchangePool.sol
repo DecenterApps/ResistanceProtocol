@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0 <0.9.0;
 import "./interfaces/Interfaces-ExchangePool.sol";
+import "hardhat/console.sol";
 
 contract ExchangePool {
     address poolRouterAddr;
@@ -42,14 +43,10 @@ contract ExchangePool {
     }
 
     /*
-    Provides liquidity to exchange pool. Simplified version of the Router "addLiquidity", in the following aspects:
-        - Parameters 5 & 6 are minimum amount of tokens able to be provided without the transactoin reverting; could be set up via the percentError, but for 
-          simplicity its 0 here
-        - Last parameter is the time the function has before reverting; here, the time is unlimited
     Before executing this function, user should:
         - Call getReserves() to get the ratio of two tokens in the pool. This is done to calculate the ratio in which the liquidity provider should provide 
           tokens (as to not lose the provided value in arbitrages)
-        - Give the Router the allowance needed for the tranaction to pass (via IERC20 approve) 
+        - Give this contract the allowance needed for the tranaction to pass (via IERC20 approve) 
     */
     function provideLiquidity(
         uint _amountNoi,
@@ -64,7 +61,7 @@ contract ExchangePool {
     {
         IERC20(noiAddr).transferFrom(msg.sender, address(this), _amountNoi);
         IERC20(daiAddr).transferFrom(msg.sender, address(this), _amountDai);
-
+  
         IERC20(noiAddr).approve(poolRouterAddr, _amountNoi);
         IERC20(daiAddr).approve(poolRouterAddr, _amountDai);
 
@@ -79,6 +76,7 @@ contract ExchangePool {
                 address(msg.sender),
                 MAX_UINT
             );
+ 
         emit LiquidityProvided(msg.sender, liquidity);
     }
 
@@ -105,7 +103,7 @@ contract ExchangePool {
         external
         returns (uint inputAmount, uint outputAmount)
     {
-        address[] memory tokenAddresses;
+        address[] memory tokenAddresses = new address[](2);
         tokenAddresses[0] = noiAddr;
         tokenAddresses[1] = daiAddr;
 
@@ -129,7 +127,7 @@ contract ExchangePool {
         external
         returns (uint inputAmount, uint outputAmount)
     {
-        address[] memory tokenAddresses;
+        address[] memory tokenAddresses = new address[](2);
         tokenAddresses[0] = daiAddr;
         tokenAddresses[1] = noiAddr;
         
@@ -147,21 +145,6 @@ contract ExchangePool {
 
         inputAmount = returnAmounts[0];
         outputAmount = returnAmounts[1];
-    }
-
-    //for test purposes only; dont forget to authorize router for tokens!!!!!!!!!! 
-    function getDAI(uint _amount) public payable returns (uint amountReceived) {
-        IRouter02 rout = IRouter02(poolRouterAddr);
-        address[] memory addrs = new address[](2);
-        (addrs[0], addrs[1]) = (rout.WETH(), daiAddr);
-
-        rout.swapETHForExactTokens{value: msg.value}(
-            _amount,
-            addrs,
-            msg.sender,
-            MAX_UINT
-        );
-        amountReceived = 1;
     }
 
     receive() external payable {}
