@@ -1,11 +1,11 @@
 import os
 
 if __name__ == "__main__":
-    dataset = "../../dataset/"
+    simulation_data = "../../dataset/simulation_data"
     historical_data = "../../images/external_data/historical/"
     images = "../../images/simulation_data/"
 
-    os.makedirs(dataset, exist_ok = True)
+    os.makedirs(simulation_data, exist_ok = True)
     os.makedirs(historical_data, exist_ok = True)
     os.makedirs(images, exist_ok = True)
 

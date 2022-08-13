@@ -125,7 +125,7 @@ class SAFE_OWNER:
     
 
 class WHALE_INSTANT_PRICE_SETTER:
-    NUM = 1
+    NUM = 0
 
     ETH_AMOUNT = 50
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH

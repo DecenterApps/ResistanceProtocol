@@ -1,10 +1,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import csv
-
-time = np.arange(1000)
-LEN = 1000
-DELTA_LEN = 50
+import sys
+# setting path
+sys.path.append('../')
+from constants import SIMULATION_TIMESTAMPS
+time = np.arange(SIMULATION_TIMESTAMPS+1)
+LEN = SIMULATION_TIMESTAMPS + 1
+DELTA_LEN = int(LEN / 20)
 
 def CPI_value():
     delta = np.random.random(DELTA_LEN)*0.00010 - 0.000025
@@ -21,7 +24,7 @@ def CPI_value():
 
 if __name__ == "__main__":
     cpi_value = CPI_value()
-    with open('../../dataset/cpi_value.csv', 'w') as csvfile:
+    with open('../../dataset/artificial/cpi_value.csv', 'w') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(cpi_value)
     plt.figure()

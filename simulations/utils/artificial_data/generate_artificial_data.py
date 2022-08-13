@@ -1,7 +1,7 @@
 import os
 
 if __name__ == "__main__":
-    dataset = "../../dataset/"
+    dataset = "../../dataset/artificial"
     artificial_data = "../../images/external_data/artificial/"
     images = "../../images/simulation_data/"
 

@@ -1,7 +1,7 @@
 dataset/*
 images/
 
-!dataset/historical/
+!dataset/historical
 
 __pycache__/
 
