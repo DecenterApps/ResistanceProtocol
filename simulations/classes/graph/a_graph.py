@@ -77,7 +77,3 @@ class Graph:
         plt.tight_layout()
 
         plt.savefig('images/graph2.png')
-
-@np.vectorize
-def constant_function(x):
-    return x
