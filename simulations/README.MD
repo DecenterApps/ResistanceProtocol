@@ -1,18 +1,28 @@
 # NOI Simulations with 2 PID controllers
 
+## Run in Docker
+
+For running the simulations inside a docker container, follow these steps:
+
+1. [Setup docker on your local machine](https://docs.docker.com/engine/install/ubuntu/)
+2. In the root folder(ResistanceProtocol/) build the dockerfile: **docker build -t simulation .**
+3. Start the container: **sudo docker run -it simulation /bin/bash**
+
 ## Creating external data
 
 Before executing the simulation, external data needs to be created. External data are ETH/USD price and CPI values. NOI market does not affect these values, so they are created independently.
 
 ### Historical data
 
-Files /dataset/historical/ether_price.csv and /dataset/historical/cpi_data.csv are real world ether price and cpi data. To use these two files, execute the script **/utils/historical_data/generate_historical_data.py**. This script will make two files /dataset/ether_data.csv and /dataset/cpi_data.csv, in the format needed in simulation, and plot 2 graphs in /images/external_data/historical/ folder.
+Folder /dataset/historical contains real world data about ether price and cpi data. To use these two files, execute the script **/utils/historical_data/generate_historical_data.py**. This script will make two files in /dataset/historical_processed, in the format needed in simulation, and plot 2 graphs in /images/external_data/historical/ folder. Because we have more data than we need for the simulation, a random moment in time will be picked and that data will be used in the simulation.
 
 ### Artificial data
 
-To create /dataset folder with cpi values and eth/usd market price, run script **utils/artificial_data/generate_artificial_data.py**.
-This will create 2 files in /dataset folder which will be needed when starting the simulation. Also, you will have 2 plots in /images folder to view the data.
+To create artificial data about cpi values and eth/usd market price, run script **utils/artificial_data/generate_artificial_data.py**.
+This will create 2 files in /dataset/artificial folder. Also, you will have 2 plots in images/external_data/artificial folder to view the data.
 You can also call the scripts generate_eth_value.py and generate_cpi_value.py independently.
+
+Whichever option you choose, you will have the dataset/simulation_data folder with values that are going to be used in a simulation. Plots are in the images/simulation_data/ folder. Every time you run scripts for generating data for the simulation, new data will overwrite theese folders, so when you execute the simulation, it will use the most recent data.
 
 | ETH/USD  |
 | :---: |
@@ -42,6 +52,12 @@ full_graph.png(1) shows data after every transaction, and timestamp_graph.png(2)
 |![](documentation_images/full_graph.png?raw=true "Full graph") | ![Alt text](documentation_images/timestamp_graph.png?raw=true "Timestamp graph")|
 
 Timestamp graph is convenient to see the market price trend, and full graph is useful to see how the market reacts to sudden changes of the market price(from malicious whales).
+
+| Controller values|
+| :---: |
+|![](documentation_images/controller_values.png?raw=true "Full graph") |
+
+More info...
 
 # Calculation of NOI market price
 
