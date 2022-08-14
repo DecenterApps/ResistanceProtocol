@@ -34,7 +34,7 @@ agent_utils.create_agents(agents)
 genesis_states = {'agents': agents}
 
 ext_data.eth_dollar = get_data_from_csv('dataset/simulation_data/eth_dollar.csv')
-ext_data.cpi_value = ext_data.format_cpi_values(INIT_REDEMPTION_PRICE, get_data_from_csv('dataset/simulation_data/cpi_value.csv'))
+ext_data.format_cpi_values(INIT_REDEMPTION_PRICE, get_data_from_csv('dataset/simulation_data/cpi_value.csv'))
 
 br = [0]*len(agent_utils.nums)
 

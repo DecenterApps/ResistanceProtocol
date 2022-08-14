@@ -13,7 +13,6 @@ class ExtData:
         return self.eth_dollar[self.get_current_timestep()]
     
     def get_cpi_value(self):
-        print(len(self.cpi_value), 'len')
         return self.cpi_value[self.get_current_timestep()]
     
     #for amount of eth, returns eth value in usd
@@ -40,7 +39,8 @@ class ExtData:
         return self.previous_state['timestep']
 
     def format_cpi_values(self, init_rp, cpi):
-        self.cpi_value = [init_rp]
+        cpi_value = [init_rp]
         for i in range(len(cpi)-1):
             q = cpi[i+1] / cpi[i]
-            self.cpi_value.append(self.cpi_value[-1] * q)
+            cpi_value.append(cpi_value[-1] * q)
+        self.cpi_value = cpi_value
