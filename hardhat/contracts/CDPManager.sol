@@ -284,11 +284,12 @@ contract CDPManager {
 
         cdpList[_cdpIndex].lockedCollateral -= _amount;
         
+        totalSupply -= _amount;
+        
         (bool sent, ) = payable(cdpList[_cdpIndex].owner).call{
             value: _amount
         }("");
         if (sent == false) revert();
-        totalSupply -= _amount;
 
         emit WithdrawCollateral(cdpList[_cdpIndex].owner, _cdpIndex, _amount);
     }
@@ -318,7 +319,6 @@ contract CDPManager {
 
         cdpList[_cdpIndex].generatedDebt += _amount;
         totalDebt = totalDebt + _amount;
-
         NOI_COIN.mint(user_cdp.owner, _amount);
         emit MintCDP(cdpList[_cdpIndex].owner, _cdpIndex, _amount);
     }
@@ -433,6 +433,7 @@ contract CDPManager {
             (SECONDS_PER_YEAR * 100);
         lastUnmintedNOICalculationTimestamp = block.timestamp;
         Treasury(payable(treasuryContractAddress)).receiveUnmintedNoi(amount);
+
         return amount;
     }
 
