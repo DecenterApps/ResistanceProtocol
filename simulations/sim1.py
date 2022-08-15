@@ -12,9 +12,19 @@ from classes.graph.full_graph import Full_Graph
 from utils.util_functions import get_data_from_csv
 from utils.exchange import *
 from agents.agent_utlis import *
+from utils.constants import *
 from tqdm import tqdm
 
+INIT_REDEMPTION_PRICE = 2
+
+ext_data = ExtData()
+agents = dict()
 exp = Experiment()
+ext_data.eth_dollar = get_data_from_csv('dataset/simulation_data/eth_dollar.csv')
+ext_data.format_cpi_values(INIT_REDEMPTION_PRICE, get_data_from_csv('dataset/simulation_data/cpi_value.csv'))
+
+starting_price = ext_data.eth_dollar[0]
+update_one_eth(starting_price//2)
 
 pool = Pool(POOL.ETH_AMOUNT, POOL.NOI_AMOUNT)
 
@@ -23,18 +33,11 @@ agent_utils: Agent_Utils = Agent_Utils()
 timestamp_graph = Timestamp_Graph(agent_utils)
 full_graph = Full_Graph()
 
-INIT_REDEMPTION_PRICE = 2
-
 price_station = PriceStation(2, INIT_REDEMPTION_PRICE, 1, full_graph)
-ext_data = ExtData()
-agents = dict()
 
 agent_utils.create_agents(agents)
 
 genesis_states = {'agents': agents}
-
-ext_data.eth_dollar = get_data_from_csv('dataset/simulation_data/eth_dollar.csv')
-ext_data.format_cpi_values(INIT_REDEMPTION_PRICE, get_data_from_csv('dataset/simulation_data/cpi_value.csv'))
 
 br = [0]*len(agent_utils.nums)
 

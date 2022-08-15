@@ -1,13 +1,24 @@
 #how much noi for one eth
 ONE_ETH = 500
 
+def update_one_eth(one_eth: int) -> None:
+    global ONE_ETH
+    ONE_ETH = one_eth
+    PRICE_TRADER.NOI_AMOUNT = PRICE_TRADER.ETH_AMOUNT * ONE_ETH
+    RATE_TRADER.NOI_AMOUNT = RATE_TRADER.ETH_AMOUNT * ONE_ETH
+    WHALE_INSTANT_PRICE_SETTER.NOI_AMOUNT = WHALE_INSTANT_PRICE_SETTER.ETH_AMOUNT * ONE_ETH
+    WHALE_INSTANT_RATE_SETTER.NOI_AMOUNT = WHALE_INSTANT_RATE_SETTER.ETH_AMOUNT * ONE_ETH
+    RANDOM_TRADER.NOI_AMOUNT = RANDOM_TRADER.ETH_AMOUNT * ONE_ETH
+    WHALE_LONGTERM_PRICE_SETTER.NOI_AMOUNT = WHALE_LONGTERM_PRICE_SETTER.ETH_AMOUNT * ONE_ETH
+    POOL.NOI_AMOUNT = POOL.ETH_AMOUNT * ONE_ETH
+
 class PRICE_TRADER:
     NUM = 300
 
     ETH_AMOUNT = 4
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
 
-    #percentage of traders resource when trading
+    # percentage of traders resource when trading
     RISKY = 1
     MODERATE = 0.3
     SAFE = 1 - MODERATE - RISKY
@@ -23,7 +34,7 @@ class RATE_TRADER:
     ETH_AMOUNT = 2
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
 
-    #percentage of traders resource when trading
+    # percentage of traders resource when trading
     RISKY = 0.5
     MODERATE = 0.3
     SAFE = 1 - MODERATE - RISKY
@@ -49,22 +60,22 @@ class LEVERAGER:
     M_DIFF = 0.25
     S_DIFF = 0.5
 
-    #initial cr of leverager
+    # initial cr of leverager
     R_CR = 1.5
     M_CR = 1.9
     S_CR = 2.5
 
-    #percent of leveragers(risky leveragers put more percent of their money in collateral)
+    # percent of leveragers(risky leveragers put more percent of their money in collateral)
     R_COLLATERAL = 1
     M_COLLATERAL = 0.7
     S_COLLATERAL = 0.5
 
-    #gap between market price and redemption price when leverager opens/closes a position
+    # gap between market price and redemption price when leverager opens/closes a position
     RELATIVE_GAP_RISKY = 0.5
     RELATIVE_GAP_MODERATE = 0.25
     RELATIVE_GAP_SAFE = 0.5
 
-    #how far in the future does the leverager look
+    # how far in the future does the leverager look
     PREDICTION_FAR = 0.2
     PREDICTION_MID = 0.3
     PREDICTION_LOW = 1 - PREDICTION_FAR - PREDICTION_MID
@@ -122,8 +133,6 @@ class SAFE_OWNER:
     PREDICTION_THRESHOLD_MID = 0.15
     PREDICTION_THRESHOLD_LOW = 0.09
 
-    
-
 class WHALE_INSTANT_PRICE_SETTER:
     NUM = 0
 
@@ -167,6 +176,10 @@ class RANDOM_TRADER:
 
     ETH_AMOUNT = 2
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
+
+    def update(self) -> None:
+        self.NOI_AMOUNT = self.ETH_AMOUNT * ONE_ETH
+
 
 class WHALE_LONGTERM_PRICE_SETTER:
     NUM = 0
