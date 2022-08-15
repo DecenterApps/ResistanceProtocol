@@ -14,8 +14,8 @@ contract ExchangePool {
     address noiAddr;
     address daiAddr;
 
-    uint constant scale = 10**18;
-    uint constant MAX_UINT = 2**256 - 1;
+    uint256 constant scale = 10**18;
+    uint256 constant MAX_UINT = 2**256 - 1;
 
     //for tests only
     event LiquidityProvided(address provider, uint256 amountLPTokens);
@@ -50,16 +50,18 @@ contract ExchangePool {
         - Call getReserves() to get the ratio of two tokens in the pool. This is done to calculate the ratio in which the liquidity provider should provide 
           tokens (as to not lose the provided value in arbitrages)
         - Give this contract the allowance needed for the tranaction to pass (via IERC20 approve) 
+    This function is a wrapped and simplified version of the Uniswap Router "addLiquidity" function. If necessary, a third parameter, uint percentError, may be 
+    added, to calculate the minimum amount of assets to be provided before transaction reverts:  _amountNoi * ((100 - _percentError) * scale / 100) / scale
     */
     function provideLiquidity(
-        uint _amountNoi,
-        uint _amountDai /*, uint _percentError*/
+        uint256 _amountNoi,
+        uint256 _amountDai
     )
         external
         returns (
-            uint amountA,
-            uint amountB,
-            uint liquidity
+            uint256 amountA,
+            uint256 amountB,
+            uint256 liquidity
         )
     {
         IERC20(noiAddr).transferFrom(msg.sender, address(this), _amountNoi);
@@ -83,9 +85,14 @@ contract ExchangePool {
         emit LiquidityProvided(msg.sender, liquidity);
     }
 
+
+    /*
+    As with the "provideLiquidity" function, additional parameters may be added to set the minimum amount of assets to be returned before the
+    transaction reverts (uint minNoi, uint minDai)
+    */
     function removeLiquidity(
-        uint _liquidity /*, uint minNoi, uint minDai */
-    ) external returns (uint amountNoi, uint amountDai) {
+        uint256 _liquidity 
+    ) external returns (uint256 amountNoi, uint256 amountDai) {
 
         IPool(poolAddr).transferFrom(msg.sender, address(this), _liquidity);
         IPool(poolAddr).approve(poolRouterAddr, _liquidity);
@@ -102,9 +109,9 @@ contract ExchangePool {
             );
     }
 
-    function exchangeNoiForDai(uint _amount)
+    function exchangeNoiForDai(uint256 _amount)
         external
-        returns (uint inputAmount, uint outputAmount)
+        returns (uint256 inputAmount, uint256 outputAmount)
     {
         address[] memory tokenAddresses = new address[](2);
         tokenAddresses[0] = noiAddr;
@@ -113,7 +120,7 @@ contract ExchangePool {
         IERC20(noiAddr).transferFrom(msg.sender, address(this), _amount);
         IERC20(noiAddr).approve(poolRouterAddr, _amount);
 
-        uint[] memory returnAmounts = IRouter02(poolRouterAddr)
+        uint256[] memory returnAmounts = IRouter02(poolRouterAddr)
             .swapExactTokensForTokens(
                 _amount,
                 0,
@@ -126,9 +133,9 @@ contract ExchangePool {
         outputAmount = returnAmounts[1];
     }
 
-    function exchangeDaiForNoi(uint _amount)
+    function exchangeDaiForNoi(uint256 _amount)
         external
-        returns (uint inputAmount, uint outputAmount)
+        returns (uint256 inputAmount, uint256 outputAmount)
     {
         address[] memory tokenAddresses = new address[](2);
         tokenAddresses[0] = daiAddr;
@@ -137,7 +144,7 @@ contract ExchangePool {
         IERC20(daiAddr).transferFrom(msg.sender, address(this), _amount);
         IERC20(daiAddr).approve(poolRouterAddr, _amount);
 
-        uint[] memory returnAmounts = IRouter02(poolRouterAddr)
+        uint256[] memory returnAmounts = IRouter02(poolRouterAddr)
             .swapExactTokensForTokens(
                 _amount,
                 0,
