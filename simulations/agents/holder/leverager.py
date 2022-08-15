@@ -30,10 +30,7 @@ def update_leverager(agents, price_station: PriceStation, pool: Pool, ext_data: 
     update_holder(agents, price_station, pool, ext_data, 'leverager', LEVERAGER)
 
 def create_new_leverager(name, eth_amount):
-    diff, cr = get_holder_values(LEVERAGER)
-    perc_amount = get_holder_perc_amount(LEVERAGER)
-    relative_gap = get_holder_relative_gap(LEVERAGER)
-    return Leverager(name, eth_amount, perc_amount, cr, max(LIQUIDATION_RATIO, cr - diff), cr + diff, relative_gap)
+    return Leverager(name, eth_amount, LEVERAGER)
 
 def create_leveragers(agents):
     for i in range(LEVERAGER.NUM):

@@ -47,7 +47,7 @@ async function repayAndCloseCDP(CDPManagerContractObj,noiContractObj,cdpIndex,ac
     const totalDebt = await CDPManagerContractObj.connect(account).getDebtWithSF(cdpIndex);
     const sfps = await getSFperSecond(CDPManagerContractObj,cdpIndex);
 
-    const txApprove = await noiContractObj.connect(account).approve(CDPManagerContractObj.address, (totalDebt + 2*sfps).toString());
+    const txApprove = await noiContractObj.connect(account).approve(CDPManagerContractObj.address, (totalDebt + 10*sfps).toString());
     await txApprove.wait();
 
     return CDPManagerContractObj.connect(account).repayAndCloseCDP(cdpIndex);

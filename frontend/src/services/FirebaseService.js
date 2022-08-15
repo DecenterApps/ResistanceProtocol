@@ -20,7 +20,6 @@ const setUpNOITracking = async(setNOISupplyHistory)=>{
   const noiRef = firebase.database().ref(`noiSupply`);
 
   noiRef.on("child_added", (snapshot) => {
-    console.log(snapshot.val());
     setNOISupplyHistory((state) => [...state, snapshot.val()]);
   });
 }
@@ -29,7 +28,6 @@ const setUpRRTracking = async(setRedemptionRateHistory)=>{
   const rrRef = firebase.database().ref(`rates`);
 
   rrRef.on("child_added", (snapshot) => {
-    console.log(snapshot.val());
     setRedemptionRateHistory((state) => [...state, snapshot.val()]);
   });
 }
@@ -38,7 +36,6 @@ const setUpRPTracking = async(setRedemptionPriceHistory)=>{
   const rpRef = firebase.database().ref(`redemptionPrices`);
 
   rpRef.on("child_added", (snapshot) => {
-    console.log(snapshot.val());
     setRedemptionPriceHistory((state) => [...state, snapshot.val()]);
   });
 }
@@ -47,7 +44,6 @@ const setUpMPTracking = async(setMarketPriceHistory)=>{
   const marketRef = firebase.database().ref(`marketPrices`);
 
   marketRef.on("child_added", (snapshot) => {
-    console.log(snapshot.val());
     setMarketPriceHistory((state) => [...state, snapshot.val()]);
   });
 }
@@ -56,9 +52,7 @@ const setUpCDPs = async (cdpsOrigin, setCDPs, address) => {
   const cdpsRef = firebase.database().ref(`cdps/${address}`);
 
   cdpsRef.on("value", (snapshot) => {
-    console.log(snapshot.val());
     let cdps = snapshot.val() || {};
-    console.log(cdps);
     let newCdps = [];
     Object.keys(cdps).forEach((key) => {
       newCdps.push(cdps[key]);

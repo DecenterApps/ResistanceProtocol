@@ -3,9 +3,14 @@ import matplotlib.pyplot as plt
 import csv
 
 from regression import *
+import sys
+# setting path
+sys.path.append('../')
+from constants import SIMULATION_TIMESTAMPS
 
 TWAP_LEN = 10
-SAMPLES = 3000
+SAMPLES = SIMULATION_TIMESTAMPS + 1
+TRAIN = int(SAMPLES / 2)
 
 time = np.arange(SAMPLES)
 
@@ -38,18 +43,19 @@ def get_prediction(twap_eth_dollar, training_ind, test_ind):
 
 if __name__ == "__main__":
     eth_dollar, twap_eth_dollar = ETH_Dollar_value()
-    prediction = get_prediction(twap_eth_dollar, 1500, SAMPLES)
-    with open('../../dataset/eth_dollar.csv', 'w') as csvfile:
+    prediction = get_prediction(twap_eth_dollar, TRAIN, SAMPLES)
+    with open('../../dataset/artificial/eth_dollar.csv', 'w') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(eth_dollar)
-    with open('../../dataset/twap_eth_dollar.csv', 'w') as csvfile:
+    with open('../../dataset/simulation_data/eth_dollar.csv', 'w') as csvfile:  #twap eth price
         writer = csv.writer(csvfile)
         writer.writerow(twap_eth_dollar)
     plt.figure()
     plt.plot(time, eth_dollar, time,  twap_eth_dollar, time, prediction)
-    plt.axvline(x = 1500, color = 'b', label = 'axvline - full height')
+    plt.axvline(x = TRAIN, color = 'b', label = 'axvline - full height')
     plt.legend(['eth_dollar', 'twap_eth_dollar', 'prediction'])
     plt.title("ETH -> dollar")
     plt.xlabel("time")
     plt.ylabel("Value of ETH")
-    plt.savefig("../../images/eth_dollar.png")
+    plt.savefig("../../images/external_data/artificial/eth_dollar.png")
+    plt.savefig("../../images/simulation_data/eth_dollar.png")

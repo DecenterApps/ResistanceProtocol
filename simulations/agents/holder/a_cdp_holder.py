@@ -4,15 +4,15 @@ import random
  
 class CDP_Holder(ABC):
 
-    def __init__(self, name, eth, perc_amount, initial_cr, repay_cr, boost_cr, relative_gap):
+    def __init__(self, name, eth, CONST):
         self.name = name
-        self.relative_gap = relative_gap
+        self.relative_gap = get_holder_relative_gap(CONST)
+        self.perc_amount = get_holder_perc_amount(CONST)
+        self.prediction_time = get_holder_prediction(CONST)
+        self.prediction_threshold = get_holder_prediction_threshold(CONST)
         self.eth = eth
         self.noi = 0
-        self.perc_amount = perc_amount
-        self.initial_cr = initial_cr
-        self.repay_cr = repay_cr
-        self.boost_cr = boost_cr
+        self.initial_cr, self.repay_cr, self.boost_cr = get_collateral_ratios(CONST)
         self.opened_position = False
         self.cdp_position: CDP_Position = None
     
@@ -57,13 +57,19 @@ def update_holder(agents, price_station: PriceStation, pool: Pool, ext_data: Ext
     holder: CDP_Holder = agents[name]
     relative_gap = np.abs(
         price_station.mp - price_station.rp) / price_station.rp
+    
+    predicted_eth_price = ext_data.get_predicted_eth_price(holder.prediction_time)
+    curr_eth_price = ext_data.get_eth_value()
+    relative_eth_difference = 0 if predicted_eth_price == 0 else abs((predicted_eth_price - curr_eth_price) / curr_eth_price)
+    relative_eth_difference *= CONST.PREDICTION_STRENGTH
 
     if holder.opened_position:
         current_cr = holder.cdp_position.calculate_cr(ext_data, price_station)
         if current_cr < LIQUIDATION_RATIO and leverager:
             holder.liquidation()
         else:
-            if relative_gap > holder.relative_gap and price_station.rp > price_station.mp and leverager:
+            if (relative_gap > holder.relative_gap and price_station.rp > price_station.mp and leverager) or \
+               (relative_eth_difference > holder.prediction_threshold and predicted_eth_price < curr_eth_price):
                 holder.close_position(ext_data, price_station, pool)
             elif current_cr > holder.boost_cr:
                 holder.boost(ext_data, price_station, pool)
@@ -71,7 +77,8 @@ def update_holder(agents, price_station: PriceStation, pool: Pool, ext_data: Ext
                 holder.repay(ext_data, price_station, pool)
     else:
         
-        if relative_gap > holder.relative_gap and price_station.rp < price_station.mp and holder.eth > 0:
+        if (relative_gap > holder.relative_gap and price_station.rp < price_station.mp and holder.eth > 0) or \
+            (relative_eth_difference > holder.prediction_threshold and predicted_eth_price > curr_eth_price):
             holder.open_position(ext_data, price_station, pool)
     
     agents[name] = holder
@@ -104,3 +111,31 @@ def get_holder_relative_gap(CONST):
     if p < CONST.RELATIVE_GAP_MODERATE:
         return 0.05
     return 0.1
+
+# returns initial collateral ratio, repayment ratio and boost ratio of a cdp holder
+def get_collateral_ratios(CONST):
+    diff, cr = get_holder_values(CONST)
+    init_cr = cr
+    repay_cr = max(LIQUIDATION_RATIO, cr - diff)
+    boost_cr = cr + diff
+    return init_cr, repay_cr, boost_cr
+
+def get_holder_prediction(CONST):
+    p = np.random.random()
+    if p < CONST.PREDICTION_FAR:
+        return 100
+    p -= CONST.PREDICTION_FAR
+    if p < CONST.PREDICTION_MID:
+        return 50
+    p -= CONST.PREDICTION_MID
+    return 25
+
+def get_holder_prediction_threshold(CONST):
+    p = np.random.random()
+    if p < CONST.PREDICTION_THRESHOLD_HIGH:
+        return 0.3
+    p -= CONST.PREDICTION_THRESHOLD_HIGH
+    if p < CONST.PREDICTION_THRESHOLD_MID:
+        return 0.15
+    p -= CONST.PREDICTION_THRESHOLD_MID
+    return 0.09
