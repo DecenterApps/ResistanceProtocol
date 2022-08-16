@@ -42,9 +42,7 @@ contract NOI {
 
     string public constant name = "Resistance Protocol";
     string public constant symbol = "NOI";
-    string public constant version = "1";
     uint8 public constant decimals = 18;
-    uint256 public immutable chainId;
     uint256 public totalSupply;
 
     // Mapping of coin balances
@@ -58,10 +56,9 @@ contract NOI {
     event Approval(address indexed src, address indexed guy, uint256 amount);
     event Transfer(address indexed src, address indexed dst, uint256 amount);
 
-    constructor(address _owner, uint256 _chainId) {
+    constructor(address _owner) {
         owner = _owner;
         authorizedAccounts[msg.sender] = true;
-        chainId = _chainId;
         emit AddAuthorization(msg.sender);
     }
 
