@@ -24,7 +24,7 @@ ext_data.eth_dollar = get_data_from_csv('dataset/simulation_data/eth_dollar.csv'
 ext_data.format_cpi_values(INIT_REDEMPTION_PRICE, get_data_from_csv('dataset/simulation_data/cpi_value.csv'))
 
 starting_price = ext_data.eth_dollar[0]
-update_one_eth(starting_price//2)
+update_one_eth(starting_price/2)
 
 pool = Pool(POOL.ETH_AMOUNT, POOL.NOI_AMOUNT)
 
