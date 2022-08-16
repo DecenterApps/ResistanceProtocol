@@ -16,9 +16,9 @@ def CPI_value():
         for _ in range(int(LEN / DELTA_LEN)):
             new_delta.append(delta[i])
     init = 2
-    out = np.zeros(1000)
+    out = np.zeros(SIMULATION_TIMESTAMPS+1)
     out[0] = init + new_delta[0]
-    for i in range(1, 1000):
+    for i in range(1, SIMULATION_TIMESTAMPS):
         out[i] = out[i-1] * (1+new_delta[i])
     return out
 
@@ -28,6 +28,7 @@ if __name__ == "__main__":
         writer = csv.writer(csvfile)
         writer.writerow(cpi_value)
     plt.figure()
+    print(len(time), len(cpi_value))
     plt.plot(time, cpi_value)
     plt.title("CPI value per timestamp")
     plt.xlabel("time")
