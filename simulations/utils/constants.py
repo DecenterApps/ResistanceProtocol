@@ -1,14 +1,25 @@
 #how much noi for one eth
 ONE_ETH = 500
 
-class PRICE_TRADER:
-    NUM = 300
+def update_one_eth(one_eth: int) -> None:
+    global ONE_ETH
+    ONE_ETH = one_eth
+    PRICE_TRADER.NOI_AMOUNT = PRICE_TRADER.ETH_AMOUNT * ONE_ETH
+    RATE_TRADER.NOI_AMOUNT = RATE_TRADER.ETH_AMOUNT * ONE_ETH
+    WHALE_INSTANT_PRICE_SETTER.NOI_AMOUNT = WHALE_INSTANT_PRICE_SETTER.ETH_AMOUNT * ONE_ETH
+    WHALE_INSTANT_RATE_SETTER.NOI_AMOUNT = WHALE_INSTANT_RATE_SETTER.ETH_AMOUNT * ONE_ETH
+    RANDOM_TRADER.NOI_AMOUNT = RANDOM_TRADER.ETH_AMOUNT * ONE_ETH
+    WHALE_LONGTERM_PRICE_SETTER.NOI_AMOUNT = WHALE_LONGTERM_PRICE_SETTER.ETH_AMOUNT * ONE_ETH
+    POOL.NOI_AMOUNT = POOL.ETH_AMOUNT * ONE_ETH
 
-    ETH_AMOUNT = 4
+class PRICE_TRADER:
+    NUM = 10
+
+    ETH_AMOUNT = 50
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
 
-    #percentage of traders resource when trading
-    RISKY = 1
+    # percentage of traders resource when trading
+    RISKY = 0.5
     MODERATE = 0.3
     SAFE = 1 - MODERATE - RISKY
 
@@ -18,12 +29,12 @@ class PRICE_TRADER:
     BOUND_LOW = 1 - BOUND_HIGH - BOUND_MID
 
 class RATE_TRADER:
-    NUM = 200
+    NUM = 0
 
-    ETH_AMOUNT = 2
+    ETH_AMOUNT = 100000
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
 
-    #percentage of traders resource when trading
+    # percentage of traders resource when trading
     RISKY = 0.5
     MODERATE = 0.3
     SAFE = 1 - MODERATE - RISKY
@@ -36,7 +47,7 @@ class RATE_TRADER:
     RR_LOW = 1 - RR_HIGH - RR_MID
 
 class LEVERAGER:
-    NUM = 200
+    NUM = 0
 
     ETH_AMOUNT = 4
 
@@ -49,22 +60,22 @@ class LEVERAGER:
     M_DIFF = 0.25
     S_DIFF = 0.5
 
-    #initial cr of leverager
+    # initial cr of leverager
     R_CR = 1.5
     M_CR = 1.9
     S_CR = 2.5
 
-    #percent of leveragers(risky leveragers put more percent of their money in collateral)
+    # percent of leveragers(risky leveragers put more percent of their money in collateral)
     R_COLLATERAL = 1
     M_COLLATERAL = 0.7
     S_COLLATERAL = 0.5
 
-    #gap between market price and redemption price when leverager opens/closes a position
+    # gap between market price and redemption price when leverager opens/closes a position
     RELATIVE_GAP_RISKY = 0.5
     RELATIVE_GAP_MODERATE = 0.25
-    RELATIVE_GAP_SAFE = 0.5
+    RELATIVE_GAP_SAFE = 1 - RELATIVE_GAP_RISKY - RELATIVE_GAP_MODERATE
 
-    #how far in the future does the leverager look
+    # how far in the future does the leverager look
     PREDICTION_FAR = 0.2
     PREDICTION_MID = 0.3
     PREDICTION_LOW = 1 - PREDICTION_FAR - PREDICTION_MID
@@ -80,9 +91,9 @@ class LEVERAGER:
 
 
 class SAFE_OWNER:
-    NUM = 200
+    NUM = 0
 
-    ETH_AMOUNT = 2
+    ETH_AMOUNT = 100000
 
     RISKY = 0.2
     MODERATE = 0.3
@@ -122,8 +133,6 @@ class SAFE_OWNER:
     PREDICTION_THRESHOLD_MID = 0.15
     PREDICTION_THRESHOLD_LOW = 0.09
 
-    
-
 class WHALE_INSTANT_PRICE_SETTER:
     NUM = 0
 
@@ -147,7 +156,7 @@ class WHALE_INSTANT_RATE_SETTER:
     BOUND_LOW = 1 - BOUND_HIGH - BOUND_MID
 
 class NOI_TRUSTER:
-    NUM = 100
+    NUM = 0
 
     ETH_AMOUNT = 5
     NOI_AMOUNT = 0
@@ -163,10 +172,11 @@ class NOI_TRUSTER:
     BOUND_LOW = 1 - BOUND_HIGH - BOUND_MID
 
 class RANDOM_TRADER:
-    NUM = 100
+    NUM = 0
 
     ETH_AMOUNT = 2
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
+
 
 class WHALE_LONGTERM_PRICE_SETTER:
     NUM = 0
@@ -199,7 +209,7 @@ class PID_CONTROLLER:
     NEGATIVE_RATE_LIMIT = 0.99
 
 class PREDICTION:
-    TRAIN_INTERVAL = 200
+    TRAIN_INTERVAL = 350
 
 MONTE_CARLO_SIMULATIONS = 1
 
@@ -209,4 +219,4 @@ INF = 10000000000
 
 TWAP_TIMESTAMPS = 100
 
-SIMULATION_TIMESTAMPS = 999
+SIMULATION_TIMESTAMPS = 2500
