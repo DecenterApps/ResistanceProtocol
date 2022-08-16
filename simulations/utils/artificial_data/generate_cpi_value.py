@@ -16,7 +16,7 @@ def CPI_value():
         for _ in range(int(LEN / DELTA_LEN)):
             new_delta.append(delta[i])
     init = 2
-    out = np.zeros(SIMULATION_TIMESTAMPS+1)
+    out = np.zeros(SIMULATION_TIMESTAMPS)
     out[0] = init + new_delta[0]
     for i in range(1, SIMULATION_TIMESTAMPS):
         out[i] = out[i-1] * (1+new_delta[i])
@@ -24,13 +24,20 @@ def CPI_value():
 
 if __name__ == "__main__":
     cpi_value = CPI_value()
+    cpi_value = np.append(cpi_value, [cpi_value[-1]])
     with open('../../dataset/artificial/cpi_value.csv', 'w') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(cpi_value)
+    
+    with open('../../dataset/simulation_data/cpi_value.csv', 'w') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(cpi_value)
+    
     plt.figure()
-    print(len(time), len(cpi_value))
-    plt.plot(time, cpi_value)
+    duz = min(len(time), len(cpi_value))
+    plt.plot(time[:duz], cpi_value[:duz])
     plt.title("CPI value per timestamp")
     plt.xlabel("time")
     plt.ylabel("Value of CPI")
+    plt.savefig("../../images/simulation_data/cpi_value.png")
     plt.savefig("../../images/external_data/artificial/cpi_value.png")

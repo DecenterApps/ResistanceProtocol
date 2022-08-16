@@ -14,6 +14,7 @@ from utils.exchange import *
 from agents.agent_utlis import *
 from utils.constants import *
 from tqdm import tqdm
+import time
 
 INIT_REDEMPTION_PRICE = 2
 
@@ -43,6 +44,8 @@ br = [0]*len(agent_utils.nums)
 
 pbar = tqdm(total=SIMULATION_TIMESTAMPS)
 
+time_arr = []
+
 def update_agents(params, substep, state_history, previous_state, policy_input):
     global br, agents
     ret = agents
@@ -59,6 +62,8 @@ def update_agents(params, substep, state_history, previous_state, policy_input):
 
     update_whale_longterm_price_setter(agents, price_station, pool, ext_data)
 
+    start_time = time.time()
+
     for i in range(agent_utils.total_sum // 2):
         p = np.random.random()
         if i % 2 == 0:
@@ -73,10 +78,15 @@ def update_agents(params, substep, state_history, previous_state, policy_input):
                 br[i] += 1
                 break
             p -= nums[i] / total_sum
+
+    end_time = time.time()
+    time_arr.append(end_time - start_time)
     
     pbar.update(1)
 
     return ('agents', ret)
+
+
 
 partial_state_update_blocks = [
     { 
@@ -119,3 +129,9 @@ full_graph.plot(ext_data)
 timestamp_graph.plot(ext_data)
 
 print(br)
+
+figure, axis = plt.subplots(1, 1, figsize=(12,12))
+axis.plot(time_arr)
+plt.tight_layout()
+
+plt.savefig('images/times.png')
