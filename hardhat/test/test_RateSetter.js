@@ -92,4 +92,18 @@ describe('RateSetter', function () {
                                                                                             
     });
 
+    it('... get rates', async () => {     
+        
+        const txChangeRate = await marketTwapFeedObj.connect(senderAccounts[0]).update();
+
+        let redemptionRate= await RateSetterContractObj.connect(senderAccounts[1]).getYearlyRedemptionRate()
+        console.log(redemptionRate.toString())
+        let proportionalTerm= await RateSetterContractObj.connect(senderAccounts[1]).getYearlyProportionalTerm()
+        console.log(proportionalTerm.toString())
+        let integralTerm= await RateSetterContractObj.connect(senderAccounts[1]).getYearlyIntegralTerm()
+        console.log(integralTerm.toString())
+        console.log((integralTerm+proportionalTerm).toString())
+                                                                                            
+    });
+
 });

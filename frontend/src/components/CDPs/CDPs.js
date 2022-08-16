@@ -178,7 +178,7 @@ export default function CDPs({ bAnimation, setBAnimation }) {
                   <div>Total Debt</div>
                   <div className="bold-text">
                     {cdps &&
-                      ethers.utils.formatEther(
+                      new Decimal(
                         cdps
                           .reduce(
                             (previousValue, currentValue) =>
@@ -188,7 +188,10 @@ export default function CDPs({ bAnimation, setBAnimation }) {
                             0
                           )
                           .toString()
-                      )}
+                      )
+                        .div(10 ** 18)
+                        .toPrecision(10)
+                        .toString()}
                   </div>
                 </VStack>
               </Box>
@@ -211,7 +214,7 @@ export default function CDPs({ bAnimation, setBAnimation }) {
                   <div>Stability fee</div>
                   <div className="bold-text">
                     {cdps &&
-                      ethers.utils.formatEther(
+                      new Decimal(
                         cdps
                           .reduce(
                             (previousValue, currentValue) =>
@@ -221,7 +224,9 @@ export default function CDPs({ bAnimation, setBAnimation }) {
                             0
                           )
                           .toString()
-                      )}
+                      ).div(10 ** 18)
+                      .toPrecision(10)
+                      .toString()}
                   </div>
                 </VStack>
               </Box>
@@ -260,18 +265,18 @@ export default function CDPs({ bAnimation, setBAnimation }) {
                             <VStack>
                               <div>Debt</div>
                               <div>
-                                {ethers.utils.formatEther(
-                                  new Decimal(c.debt.toString()).toString()
-                                )}{" "}
+                                {
+                                  new Decimal(c.debt.toString()).div(10**18).toPrecision(10).toString()
+                                }{" "}
                               </div>
                             </VStack>
                             <VStack>
                               <div>Stabillity fee</div>
                               <div>
                                 {c.sf !== undefined
-                                  ? ethers.utils.formatEther(
-                                      new Decimal(c.sf.toString()).toString()
-                                    )
+                                  ? 
+                                      new Decimal(c.sf.toString()).div(10**18).toPrecision(10).toString()
+                                    
                                   : "Calculating..."}
                               </div>
                             </VStack>

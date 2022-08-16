@@ -24,6 +24,7 @@ contract RateSetter {
     uint256 ethPrice;
 
     uint256 public constant RAY = 10**27;
+    uint256 public constant SECONDS_IN_A_YEAR = 31556926;
     uint256 redemptionPriceUpdateTime;
     uint256 internal constant EIGHTEEN_DECIMAL_NUMBER = 10**18;
 
@@ -36,7 +37,7 @@ contract RateSetter {
 
     event ModifyParameters(bytes32 indexed _parameter, uint256 _data);
     event ModifyContract(bytes32 indexed _contract, address _newAddress);
-    event NewPrices(uint256 _marketPrice,uint256 _redemptionPrice);
+    event NewPrices(uint256 _marketPrice, uint256 _redemptionPrice);
     event NewRedemptionRate(uint256 _value);
 
     // AUTH
@@ -69,8 +70,12 @@ contract RateSetter {
      * @param _parameter The name of the parameter modified
      * @param _data New value for the parameter
      */
-    function modifyParameters(bytes32 _parameter, uint256 _data) external isOwner {
-        if (_parameter == "redemptionPriceUpdateTime") redemptionPriceUpdateTime = _data;
+    function modifyParameters(bytes32 _parameter, uint256 _data)
+        external
+        isOwner
+    {
+        if (_parameter == "redemptionPriceUpdateTime")
+            redemptionPriceUpdateTime = _data;
         else revert RateSetter__UnknownParameter();
         emit ModifyParameters(_parameter, _data);
     }
@@ -80,10 +85,16 @@ contract RateSetter {
      * @param _contract The name of the contract modified
      * @param _newAddress New address for the contract
      */
-    function modifyContracts(bytes32 _contract, address _newAddress) external isOwner {
-        if (_contract == "CDPManager") CDPManager_CONTRACT = CDPManager(_newAddress);
-        else if (_contract == "AbsPiController") AbsPiController_CONTRACT = AbsPiController(_newAddress);
-        else if (_contract == "CPITrackerOracle") cpiDataFeed= CPITrackerOracle(_newAddress);
+    function modifyContracts(bytes32 _contract, address _newAddress)
+        external
+        isOwner
+    {
+        if (_contract == "CDPManager")
+            CDPManager_CONTRACT = CDPManager(_newAddress);
+        else if (_contract == "AbsPiController")
+            AbsPiController_CONTRACT = AbsPiController(_newAddress);
+        else if (_contract == "CPITrackerOracle")
+            cpiDataFeed = CPITrackerOracle(_newAddress);
         else revert RateSetter__UnknownContract();
         emit ModifyContract(_contract, _newAddress);
     }
@@ -104,7 +115,7 @@ contract RateSetter {
         owner = _owner;
         CDPManager_CONTRACT = CDPManager(_cdpManager);
         AbsPiController_CONTRACT = AbsPiController(_AbsPiController);
-        redemptionPrice =  RAY;
+        redemptionPrice = RAY;
         redemptionRate = RAY;
 
         cpiDataFeed = CPITrackerOracle(_cpiDataFeed);
@@ -115,11 +126,13 @@ contract RateSetter {
     /*
      * @notice updates rates with values gathered from PI controllers
      */
-    function updatePrices(uint256 _ethTwapPrice, uint256 _noiMarketPrice) public isAuthorized{
-
+    function updatePrices(uint256 _ethTwapPrice, uint256 _noiMarketPrice)
+        public
+        isAuthorized
+    {
         ethPrice = _ethTwapPrice;
 
-        // reward caller 
+        // reward caller
         uint256 tlv = AbsPiController_CONTRACT.tlv();
         uint256 iapcr = rpower(AbsPiController_CONTRACT.pscl(), tlv, RAY);
         uint256 validated = AbsPiController_CONTRACT.computeRate(
@@ -144,8 +157,10 @@ contract RateSetter {
         redemptionPriceUpdateTime = block.timestamp;
 
         // set Eth/Redemption Rate
-        CDPManager_CONTRACT.setEthRp(_ethTwapPrice *(10**19)* EIGHTEEN_DECIMAL_NUMBER / redemptionPrice);
-
+        CDPManager_CONTRACT.setEthRp(
+            (_ethTwapPrice * (10**19) * EIGHTEEN_DECIMAL_NUMBER) /
+                redemptionPrice
+        );
     }
 
     function updateRatesInternal() public {}
@@ -155,11 +170,31 @@ contract RateSetter {
         return data;
     }
 
-    function getRedemptionRate() public view returns (uint256){
+    function getYearlyRedemptionRate() public view returns (uint256) {
+        //return redemptionRate;
+        return rpower(redemptionRate, SECONDS_IN_A_YEAR, RAY);
+    }
+
+    function getYearlyProportionalTerm() public view returns (uint256) {
+        uint256 pTerm = uint256(
+            AbsPiController_CONTRACT.lastAdjustedProportionalTerm()
+        );
+        
+        return rpower(pTerm+RAY, SECONDS_IN_A_YEAR, RAY);
+    }
+
+    function getYearlyIntegralTerm() public view returns (uint256) {
+        uint256 iTerm = uint256(
+            AbsPiController_CONTRACT.lastAdjustedIntegralTerm()
+        );
+        return rpower(iTerm+RAY, SECONDS_IN_A_YEAR, RAY);
+    }
+
+    function getRedemptionRate() public view returns (uint256) {
         return redemptionRate;
     }
 
-    function getRedemptionPrice() public view returns (uint256){
+    function getRedemptionPrice() public view returns (uint256) {
         return redemptionPrice;
     }
 

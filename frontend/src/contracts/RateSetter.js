@@ -129,6 +129,19 @@ export const ABI= [
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "SECONDS_IN_A_YEAR",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "address",
@@ -189,6 +202,45 @@ export const ABI= [
   {
     "inputs": [],
     "name": "getRedemptionRate",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getYearlyIntegralTerm",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getYearlyProportionalTerm",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getYearlyRedemptionRate",
     "outputs": [
       {
         "internalType": "uint256",
@@ -340,4 +392,4 @@ export const ABI= [
     "type": "function"
   }
 ]
-export const address= "0x975Ab64F4901Af5f0C96636deA0b9de3419D0c2F"
+export const address= "0x8ac87219a0F5639BC01b470F87BA2b26356CB2B9"

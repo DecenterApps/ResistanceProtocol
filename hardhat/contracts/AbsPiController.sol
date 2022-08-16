@@ -345,4 +345,18 @@ contract AbsPiController {
     function pscl() external view returns (uint256) {
         return perSecondCumulativeLeak;
     }
+
+    /*
+     * @notice returns last adjusted proportional term
+     */
+    function lastAdjustedProportionalTerm() external view returns (int256) {
+        return ((deviationObservations[oll() - 1].proportional * int(Kp)) / int(EIGHTEEN_DECIMAL_NUMBER));
+    }
+
+    /*
+     * @notice returns last adjusted integral term
+     */
+    function lastAdjustedIntegralTerm() external view returns (int256) {
+        return ((deviationObservations[oll() - 1].integral * int(Ki)) / int(EIGHTEEN_DECIMAL_NUMBER));
+    }
 }

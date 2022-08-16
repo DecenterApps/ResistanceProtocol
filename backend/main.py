@@ -235,14 +235,14 @@ def main():
     try:
         loop.run_until_complete(
             asyncio.gather(
-                cdp_open_loop(event_filter_cdp_open, 2),
-                cdp_close_loop(event_filter_cdp_close, 2),
-                mint_loop(event_filter_mint, 2),
-                repay_loop(event_filter_repay, 2),
-                withdraw_loop(event_filter_withdraw, 2),
-                boost_loop(event_filter_boost, 2),
-                calculate_sf_loop(contract, 10),
-                update_cr_loop(contract, 10),
+                #cdp_open_loop(event_filter_cdp_open, 2),
+                #cdp_close_loop(event_filter_cdp_close, 2),
+                #mint_loop(event_filter_mint, 2),
+                #repay_loop(event_filter_repay, 2),
+                #withdraw_loop(event_filter_withdraw, 2),
+                #boost_loop(event_filter_boost, 2),
+                #calculate_sf_loop(contract, 10),
+                #update_cr_loop(contract, 10),
                 log_noi_supply(contractNOI, 10),
                 log_prices(event_filter_prices,10),
                 log_redemption_rate(event_filter_redemption_rate,10),

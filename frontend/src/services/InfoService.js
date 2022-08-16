@@ -75,7 +75,7 @@ const getLR = async (signer) => {
 const getRedemptionRate = async (signer) => {
   const rrResponse = await contractRATESETTER
     .connect(signer)
-    .getRedemptionRate();
+    .getYearlyRedemptionRate();
   return rrResponse;
 };
 
@@ -97,17 +97,17 @@ const getNOISupply = async (signer) => {
 };
 
 const getProportionalTerm = async (signer) => {
-  const pResponse = await contractCONTROLLER
+  const pResponse = await contractRATESETTER
     .connect(signer)
-    .getLastProportionalTerm();
-  return pResponse;
+    .getYearlyProportionalTerm();
+  return new Decimal(pResponse.toString()).div(10 ** 27).sub(1).toPrecision(5).toString();
 };
 
 const getIntegralTerm = async (signer) => {
-  const iResponse = await contractCONTROLLER
+  const iResponse = await contractRATESETTER
     .connect(signer)
-    .getLastIntegralTerm();
-  return iResponse;
+    .getYearlyIntegralTerm();
+  return new Decimal(iResponse.toString()).div(10 ** 27).sub(1).toPrecision(5).toString();
 };
 
 const getCdpCount = async (signer) => {

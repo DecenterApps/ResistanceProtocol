@@ -143,13 +143,8 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
                 />
                 <div>Total ETH locked</div>
                 <div className="bold-text">
-                  {ethers.utils.formatEther(
-                    new Decimal(totalEth.toString()).toString()
-                  )}{" "}
-                  ($
-                  {ethers.utils.formatEther(
-                    new Decimal(totalEth.toString()).toString()
-                  ) * ethPrice}
+                  {new Decimal(totalEth.toString()).div(10**18).toString()} ($
+                  {new Decimal(totalEth.toString()).div(10**18).mul(ethPrice).toString()}
                   ){" "}
                 </div>
               </VStack>
@@ -172,9 +167,9 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
                 />
                 <div>Outstanding NOI</div>
                 <div className="bold-text">
-                  {ethers.utils.formatEther(
-                    new Decimal(noiSupply.toString()).toString()
-                  )}
+                  {
+                    new Decimal(noiSupply.toString()).div(10**18).toPrecision(15).toString()
+                  }
                 </div>
               </VStack>
             </Box>
@@ -230,16 +225,15 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
                       {new Decimal(rr.toString())
                         .div(10 ** 27)
                         .sub(1)
+                        .toPrecision(5)
                         .toString()}
                       %
                     </div>
                     <div>
-                      <b>pRate</b>:
-                      {new Decimal(pTerm.toString()).div(10 ** 27).toString()}%
+                      <b>pRate</b>:{pTerm}%
                     </div>
                     <div>
-                      <b>iRate</b>:{" "}
-                      {new Decimal(iTerm.toString()).div(10 ** 27).toString()}%
+                      <b>iRate</b>: {iTerm}%
                     </div>
                   </VStack>
                 </Box>
@@ -273,9 +267,9 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
                     <VStack>
                       <div>ERC20 NOI Supply</div>
                       <div className="bold-text">
-                        {ethers.utils.formatEther(
-                          new Decimal(noiSupply.toString()).toString()
-                        )}
+                        {
+                          new Decimal(noiSupply.toString()).div(10**18).toPrecision(15).toString()
+                        }
                       </div>
                     </VStack>
                   </Box>
@@ -341,7 +335,7 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
                     <div className="bold-text">
                       {" "}
                       {new Decimal(marketPrice.toString())
-                        .div(10 ** 8)
+                        .div(10 ** 8).toPrecision(5)
                         .toString()}{" "}
                       USD
                     </div>
@@ -359,7 +353,7 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
                     <div>NOI Redemption Price</div>
                     <div className="bold-text">
                       {new Decimal(redemptionPrice.toString())
-                        .div(10 ** 27)
+                        .div(10 ** 27).toPrecision(8)
                         .toString()}{" "}
                       USD
                     </div>
@@ -380,7 +374,7 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
                         .div(10 ** 8)
                         .sub(
                           new Decimal(redemptionPrice.toString()).div(10 ** 27)
-                        )
+                        ).toPrecision(5)
                         .toString()}{" "}
                       USD
                     </div>
