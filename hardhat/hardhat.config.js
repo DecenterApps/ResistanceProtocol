@@ -14,7 +14,10 @@ module.exports = {
     networks: {
         hardhat: {
             chainId: 31337,
-            allowUnlimitedContractSize: true
+            allowUnlimitedContractSize: true,
+            accounts: {
+                count: 100
+            }
         },
         kovan: {
             url: KOVAN_RPC_URL,

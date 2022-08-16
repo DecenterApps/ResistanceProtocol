@@ -17,6 +17,7 @@ module.exports = async ({ getNamedAccounts }) => {
     const EthTWAPFeedContractObj = await ethers.getContract("EthTwapFeed", deployer);
     const MarketTwapFeed = await ethers.getContract("MarketTwapFeed", deployer);
     const AbsPIController = await ethers.getContract("AbsPiController", deployer);
+    const ExchangePool = await ethers.getContract("ExchangePoolSimMock", deployer);
 
 
     writeAbiAndAddress("MultiSigWallet", msw.address)
@@ -29,8 +30,7 @@ module.exports = async ({ getNamedAccounts }) => {
     writeAbiAndAddress("EthTwapFeed", EthTWAPFeedContractObj.address)
     writeAbiAndAddress("MarketTwapFeed", MarketTwapFeed.address)
     writeAbiAndAddress("AbsPiController",AbsPIController.address)
-
-
+    writeAbiAndAddress("ExchangePoolSimMock",ExchangePool.address)
 };
 
 module.exports.tags = ["all", "writeforfront"];

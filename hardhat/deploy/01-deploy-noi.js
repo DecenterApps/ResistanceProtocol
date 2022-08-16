@@ -6,15 +6,13 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     const { deploy, log } = deployments;
     const { deployer } = await getNamedAccounts();
 
-    const chainId = network.config.chainId;
-
     const multiSigWalletAddress = (await ethers.getContract("MultiSigWallet", deployer)).address;
 
     log("----------------------------------------------------");
     log("Deploying NOI and waiting for confirmations...");
     const noi = await deploy("NOI", {
         from: deployer,
-        args: [multiSigWalletAddress, chainId],
+        args: [multiSigWalletAddress],
         log: true,
         waitConfirmations: network.config.blockConfirmations || 1,
     });
@@ -22,7 +20,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 
     // verify contract on etherscan
     if (!developmentChains.includes(network.name) && process.env.ETHERSCAN_API_KEY) {
-        await verify(noi.address, [multiSigWalletAddress, chainId]);
+        await verify(noi.address, [multiSigWalletAddress]);
     }
 };
 

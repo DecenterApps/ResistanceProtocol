@@ -14,7 +14,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   const TwapInterval = 24; // twap window 24h
 
   let lendingPoolAddress = (
-    await ethers.getContract("LendingPoolMock", deployer)
+    await ethers.getContract("ExchangePoolSimMock", deployer)
   ).address;
 
   let EthTwapFeedAddress = (await ethers.getContract("EthTwapFeed", deployer))
