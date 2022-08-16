@@ -82,6 +82,8 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
   const [redemptionRateHistory, setRedemptionRateHistory] = useState([]);
   const [redemptionPriceHistory, setRedemptionPriceHistory] = useState([]);
   const [marketPriceHistory, setMarketPriceHistory] = useState([]);
+  const [noiSurplus,setNoiSurplus]=useState(0);
+  const [noiInTreasury,setNoiInTreasury]=useState(0);
 
   useEffect(() => {
     FirebaseService.setUpNOITracking(setNOISupplyHistory);
@@ -108,9 +110,11 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
     setRedemptionPrice(await InfoService.getRedemptionPrice(signer));
     setMarketPrice(await InfoService.getMarketPrice(signer));
     setNOISupply(await InfoService.getNOISupply(signer));
+    setCdpCount(await InfoService.getCdpCount(signer));
+    setNoiInTreasury(await InfoService.getTreasuryNoi(signer));
+    setNoiSurplus(await InfoService.getNoiSurplus(signer));
     setPTerm(await InfoService.getProportionalTerm(signer));
     setITerm(await InfoService.getIntegralTerm(signer));
-    setCdpCount(await InfoService.getCdpCount(signer));
   };
 
   useEffect(() => {
@@ -168,7 +172,7 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
                 <div>Outstanding NOI</div>
                 <div className="bold-text">
                   {
-                    new Decimal(noiSupply.toString()).div(10**18).toPrecision(15).toString()
+                    new Decimal(noiSupply.toString()).add(new Decimal(noiSurplus.toString())).div(10**18).toPrecision(15).toString()
                   }
                 </div>
               </VStack>
@@ -298,7 +302,7 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
                     </div>
                     <VStack>
                       <div>NOI surplus</div>
-                      <div className="bold-text">TO DO</div>
+                      <div className="bold-text">{new Decimal(noiSurplus.toString()).div(10**18).toPrecision(15).toString()}</div>
                     </VStack>
                   </Box>
                   <Box className="div-indiv2-line2 ">
@@ -311,7 +315,7 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
                     </div>
                     <VStack>
                       <div>NOI in treasury</div>
-                      <div className="bold-text">TO DO</div>
+                      <div className="bold-text">{new Decimal(noiInTreasury.toString()).div(10**18).toPrecision(15).toString()}</div>
                     </VStack>
                   </Box>
                 </HStack>

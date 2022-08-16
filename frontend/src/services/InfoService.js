@@ -25,6 +25,10 @@ import {
   address as address_CONTROLLER,
   ABI as ABI_CONTROLLER,
 } from "../contracts/AbsPiController";
+import {
+  ABI as ABI_TREASURY,
+  address as address_TREASURY,
+} from "../contracts/Treasury";
 
 const contractCDPManager = new ethers.Contract(
   address_CDPMANAGER,
@@ -46,6 +50,8 @@ const contractRATESETTER = new ethers.Contract(
 const contractMARKET = new ethers.Contract(address_MARKET, ABI_MARKET);
 
 const contractNOI = new ethers.Contract(address_NOI, ABI_NOI);
+
+const contractTREASURY= new ethers.Contract(address_TREASURY,ABI_TREASURY);
 
 const contractCONTROLLER = new ethers.Contract(
   address_CONTROLLER,
@@ -100,20 +106,38 @@ const getProportionalTerm = async (signer) => {
   const pResponse = await contractRATESETTER
     .connect(signer)
     .getYearlyProportionalTerm();
-  return new Decimal(pResponse.toString()).div(10 ** 27).sub(1).toPrecision(5).toString();
+  return new Decimal(pResponse.toString())
+    .div(10 ** 27)
+    .sub(1)
+    .toPrecision(5)
+    .toString();
 };
 
 const getIntegralTerm = async (signer) => {
   const iResponse = await contractRATESETTER
     .connect(signer)
     .getYearlyIntegralTerm();
-  return new Decimal(iResponse.toString()).div(10 ** 27).sub(1).toPrecision(5).toString();
+  return new Decimal(iResponse.toString())
+    .div(10 ** 27)
+    .sub(1)
+    .toPrecision(5)
+    .toString();
 };
 
 const getCdpCount = async (signer) => {
   const countResponse = await contractCDPManager.connect(signer).openCDPcount();
   return countResponse;
 };
+
+const getNoiSurplus = async (signer) => {
+  const surplusResponse=await contractTREASURY.connect(signer).unmintedNoiBalance();
+  return surplusResponse;
+}
+
+const getTreasuryNoi = async (signer) =>{
+  const treasuryResponse=await contractNOI.connect(signer).balanceOf(address_TREASURY);
+  return treasuryResponse;
+}
 
 export default {
   getCdpCount,
@@ -127,4 +151,6 @@ export default {
   getSF,
   getTotalEth,
   getEthPrice,
+  getNoiSurplus,
+  getTreasuryNoi,
 };
