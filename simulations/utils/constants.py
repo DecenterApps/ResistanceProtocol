@@ -13,9 +13,9 @@ def update_one_eth(one_eth: int) -> None:
     POOL.NOI_AMOUNT = POOL.ETH_AMOUNT * ONE_ETH
 
 class PRICE_TRADER:
-    NUM = 300
+    NUM = 10
 
-    ETH_AMOUNT = 4
+    ETH_AMOUNT = 100000
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
 
     # percentage of traders resource when trading
@@ -29,9 +29,9 @@ class PRICE_TRADER:
     BOUND_LOW = 1 - BOUND_HIGH - BOUND_MID
 
 class RATE_TRADER:
-    NUM = 200
+    NUM = 10
 
-    ETH_AMOUNT = 2
+    ETH_AMOUNT = 100000
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
 
     # percentage of traders resource when trading
@@ -47,7 +47,7 @@ class RATE_TRADER:
     RR_LOW = 1 - RR_HIGH - RR_MID
 
 class LEVERAGER:
-    NUM = 200
+    NUM = 0
 
     ETH_AMOUNT = 4
 
@@ -73,7 +73,7 @@ class LEVERAGER:
     # gap between market price and redemption price when leverager opens/closes a position
     RELATIVE_GAP_RISKY = 0.5
     RELATIVE_GAP_MODERATE = 0.25
-    RELATIVE_GAP_SAFE = 0.5
+    RELATIVE_GAP_SAFE = 1 - RELATIVE_GAP_RISKY - RELATIVE_GAP_MODERATE
 
     # how far in the future does the leverager look
     PREDICTION_FAR = 0.2
@@ -91,9 +91,9 @@ class LEVERAGER:
 
 
 class SAFE_OWNER:
-    NUM = 200
+    NUM = 20
 
-    ETH_AMOUNT = 2
+    ETH_AMOUNT = 100000
 
     RISKY = 0.2
     MODERATE = 0.3
@@ -156,7 +156,7 @@ class WHALE_INSTANT_RATE_SETTER:
     BOUND_LOW = 1 - BOUND_HIGH - BOUND_MID
 
 class NOI_TRUSTER:
-    NUM = 100
+    NUM = 0
 
     ETH_AMOUNT = 5
     NOI_AMOUNT = 0
@@ -172,13 +172,10 @@ class NOI_TRUSTER:
     BOUND_LOW = 1 - BOUND_HIGH - BOUND_MID
 
 class RANDOM_TRADER:
-    NUM = 100
+    NUM = 0
 
     ETH_AMOUNT = 2
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
-
-    def update(self) -> None:
-        self.NOI_AMOUNT = self.ETH_AMOUNT * ONE_ETH
 
 
 class WHALE_LONGTERM_PRICE_SETTER:
@@ -198,7 +195,7 @@ class WHALE_LONGTERM_PRICE_SETTER:
     LONG_PERIOD = 1 - SHORT_PERIOD - MID_PERIOD
 
 class POOL:
-    ETH_AMOUNT = 200
+    ETH_AMOUNT = 500000
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
 
 class REDEMPTION_RATES:
@@ -222,4 +219,4 @@ INF = 10000000000
 
 TWAP_TIMESTAMPS = 100
 
-SIMULATION_TIMESTAMPS = 999
+SIMULATION_TIMESTAMPS = 1700
