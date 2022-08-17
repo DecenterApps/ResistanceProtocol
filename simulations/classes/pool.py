@@ -7,6 +7,7 @@ class Pool:
     def __init__(self, eth_amount:float, noi_amount:float):
         self.noi = noi_amount
         self.eth = eth_amount
+        self.cnt = 0
     
     # returns eth and noi amount of how much the pool has been changed(absolute value)
     def put_eth_get_noi(self, eth_add, price_station, ext_data: ExtData) -> Tuple[float, float]:
@@ -22,6 +23,7 @@ class Pool:
             noi_sum += noi_val
 
         price_station.update_mp(self, ext_data)
+        self.cnt += 1
         return eth_add, noi_sum
 
     # returns eth and noi amount of how much the pool has been changed(absolute value)
@@ -38,6 +40,7 @@ class Pool:
             eth_sum += eth_val
 
         price_station.update_mp(self, ext_data)
+        self.cnt += 1
         return eth_sum, noi_add
     
     #given the resulting eth, calculates how much noi should agent put into the pool

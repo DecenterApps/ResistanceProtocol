@@ -12,12 +12,17 @@ class Regression:
         data = np.array(data)
         X_l = np.arange(data.size)
         X_l = X_l.reshape(-1,1)
+        original_len = data.size
+        if data.size > 500:
+            data = data[-500:]
+            X_l = X_l[-500:]
         regression = svm.SVR(kernel = 'rbf', degree = 3, C = 10, epsilon = 0.01)
         regression.fit(X_l, data)
+
         self.regression = regression
 
     def predict(self, test_ind: int):
-        arr = np.arange(test_ind)        
+        arr = np.arange(test_ind)
         arr = arr.reshape(-1,1)
         self.prediction_data = self.regression.predict(arr)
 

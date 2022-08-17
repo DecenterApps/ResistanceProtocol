@@ -62,8 +62,6 @@ def update_agents(params, substep, state_history, previous_state, policy_input):
 
     update_whale_longterm_price_setter(agents, price_station, pool, ext_data)
 
-    start_time = time.time()
-
     for i in range(agent_utils.total_sum // 2):
         p = np.random.random()
         if i % 2 == 0:
@@ -79,14 +77,9 @@ def update_agents(params, substep, state_history, previous_state, policy_input):
                 break
             p -= nums[i] / total_sum
 
-    end_time = time.time()
-    time_arr.append(end_time - start_time)
-    
     pbar.update(1)
 
     return ('agents', ret)
-
-
 
 partial_state_update_blocks = [
     { 
@@ -129,9 +122,3 @@ full_graph.plot(ext_data)
 timestamp_graph.plot(ext_data)
 
 print(br)
-
-figure, axis = plt.subplots(1, 1, figsize=(12,12))
-axis.plot(time_arr)
-plt.tight_layout()
-
-plt.savefig('images/times.png')
