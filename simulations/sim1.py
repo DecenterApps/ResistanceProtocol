@@ -18,10 +18,8 @@ from tqdm import tqdm
 INIT_REDEMPTION_PRICE = 2
 
 ext_data = ExtData()
-ext_data.eth_dollar = get_data_from_csv(
-    'dataset/simulation_data/eth_dollar.csv')
-ext_data.format_cpi_values(INIT_REDEMPTION_PRICE, get_data_from_csv(
-    'dataset/simulation_data/cpi_value.csv'))
+ext_data.eth_dollar = get_data_from_csv('dataset/simulation_data/eth_dollar.csv')
+ext_data.format_cpi_values(INIT_REDEMPTION_PRICE, get_data_from_csv('dataset/simulation_data/cpi_value.csv'))
 
 exp = Experiment()
 
@@ -69,9 +67,8 @@ def set_previous_values(previous_state):
 
 def update_agents(params, substep, state_history, previous_state, policy_input):
 
-    RANDOM_TRADER.NUM = params['parameters']['random_trader']
-
     if previous_state['timestep'] == 0:
+        update_constants(params['parameters'])
         agents, pool, price_station, timestamp_graph, full_graph, agent_utils, br = init_state()
         pbar.clear()
     else:
@@ -83,11 +80,11 @@ def update_agents(params, substep, state_history, previous_state, policy_input):
     price_station.calculate_redemption_price(ext_data)
     timestamp_graph.add_to_graph(agents, price_station, pool)
 
-    total_sum = agent_utils.total_sum
+    total_sum = np.sum(nums)
 
     update_whale_longterm_price_setter(agents, price_station, pool, ext_data)
-
-    for i in range(agent_utils.total_sum // 2):
+    
+    for i in range(total_sum // 2):
         p = np.random.random()
         if i % 2 == 0:
             if RATE_TRADER.NUM + PRICE_TRADER.NUM > 0 and p < RATE_TRADER.NUM / (RATE_TRADER.NUM + PRICE_TRADER.NUM):
@@ -97,8 +94,7 @@ def update_agents(params, substep, state_history, previous_state, policy_input):
             continue
         for i in range(len(agent_utils.nums)):
             if p < agent_utils.nums[i] / total_sum:
-                agent_utils.agents_dict[agent_utils.names[i]]['update'](
-                    agents, price_station, pool, ext_data)
+                agent_utils.agents_dict[agent_utils.names[i]]['update'](agents, price_station, pool, ext_data)
                 br[i] += 1
                 break
             p -= agent_utils.nums[i] / total_sum
