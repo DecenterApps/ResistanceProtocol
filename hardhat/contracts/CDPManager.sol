@@ -363,6 +363,11 @@ contract CDPManager {
         return totalSupply;
     }
 
+    /// @notice view total debt of ether in contract
+    function getTotalDebt() public view returns (uint256) {
+        return totalDebt;
+    }
+
 
     /// @notice get current CR of CDP
     /// @param _collateral total collateral
