@@ -14,10 +14,11 @@ abstract contract CPITrackerOracle {
 error RateSetter__UnknownParameter();
 error RateSetter__UnknownContract();
 error RateSetter__NotOwner();
-error RateSetter__NotAuthorized();
+error RateSetter__NotMarketTwapFeed();
 
 contract RateSetter {
     address public immutable owner;
+    address public marketTwapFeedContractAddress;  
     uint256 redemptionPrice;
     uint256 CPI;
     uint256 redemptionRate;
@@ -39,24 +40,14 @@ contract RateSetter {
 
     // AUTH
 
-    modifier isOwner() {
+    modifier onlyOwner() {
         if (owner != msg.sender) revert RateSetter__NotOwner();
         _;
     }
 
-    mapping(address => bool) public authorizedAccounts;
-
-    function addAuthorization(address account) external isOwner {
-        authorizedAccounts[account] = true;
-    }
-
-    function removeAuthorization(address account) external isOwner {
-        authorizedAccounts[account] = false;
-    }
-
-    modifier isAuthorized() {
-        if (authorizedAccounts[msg.sender] == false)
-            revert RateSetter__NotAuthorized();
+    modifier isMarketTwapFeed() {
+        if (msg.sender != marketTwapFeedContractAddress && msg.sender != owner)
+            revert RateSetter__NotMarketTwapFeed();
         _;
     }
 
@@ -67,7 +58,7 @@ contract RateSetter {
      * @param _parameter The name of the parameter modified
      * @param _data New value for the parameter
      */
-    function modifyParameters(bytes32 _parameter, uint256 _data) external isOwner {
+    function modifyParameters(bytes32 _parameter, uint256 _data) external onlyOwner {
         if (_parameter == "redemptionPriceUpdateTime") redemptionPriceUpdateTime = _data;
         else revert RateSetter__UnknownParameter();
         emit ModifyParameters(_parameter, _data);
@@ -78,12 +69,16 @@ contract RateSetter {
      * @param _contract The name of the contract modified
      * @param _newAddress New address for the contract
      */
-    function modifyContracts(bytes32 _contract, address _newAddress) external isOwner {
+    function modifyContracts(bytes32 _contract, address _newAddress) external onlyOwner {
         if (_contract == "CDPManager") CDPManager_CONTRACT = CDPManager(_newAddress);
         else if (_contract == "AbsPiController") AbsPiController_CONTRACT = AbsPiController(_newAddress);
         else if (_contract == "CPITrackerOracle") cpiDataFeed= CPITrackerOracle(_newAddress);
         else revert RateSetter__UnknownContract();
         emit ModifyContract(_contract, _newAddress);
+    }
+
+    function setMarketTwapFeedContractAddress(address _address) external onlyOwner { 
+        marketTwapFeedContractAddress = _address;
     }
 
     /*
@@ -113,7 +108,7 @@ contract RateSetter {
     /*
      * @notice updates rates with values gathered from PI controllers
      */
-    function updatePrices(uint256 _ethTwapPrice, uint256 _noiMarketPrice) public isAuthorized{
+    function updatePrices(uint256 _ethTwapPrice, uint256 _noiMarketPrice) public isMarketTwapFeed{
 
         ethPrice = _ethTwapPrice;
 

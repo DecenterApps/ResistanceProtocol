@@ -101,10 +101,10 @@ module.exports = async ({ getNamedAccounts }) => {
     );
 
     await executeActionFromMSW(
-        msw,
+        msw, 
         0,
         cdpManagerContractObj.address,
-        "addAuthorization",
+        "setRateSetterContractAddress",
         ["address"],
         [RateSetterContractObj.address]
     );
@@ -113,16 +113,16 @@ module.exports = async ({ getNamedAccounts }) => {
         msw,
         0,
         EthTwapFeed.address,
-        "addAuthorization",
+        "setMarketTwapFeedContractAddress",
         ["address"],
         [MarketTwapFeed.address]
     );
 
     await executeActionFromMSW(
-        msw,
+        msw, 
         0,
         RateSetterContractObj.address,
-        "addAuthorization",
+        "setMarketTwapFeedContractAddress",
         ["address"],
         [MarketTwapFeed.address]
     );
