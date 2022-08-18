@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0 <0.9.0;
 
-error CPIController_TooSoon();
-error CPIController_NotOwner();
-error CPIController_ContractNotEnabled();
+error CPIController__TooSoon();
+error CPIController__NotOwner();
+error CPIController__ContractNotEnabled();
+error CPIController__NotRateSetter();
 
 contract CPIController {
 
@@ -35,6 +36,7 @@ contract CPIController {
 
     // --- Auth ---
     address public immutable owner;
+    address public rateSetterContractAddress;
     bool public contractEnabled;
 
     // --- Fluctuating/Dynamic Variables ---
@@ -46,13 +48,19 @@ contract CPIController {
 
     // --- Modifiers ---
     modifier isOwner() {
-        if (owner != msg.sender) revert CPIController_NotOwner();
+        if (owner != msg.sender) revert CPIController__NotOwner();
         _;
     }
 
     modifier isContractEnabled() {
-        if (!contractEnabled) revert CPIController_ContractNotEnabled();
+        if (!contractEnabled) revert CPIController__ContractNotEnabled();
         _;
+    }
+
+    modifier isRateSetter(){
+        if (msg.sender != rateSetterContractAddress && msg.sender != owner)
+            revert CPIController__NotRateSetter();
+        _;   
     }
 
     // --- Functions ---    
@@ -138,9 +146,13 @@ contract CPIController {
         uint256 _marketValue,
         uint256 _redemptionValue,
         uint256 _accumulatedLeak
-    ) external isContractEnabled returns (uint256) {
+    ) external 
+        isContractEnabled 
+        isRateSetter
+        returns (uint256)
+    {
         if (block.timestamp - lastUpdateTime < integralPeriodSize) {
-            revert CPIController_TooSoon();
+            revert CPIController__TooSoon();
         }
         alpha = _accumulatedLeak;
         int256 proportionalTerm = int256(_redemptionValue) -
@@ -154,7 +166,7 @@ contract CPIController {
         );
         if (piOutput != 0) {
             uint256 newRedemptionRate = getBoundedRedemptionRate(piOutput);
-            return newRedemptionRate;
+            return TWENTY_SEVEN_DECIMAL_NUMBER * 2 - newRedemptionRate;
         } else {
             return TWENTY_SEVEN_DECIMAL_NUMBER;
         }
@@ -188,7 +200,10 @@ contract CPIController {
         return elapsed;
     }
 
-    ///@notice returns last proportional term 
+    function setRateSetterContractAddress(address _address) external isOwner{
+        rateSetterContractAddress = _address;
+    }
+
     function getLastProportionalTerm() public view returns (int256) {
         if (oll() == 0) return 0;
         return deviationObservations[oll() - 1].proportional;
