@@ -19,7 +19,6 @@ module.exports = async ({ getNamedAccounts }) => {
     const AbsPIController = await ethers.getContract("AbsPiController", deployer);
     const ExchangePool = await ethers.getContract("ExchangePoolSimMock", deployer);
 
-
     writeAbiAndAddress("MultiSigWallet", msw.address)
     writeAbiAndAddress("NOI", noiContract.address)
     writeAbiAndAddress("CDPManager", cdpManagerContractObj.address)

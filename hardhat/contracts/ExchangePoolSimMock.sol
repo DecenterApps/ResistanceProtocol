@@ -11,11 +11,9 @@ contract ExchangePoolSimMock {
     NOI private immutable noiContract;
     AggregatorV3Interface private immutable ethPriceFeed;
 
-    constructor(address _noiContract) {
+    constructor(address _noiContract, address ethPriceFeedAddress) {
         noiContract = NOI(_noiContract);
-        ethPriceFeed = AggregatorV3Interface(
-            0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419
-        );
+        ethPriceFeed = AggregatorV3Interface(ethPriceFeedAddress);
     }
 
     function addFunds(uint256 amount) public payable {
@@ -56,9 +54,8 @@ contract ExchangePoolSimMock {
     }
 
     function getNoiMarketPrice() public view returns (uint256) {
-        uint256 noiAmount = howMuchNoiForEth(1e18);
-        uint256 ethPrice = getEthPrice();
-        return noiAmount / (ethPrice * 1e10);
+        uint256 ethAmount = howMuchEthForNoi(1e18);
+        return ethAmount * getEthPrice()/1e18;
     }
 
     function getEthPrice() public view returns (uint256) {
@@ -76,11 +73,11 @@ contract ExchangePoolSimMock {
         )
     {
         uint256 noiCnt = noiContract.balanceOf(address(this));
-        uint256 daiCnt = address(this).balance * getEthPrice();
-        if (noiCnt == 0 || daiCnt == 0) {
-            return (1, 1, block.timestamp);
+        uint256 ethCnt = address(this).balance;
+        if (noiCnt == 0 || ethCnt == 0) {
+            return (100000e18, 200e18, block.timestamp);
         } else {
-            return (noiCnt, daiCnt, block.timestamp);
+            return (noiCnt, ethCnt, block.timestamp);
         }
     }
 }

@@ -104,7 +104,7 @@ contract RateSetter {
         owner = _owner;
         CDPManager_CONTRACT = CDPManager(_cdpManager);
         AbsPiController_CONTRACT = AbsPiController(_AbsPiController);
-        redemptionPrice = (100 * RAY) / 100;
+        redemptionPrice = (100 * 2 * RAY) / 100;
         redemptionRate = RAY;
 
         cpiDataFeed = CPITrackerOracle(_cpiDataFeed);

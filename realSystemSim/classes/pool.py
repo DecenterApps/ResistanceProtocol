@@ -19,7 +19,6 @@ ExchangePool = web3.eth.contract(
     address=ADDRESS_EXCHANGEPOOLSIMMOCK, abi=ABI_EXCHANGEPOOLSIMMOCK)
 NoiContract = web3.eth.contract(address=ADDRESS_NOI, abi=ABI_NOI)
 
-
 class Pool:
     def __init__(self):
         pass
@@ -32,7 +31,7 @@ class Pool:
                 "value": web3.toWei(eth_add, "ether"),
             }
         )
-        send_tx(tx, trader.private_key)
+        send_tx(tx, trader.private_key, trader.name, True)
 
     def put_noi_get_eth(self, noi_add, trader):
         approveTx = ExchangePool.functions.approve(ExchangePool.address, web3.toWei(noi_add)).buildTransaction(
@@ -41,7 +40,7 @@ class Pool:
                 'nonce': web3.eth.get_transaction_count(trader.address),
             }
         )
-        send_tx(approveTx, trader.private_key)
+        send_tx(approveTx, trader.private_key, trader.name, True)
 
         tx = ExchangePool.functions.putNoiGetEth(web3.toWei(noi_add)).buildTransaction(
             {
@@ -49,7 +48,7 @@ class Pool:
                 'nonce': web3.eth.get_transaction_count(trader.address),
             }
         )
-        send_tx(tx, trader.private_key)
+        send_tx(tx, trader.private_key, trader.name, True)
 
     # given the resulting eth, calculates how much noi should agent put into the pool
 

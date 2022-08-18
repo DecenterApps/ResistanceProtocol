@@ -72,8 +72,10 @@ contract MarketTwapFeed {
         lastUpdateTimestamp = block.timestamp;
 
         daiPriceFeed = AggregatorV3Interface(
-            0xAed0c38402a5d19df6E4c03F4E2DceD6e29c1ee9
+            0xCBBe2A5c3A22BE749D5DDF24e9534f98951983e2
         );
+        // dai contract
+        //0xAed0c38402a5d19df6E4c03F4E2DceD6e29c1ee9
 
         updateTimeInterval = _updateTimeInterval;
         twapWindowSize = _twapWindowSize + 1;

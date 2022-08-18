@@ -45,7 +45,7 @@ def update_trader(agents, price_station: PriceStation, pool: Pool, literal_name,
     num = CONST.ACCOUNTS_END - CONST.ACCOUNTS_START
     if num == 0:
         return
-    i = random.randint(0, num - 1)
+    i = random.randint(CONST.ACCOUNTS_START, num - 1)
 
     name = literal_name + str(i)
     trader: Trader = agents[name]

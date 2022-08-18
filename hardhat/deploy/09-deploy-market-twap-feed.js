@@ -10,7 +10,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   const { deployer } = await getNamedAccounts();
   const chainId = network.config.chainId;
 
-  const PriceRefreshInterval = 5 //3600; // 60 min
+  const PriceRefreshInterval = 3600 //3600; // 60 min
   const TwapInterval = 24; // twap window 24h
 
   let lendingPoolAddress = (

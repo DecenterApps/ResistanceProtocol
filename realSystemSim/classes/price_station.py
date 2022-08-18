@@ -30,7 +30,6 @@ class PriceStation:
         self.num_steps = 0
 
     def getMp(self):
-        rez = ExchangePool.functions.getNoiMarketPrice().call()
         return web3.fromWei(ExchangePool.functions.getNoiMarketPrice().call(), 'ether')
 
     def getRp(self):
