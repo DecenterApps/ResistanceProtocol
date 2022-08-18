@@ -7,6 +7,7 @@ from agents.trader.whale_instant_rate_setter import *
 from agents.trader.noi_truster import *
 from agents.trader.random_trader import *
 from agents.trader.whale_longterm_price_setter import *
+from utils.constants import names as agent_names
 
 def get_agents_dict():
     return {
@@ -92,23 +93,17 @@ def get_agents_dict():
             },
         }
     }
-
-nums = [RATE_TRADER.NUM, PRICE_TRADER.NUM, LEVERAGER.NUM, SAFE_OWNER.NUM, WHALE_INSTANT_PRICE_SETTER.NUM, 
-        WHALE_INSTANT_RATE_SETTER.NUM, NOI_TRUSTER.NUM, RANDOM_TRADER.NUM, WHALE_LONGTERM_PRICE_SETTER.NUM]
-total_sum = np.sum(nums)
-names = ['rate_trader', 'price_trader', 'leverager', 'safe_owner', 'whale_instant_price_setter',
-         'whale_instant_rate_setter', 'noi_truster', 'random_trader', 'whale_longterm_price_setter']
+names = agent_names
 
 class Agent_Utils:
     def __init__(self):
         self.nums = nums
-        self.total_sum = total_sum
         self.names = names
         self.agents_dict = get_agents_dict()
 
-    def calculate_all_amounts(self, previous_state):
+    def calculate_all_amounts(self, agents):
         for i in range(len(names)):
-            eth, noi = calculate_agents_amount(previous_state, names[i], nums[i])
+            eth, noi = calculate_agents_amount(agents, names[i], nums[i])
             self.agents_dict[names[i]]['graph']['eth'].append(eth)
             self.agents_dict[names[i]]['graph']['noi'].append(noi)
 
@@ -117,12 +112,12 @@ class Agent_Utils:
         for i in range(len(names)):
             self.agents_dict[names[i]]['create'](agents)
 
-def calculate_agents_amount(previous_state, agent_name, num):
+def calculate_agents_amount(agents, agent_name, num):
     eth_sum = 0
     noi_sum = 0
     for i in range(num):
         name = agent_name + str(i)
-        agent = previous_state['agents'][name]
+        agent = agents[name]
         eth_sum += agent.eth
         noi_sum += agent.noi
         if isinstance(agent, CDP_Holder) and agent.opened_position:
