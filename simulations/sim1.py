@@ -22,19 +22,11 @@ INIT_REDEMPTION_PRICE = 2
 ext_data = ExtData()
 ext_data.eth_dollar = get_data_from_csv('dataset/simulation_data/eth_dollar.csv')
 ext_data.format_cpi_values(INIT_REDEMPTION_PRICE, get_data_from_csv('dataset/simulation_data/cpi_value.csv'))
+ext_data.eth_prediction = get_data_from_csv('dataset/simulation_data/predicted_data.csv')
 
 exp = Experiment()
 
-genesis_states = {'sim': {
-    'agents': None,
-    'pool': None,
-    'price_station': None,
-    'timestamp_graph': None,
-    'full_graph': None,
-    'agent_utils': None,
-    'br': None,
-}
-}
+genesis_states = {'sim': {} }
 
 pbar = tqdm(total=SIMULATION_TIMESTAMPS)
 
@@ -70,17 +62,18 @@ def plot_graphs(timestamp_graph, full_graph, br):
     timestamp_graph.plot(ext_data)
     print(br)
 
+agents, pool, price_station, timestamp_graph, full_graph, agent_utils, br = init_state()
+
 def update_agents(params, substep, state_history, previous_state, policy_input):
+    global agents, pool, price_station, timestamp_graph, full_graph, agent_utils, br
 
     if previous_state['timestep'] == 0:
-        update_constants(params['parameters'])
-        agents, pool, price_station, timestamp_graph, full_graph, agent_utils, br = init_state()
+        if 'parameters' in params:
+            update_constants(params['parameters'])
+            agents, pool, price_station, timestamp_graph, full_graph, agent_utils, br = init_state()
         pbar.clear()
-    else:
-        agents, pool, price_station, timestamp_graph, full_graph, agent_utils, br = set_previous_values(previous_state)
 
     ext_data.set_parameters(substep, previous_state)
-    ext_data.set_fresh_eth_prediction()
     price_station.get_fresh_mp(pool, ext_data)
     price_station.calculate_redemption_price(ext_data)
     timestamp_graph.add_to_graph(agents, price_station, pool)
@@ -103,24 +96,20 @@ def update_agents(params, substep, state_history, previous_state, policy_input):
                 break
             p -= agent_utils.nums[i] / total_sum
 
-    pbar.update(1)
-
     if previous_state['timestep'] == SIMULATION_TIMESTAMPS - 1:
         plot_graphs(full_graph, timestamp_graph, br)
+        print('poceo spor')
         with open('dataset/graphs.csv', 'a') as f:
             writer = csv.writer(f)
             one, two, three = timestamp_graph.save_main_axis(ext_data)
             writer.writerow([one, two, three])
             one, two, three = full_graph.save_main_axis(ext_data)
             writer.writerow([one, two, three])
+        print('kraj spor')
+    
+    pbar.update(1)
 
-    return ('sim', {'agents': agents,
-                    'pool': pool,
-                    'price_station': price_station,
-                    'timestamp_graph': timestamp_graph,
-                    'full_graph': full_graph,
-                    'agent_utils': agent_utils,
-                    'br': br})
+    return ('sim', {})
 
 partial_state_update_blocks = [
     {
@@ -139,14 +128,40 @@ sim_config_dict = {
     'M': {
         'parameters': [
             {
-                'random_trader': 2,
-                'rate_trader': 10,
-                'noi_truster': 10,
-                'leverager': 1,
-
+                'leverager': 5,
+                'safe_owner': 5
             },
             {
-                'random_trader': 0,
+                'leverager': 0,
+                'safe_owner': 0
+            },
+            {
+                'leverager': 10,
+                'safe_owner': 10
+            },
+            {
+                'leverager': 15,
+                'safe_owner': 15
+            },
+            {
+                'leverager': 20,
+                'safe_owner': 20
+            },
+            {
+                'leverager': 25,
+                'safe_owner': 25
+            },
+            {
+                'leverager': 30,
+                'safe_owner': 30
+            },
+            {
+                'leverager': 40,
+                'safe_owner': 40
+            },
+            {
+                'leverager': 50,
+                'safe_owner': 50
             },
         ]
     }

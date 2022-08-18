@@ -7,7 +7,6 @@ class ExtData:
         self.substep = 0
         self.previous_state = {}
         self.eth_prediction = []
-        self.regression = Regression()
     
     def get_eth_value(self):
         return self.eth_dollar[self.get_current_timestep()]
@@ -23,11 +22,8 @@ class ExtData:
     def get_eth_amount_for_value(self, dollar_value):
         return dollar_value / self.get_eth_value()
 
-    def set_fresh_eth_prediction(self):
-        self.regression.update(self.eth_dollar[:self.get_current_timestep()])
-
     def get_predicted_eth_price(self, timestamp):
-        return self.regression.get_predicted_eth_price(timestamp)
+        return self.eth_prediction[min(timestamp, len(self.eth_prediction))]
 
     def set_parameters(self, substep, previous_state):
         self.substep = substep
