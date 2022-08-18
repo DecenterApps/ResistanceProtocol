@@ -63,3 +63,5 @@ if __name__ == "__main__":
     plt.plot(ether[p:p+num_timestamps])
     plt.title("ETHER")
     plt.savefig("../../images/simulation_data/eth_dollar.png")
+
+    exec(open("../../classes/regression.py").read())
