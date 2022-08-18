@@ -9,11 +9,13 @@ from classes.graph.a_graph import *
 from classes.price_station import *
 from classes.graph.timestamp_graph import Timestamp_Graph
 from classes.graph.full_graph import Full_Graph
-from utils.util_functions import get_data_from_csv
+from utils.util_functions import *
 from utils.exchange import *
 from agents.agent_utils import *
 from utils.constants import *
 from tqdm import tqdm
+import csv
+
 
 INIT_REDEMPTION_PRICE = 2
 
@@ -36,6 +38,9 @@ genesis_states = {'sim': {
 
 pbar = tqdm(total=SIMULATION_TIMESTAMPS)
 
+f = open('dataset/graphs.csv', "w+")
+f.close()
+
 def init_state():
     agents = dict()
     starting_price = ext_data.eth_dollar[0]
@@ -49,12 +54,6 @@ def init_state():
     br = [0]*len(agent_utils.nums)
     return (agents, pool, price_station, timestamp_graph, full_graph, agent_utils, br)
 
-def plot_graphs(full_graph, timestamp_graph, br):
-    global ext_data
-    full_graph.plot(ext_data)
-    timestamp_graph.plot(ext_data)
-    print(br)
-
 def set_previous_values(previous_state):
     agents = previous_state['sim']['agents']
     pool: Pool = previous_state['sim']['pool']
@@ -64,6 +63,12 @@ def set_previous_values(previous_state):
     agent_utils: Agent_Utils = previous_state['sim']['agent_utils']
     br = previous_state['sim']['br']
     return (agents, pool, price_station, timestamp_graph, full_graph, agent_utils, br)
+
+def plot_graphs(timestamp_graph, full_graph, br):
+    global ext_data
+    full_graph.plot(ext_data)
+    timestamp_graph.plot(ext_data)
+    print(br)
 
 def update_agents(params, substep, state_history, previous_state, policy_input):
 
@@ -80,10 +85,9 @@ def update_agents(params, substep, state_history, previous_state, policy_input):
     price_station.calculate_redemption_price(ext_data)
     timestamp_graph.add_to_graph(agents, price_station, pool)
 
-    total_sum = np.sum(nums)
-
     update_whale_longterm_price_setter(agents, price_station, pool, ext_data)
     
+    total_sum = np.sum(nums)
     for i in range(total_sum // 2):
         p = np.random.random()
         if i % 2 == 0:
@@ -103,6 +107,12 @@ def update_agents(params, substep, state_history, previous_state, policy_input):
 
     if previous_state['timestep'] == SIMULATION_TIMESTAMPS - 1:
         plot_graphs(full_graph, timestamp_graph, br)
+        with open('dataset/graphs.csv', 'a') as f:
+            writer = csv.writer(f)
+            one, two, three = timestamp_graph.save_main_axis(ext_data)
+            writer.writerow([one, two, three])
+            one, two, three = full_graph.save_main_axis(ext_data)
+            writer.writerow([one, two, three])
 
     return ('sim', {'agents': agents,
                     'pool': pool,
@@ -129,11 +139,15 @@ sim_config_dict = {
     'M': {
         'parameters': [
             {
-                'random_trader': 0,
+                'random_trader': 2,
+                'rate_trader': 10,
+                'noi_truster': 10,
+                'leverager': 1,
+
             },
             {
-                'random_trader': 10,
-            }
+                'random_trader': 0,
+            },
         ]
     }
 }
@@ -154,3 +168,5 @@ raw_system_events, tensor_field, sessions = simulation.execute()
 
 simulation_result = pd.DataFrame(raw_system_events)
 simulation_result.set_index(['subset', 'run', 'timestep', 'substep'])
+
+plot_all_graphs()

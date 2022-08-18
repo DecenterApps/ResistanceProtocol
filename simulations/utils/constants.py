@@ -15,7 +15,7 @@ def update_one_eth(one_eth: int) -> None:
 class PRICE_TRADER:
     NUM = 10
 
-    ETH_AMOUNT = 50
+    ETH_AMOUNT = 20
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
 
     # percentage of traders resource when trading
@@ -31,7 +31,7 @@ class PRICE_TRADER:
 class RATE_TRADER:
     NUM = 0
 
-    ETH_AMOUNT = 100000
+    ETH_AMOUNT = 10
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
 
     # percentage of traders resource when trading
@@ -195,7 +195,7 @@ class WHALE_LONGTERM_PRICE_SETTER:
     LONG_PERIOD = 1 - SHORT_PERIOD - MID_PERIOD
 
 class POOL:
-    ETH_AMOUNT = 200
+    ETH_AMOUNT = 500
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
 
 class REDEMPTION_RATES:
@@ -232,7 +232,6 @@ nums = [RATE_TRADER.NUM, PRICE_TRADER.NUM, LEVERAGER.NUM, SAFE_OWNER.NUM, WHALE_
 
 def update_constants(params):
     global nums
-    print('updating constants')
     for i in range(len(names)):
         update_field(agent_const_classes[i], names[i], params)
         nums[i] = agent_const_classes[i].NUM

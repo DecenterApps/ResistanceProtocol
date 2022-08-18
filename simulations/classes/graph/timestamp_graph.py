@@ -21,7 +21,15 @@ class Timestamp_Graph(Graph):
         Graph.plotGraph1(self, 'images/timestamp_graph.png', ext_data, 'timestamp_graph')
         self.plot_agents_balance()
 
-
+    def save_main_axis(self, ext_data: ExtData):
+        return self.m_prices, self.r_prices, ext_data.cpi_value[0:len(self.r_prices)-1]
+        # axis.plot(self.m_prices)
+        # axis.plot(self.r_prices, color='red')
+        # axis.plot(ext_data.cpi_value[0:len(self.r_prices)-1], color='greenyellow')
+        # axis.legend(['market price', 'redemption price', 'cpi'])
+        # axis.set_title("Market price, Redemption price, Inflation value")
+        # return axis
+        
     def plot_agents_balance(self):
         cnt = len(self.agent_utils.names)
         figure, axis = plt.subplots(cnt, 2, figsize=(12,12))
