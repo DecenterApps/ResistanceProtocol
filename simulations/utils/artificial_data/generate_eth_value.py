@@ -73,7 +73,7 @@ if __name__ == "__main__":
     time = np.arange(samples)
 
     eth_dollar, twap_eth_dollar = ETH_Dollar_value(trend, samples)
-    prediction = get_prediction(twap_eth_dollar, samples // 2, samples)
+    prediction = get_prediction(twap_eth_dollar, 1500, samples)
     with open('../../dataset/artificial/eth_dollar.csv', 'w') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(eth_dollar)
@@ -82,11 +82,14 @@ if __name__ == "__main__":
         writer.writerow(twap_eth_dollar)
     plt.figure()
     plt.plot(time, eth_dollar, time,  twap_eth_dollar, time, prediction)
-    plt.axvline(x = samples // 2, color = 'b', label = 'axvline - full height')
+    plt.axvline(x = 1500, color = 'b', label = 'axvline - full height')
     plt.legend(['eth_dollar', 'twap_eth_dollar', 'prediction'])
     plt.title("ETH -> dollar")
     plt.xlabel("time")
     plt.ylabel("Value of ETH")
     plt.savefig("../../images/external_data/artificial/eth_dollar.png")
     plt.savefig("../../images/simulation_data/eth_dollar.png")
+
+    exec(open("../../classes/regression.py").read())
+
 
