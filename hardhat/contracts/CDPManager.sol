@@ -10,7 +10,7 @@ error CDPManager__OnlyOwnerAuthorization();
 error CDPManager__UnauthorizedLiquidator();
 error CDPManager__NotAuthorized();
 error CDPManager__InvalidCDPIndex();
-error CDPManager__ContractNotAuthorized();
+error CDPManager__NotRateSetter();
 error CDPManager__NotOwner();
 error CDPManager__HasDebt();
 error CDPManager__LiquidationRatioReached();
@@ -54,11 +54,9 @@ contract CDPManager {
     address liquidatorContractAddress;
     address parametersContractAddress;
     address treasuryContractAddress;
+    address rateSetterContractAddress;
 
     address public immutable owner;
-
-    // --- Auth ---
-    mapping(address => bool) public authorizedAccounts;
 
     uint256 internal constant TWENTY_SEVEN_DECIMAL_NUMBER = 10**27;
     uint256 internal constant EIGHTEEN_DECIMAL_NUMBER = 10**18;
@@ -81,10 +79,9 @@ contract CDPManager {
     );
     event MintCDP(address indexed _from, uint256 indexed _cdpIndex, uint256 _amount);
     event RepayCDP(address indexed _from, uint256 indexed _cdpIndex, uint256 _amount);
-    event AddAuthorization(address _account);
-    event RemoveAuthorization(address _account);
     event ModifyParameters(bytes32 indexed _parameter, uint256 _data);
     event ModifyContract(bytes32 indexed _contract, address _newAddress);
+    event SetRateSetterContractAddress(address _address);
 
 
 
@@ -99,9 +96,9 @@ contract CDPManager {
         _;
     }
 
-    modifier isAuthorized() {
-        if (authorizedAccounts[msg.sender] == false)
-            revert CDPManager__ContractNotAuthorized();
+    modifier isRateSetter() {
+        if (msg.sender != rateSetterContractAddress && msg.sender != owner)
+            revert CDPManager__NotRateSetter();
         _;
     }
 
@@ -119,7 +116,6 @@ contract CDPManager {
 
     constructor(address _owner, address _noiCoin) {
         owner = _owner;
-        authorizedAccounts[msg.sender] = true;
         totalSupply = 0;
         cdpi = 0;
         openCDPcount = 0;
@@ -128,15 +124,9 @@ contract CDPManager {
         NOI_COIN = NOI(_noiCoin);
     }
 
-
-    function addAuthorization(address account) external onlyOwner {
-        authorizedAccounts[account] = true;
-        emit AddAuthorization(account);
-    }
-
-    function removeAuthorization(address account) external onlyOwner {
-        authorizedAccounts[account] = false;
-        emit RemoveAuthorization(account);
+    function setRateSetterContractAddress(address _address) external onlyOwner {
+        rateSetterContractAddress = _address;
+        emit SetRateSetterContractAddress(_address);
     }
 
     /// @notice Modify general uint256 params
@@ -511,7 +501,7 @@ contract CDPManager {
         emit CDPClose(cdpList[_cdpIndex].owner, _cdpIndex);
     }
 
-    function setEthRp(uint256 _ethRp) public isAuthorized {
+    function setEthRp(uint256 _ethRp) public isRateSetter {
         ethRp = _ethRp;
     }
 
