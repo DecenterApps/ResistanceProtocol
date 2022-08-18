@@ -99,7 +99,7 @@ describe('ExchangePool', function () {
         assert(noiAmount == 1000 && daiAmount == 1000, "Required liquidity not in pool");
     });
 
-    it('... two provisions, one remove :3', async () => {        
+    it('... two provisions, one remove', async () => {        
         //Getting NOI and DAI
         await getNOI(CDPManagerContractObj, senderAccounts[1], 250, 100000);
         await getDAI(daiContractObj, routerContractObj, senderAccounts[1], 250, 100000, wethAddr);

@@ -6,13 +6,17 @@ import "./interfaces/IPool.sol";
 import "./interfaces/IRouter.sol";
 import "hardhat/console.sol";
 
-contract ExchangePool {
-    address poolRouterAddr;
-    address poolAddr;
-    address poolFactoryAddr;
+error ExchangePool__NotOwner();
 
-    address noiAddr;
-    address daiAddr;
+contract ExchangePool {
+    address public poolRouterAddr;
+    address public poolAddr;
+    address public poolFactoryAddr;
+
+    address public noiAddr;
+    address public daiAddr;
+
+    address public owner;
 
     uint256 constant scale = 10**18;
     uint256 constant MAX_UINT = 2**256 - 1;
@@ -20,17 +24,20 @@ contract ExchangePool {
     //for tests only
     event LiquidityProvided(address provider, uint256 amountLPTokens);
 
-    constructor(address _noiAddr) {
-        poolRouterAddr = 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D; //both mainnet & kovan address
-        poolFactoryAddr = IRouter02(poolRouterAddr).factory();
-        daiAddr = 0x6B175474E89094C44Da98b954EedeAC495271d0F; //mainnet address (kovan address is different)
-        noiAddr = _noiAddr;
-
-        poolAddr = IFactory(poolFactoryAddr).createPair(noiAddr, daiAddr);
+    modifier onlyOwner() {
+        if (owner != msg.sender) revert ExchangePool__NotOwner();
+        _;
     }
 
-    function getRouterAddress() public view returns (address routerAddress) {
-        return poolRouterAddr;
+    constructor(address _owner, address _noiAddr, address _daiAddr, address _routerAddr) {
+        owner = _owner;
+
+        daiAddr = _daiAddr;                                            
+        noiAddr = _noiAddr;
+        poolRouterAddr = _routerAddr;                                   
+
+        poolFactoryAddr = IRouter02(poolRouterAddr).factory();
+        poolAddr = IFactory(poolFactoryAddr).createPair(noiAddr, daiAddr);
     }
 
     function getReserves()
@@ -43,6 +50,16 @@ contract ExchangePool {
         )
     {
         (_reserve0, _reserve1, _blockTimestampLast) = IPool(poolAddr).getReserves();
+    }
+
+    function modifyAddressParameter(bytes32 _parameter, address _value) external onlyOwner{
+        if(_parameter == "DAI") daiAddr = _value;
+        else if (_parameter == "NOI") noiAddr = _value;
+        else if (_parameter == "Router"){
+            poolRouterAddr = _value;
+            poolFactoryAddr = IRouter02(poolRouterAddr).factory();
+            poolAddr = IFactory(poolFactoryAddr).createPair(noiAddr, daiAddr);
+        } 
     }
 
     /*
