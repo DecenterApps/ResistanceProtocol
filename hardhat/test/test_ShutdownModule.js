@@ -74,9 +74,7 @@ describe('ShutdownModule', function () {
         shutdown  = await ShutdownModuleObj.connect(senderAccounts[0]).shutdown();
         assert.equal('true',shutdown.toString());
 
-        const txShutdownAll  = await ShutdownModuleObj.connect(senderAccounts[0]).shutdownAllContracts();
-
-        const txProcess  = await ShutdownModuleObj.connect(senderAccounts[0]).processSafe();
+        const txProcess  = await ShutdownModuleObj.connect(senderAccounts[0]).processCDP("2");
 
     });
 });

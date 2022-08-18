@@ -27,6 +27,11 @@ export const ABI= [
   },
   {
     "inputs": [],
+    "name": "EthTwapFeed__NotActive",
+    "type": "error"
+  },
+  {
+    "inputs": [],
     "name": "EthTwapFeed__NotAuthorized",
     "type": "error"
   },
@@ -164,6 +169,13 @@ export const ABI= [
       }
     ],
     "name": "removeAuthorization",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "shutdown",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

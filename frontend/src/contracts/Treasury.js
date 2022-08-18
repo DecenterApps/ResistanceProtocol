@@ -22,6 +22,11 @@ export const ABI= [
   },
   {
     "inputs": [],
+    "name": "Treasury__NotEnoughNOIForReedem",
+    "type": "error"
+  },
+  {
+    "inputs": [],
     "name": "Treasury__NotOwner",
     "type": "error"
   },
@@ -160,6 +165,29 @@ export const ABI= [
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "_to",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_ethRp",
+        "type": "uint256"
+      }
+    ],
+    "name": "reedemNoiForCollateral",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "_from",
         "type": "address"
@@ -179,6 +207,19 @@ export const ABI= [
       }
     ],
     "name": "setCDPManagerContractAddress",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_NOIContractAddress",
+        "type": "address"
+      }
+    ],
+    "name": "setNOIContractAddress",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

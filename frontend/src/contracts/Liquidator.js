@@ -17,6 +17,16 @@ export const ABI= [
   },
   {
     "inputs": [],
+    "name": "Liquidator__NotActive",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "Liquidator__NotShutdownModule",
+    "type": "error"
+  },
+  {
+    "inputs": [],
     "name": "Liquidator__SendToTreasuryFailed",
     "type": "error"
   },
@@ -162,11 +172,31 @@ export const ABI= [
     "inputs": [
       {
         "internalType": "address",
+        "name": "_shutdownModuleContractAddress",
+        "type": "address"
+      }
+    ],
+    "name": "setShutdownModuleContractAddress",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
         "name": "_treasuryContractAddress",
         "type": "address"
       }
     ],
     "name": "setTreasuryContractAddress",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "shutdown",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

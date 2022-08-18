@@ -27,6 +27,11 @@ export const ABI= [
   },
   {
     "inputs": [],
+    "name": "RateSetter__NotActive",
+    "type": "error"
+  },
+  {
+    "inputs": [],
     "name": "RateSetter__NotAuthorized",
     "type": "error"
   },
@@ -367,6 +372,13 @@ export const ABI= [
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "shutdown",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "uint256",
@@ -380,13 +392,6 @@ export const ABI= [
       }
     ],
     "name": "updatePrices",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "updateRatesInternal",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

@@ -55,7 +55,6 @@ contract CDPManager {
     address liquidatorContractAddress;
     address parametersContractAddress;
     address treasuryContractAddress;
-    address shutdownModuleAddress;
 
     address public immutable owner;
 
@@ -121,7 +120,7 @@ contract CDPManager {
     }
 
     modifier isActive() {
-        if (!active && msg.sender!=shutdownModuleAddress)
+        if (!active)
             revert CDPManager__NotActive();
         _;
     }
@@ -195,12 +194,6 @@ contract CDPManager {
         treasuryContractAddress = _treasuryContractAddress;
     }
 
-    function setShutdownModuleAddress(address _shutdownModuleAddress)
-        public
-        onlyOwner
-    {
-        shutdownModuleAddress = _shutdownModuleAddress;
-    }
 
     /// @notice adds new CDP to circular linked list of users CDPs
     function addToLinkedList(uint256 _cdpIndex) private{

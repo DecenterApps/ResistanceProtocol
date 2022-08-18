@@ -938,19 +938,6 @@ export const ABI= [
     "inputs": [
       {
         "internalType": "address",
-        "name": "_shutdownModuleAddress",
-        "type": "address"
-      }
-    ],
-    "name": "setShutdownModuleAddress",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
         "name": "_treasuryContractAddress",
         "type": "address"
       }

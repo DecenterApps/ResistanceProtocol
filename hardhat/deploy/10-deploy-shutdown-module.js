@@ -9,16 +9,13 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     // getContract gets the most recent deployment for the specified contract
     //const coinAddress = (await ethers.getContract("NOI", deployer)).address;
 
-    const cdpManagerContractObj = await ethers.getContract("CDPManager", deployer);
-    const TreasuryContractObj = await ethers.getContract("Treasury", deployer);
-    const ParametersContractObj = await ethers.getContract("Parameters", deployer);
-
+    const multiSigWalletAddress = (await ethers.getContract("MultiSigWallet", deployer)).address;
 
     log("----------------------------------------------------");
     log("Deploying ShutdownModule and waiting for confirmations...");
     const ShutdownModule = await deploy("ShutdownModule", {
         from: deployer,
-        args: [ParametersContractObj.address,TreasuryContractObj.address,cdpManagerContractObj.address],
+        args: [multiSigWalletAddress],
         log: true,
         // wait if on a live network so we can verify properly
         waitConfirmations: network.config.blockConfirmations || 1,
@@ -27,7 +24,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 
     // verify contract on etherscan
     if (!developmentChains.includes(network.name) && process.env.ETHERSCAN_API_KEY) {
-        await verify(ShutdownModule.address, [ParametersContractObj.address,TreasuryContractObj.address,cdpManagerContractObj.address]);
+        await verify(ShutdownModule.address, [multiSigWalletAddress]);
     }
 };
 
