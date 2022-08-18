@@ -6,7 +6,6 @@ import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 error EthTwapFeed__TimeIntervalDidNotPass();
 error EthTwapFeed__NotMarketTwapFeed();
-error EthTwapFeed__NotAuthorized();
 error EthTwapFeed__NotOwner();
 
 contract EthTwapFeed {
@@ -18,6 +17,7 @@ contract EthTwapFeed {
     uint256 private lastUpdateTimestamp;
     uint256 private prevCumulativeValue = 0;
     uint256 private prevEthPrice;
+    address public marketTwapFeedContractAddress;
 
     struct Snapshot {
         uint256 cumulativeValue;
@@ -33,25 +33,20 @@ contract EthTwapFeed {
         _;
     }
 
-    modifier isOwner() {
+    modifier onlyOwner() {
         if (msg.sender != owner) revert EthTwapFeed__NotOwner();
         _;
     }
 
-    mapping(address => bool) public authorizedAccounts;
     address public immutable owner;
 
-    function addAuthorization(address account) external isOwner {
-        authorizedAccounts[account] = true;
+    function setMarketTwapFeedContractAddress(address _address) external onlyOwner {
+        marketTwapFeedContractAddress = _address;
     }
 
-    function removeAuthorization(address account) external isOwner {
-        authorizedAccounts[account] = false;
-    }
-
-    modifier isAuthorized() {
-        if (authorizedAccounts[msg.sender] == false)
-            revert EthTwapFeed__NotAuthorized();
+    modifier isMarketTwapFeed() {
+        if(msg.sender != marketTwapFeedContractAddress && msg.sender != owner)
+            revert EthTwapFeed__NotMarketTwapFeed();
         _;
     }
 
@@ -93,7 +88,7 @@ contract EthTwapFeed {
     function updateAndGetTwap()
         public
         IntervalPassed
-        isAuthorized
+        isMarketTwapFeed
         returns (uint256)
     {
         uint256 timePassed = block.timestamp - lastUpdateTimestamp;

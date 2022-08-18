@@ -64,7 +64,7 @@ describe("EthTwapFeed", function () {
       msw,
       0,
       EthTwapFeedShortInterval.address,
-      "addAuthorization",
+      "setMarketTwapFeedContractAddress",
       ["address"],
       [deployer]
     );
@@ -72,7 +72,7 @@ describe("EthTwapFeed", function () {
       msw,
       0,
       EthTwapFeedLongInterval.address,
-      "addAuthorization",
+      "setMarketTwapFeedContractAddress",
       ["address"],
       [deployer]
     );

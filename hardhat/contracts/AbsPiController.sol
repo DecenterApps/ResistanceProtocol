@@ -9,29 +9,12 @@ error AbsPiController__ContractNotEnabled();
 
 contract AbsPiController {
     // --- Auth ---
-    mapping(address => bool) public authorizedAccounts;
     address public immutable owner;
 
     bool public contractEnabled;
 
-    function addAuthorization(address account) external isOwner {
-        authorizedAccounts[account] = true;
-        emit AddAuthorization(account);
-    }
-
-    function removeAuthorization(address account) external isOwner {
-        authorizedAccounts[account] = false;
-        emit RemoveAuthorization(account);
-    }
-
     modifier isOwner() {
         if (owner != msg.sender) revert AbsPiController__NotOwner();
-        _;
-    }
-
-    modifier isAuthorized() {
-        if (authorizedAccounts[msg.sender] == false)
-            revert AbsPiController__NotAuthorized();
         _;
     }
 
@@ -42,8 +25,6 @@ contract AbsPiController {
 
     // EVENTS
 
-    event AddAuthorization(address _account);
-    event RemoveAuthorization(address _account);
     event ModifyUintParameter(bytes32 parameter, uint256 data);
     event ModifyIntParameter(bytes32 parameter, int256 data);
 
@@ -87,7 +68,6 @@ contract AbsPiController {
         owner = _owner;
         contractEnabled = true;
         defaultRedemptionRate = TWENTY_SEVEN_DECIMAL_NUMBER;
-        authorizedAccounts[msg.sender] = true;
         Kp = _Kp;
         Ki = _Ki;
         feedbackOutputUpperBound = uint256(type(int256).max);
