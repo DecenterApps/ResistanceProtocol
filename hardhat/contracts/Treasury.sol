@@ -6,16 +6,20 @@ error Treasury__NotOwner();
 error Treasury__NotEnoughFunds();
 error Treasury__TransactionFailed();
 error Treasury__UnauthorizedCDPManager();
+error Treasury__UnauthorizedShutdownModule();
 
 contract Treasury {
     address public immutable owner;
     mapping(address => bool) userAuthorized;
 
     address CDPManagerContractAddress;
+    address ShutdownModuleContractAddress;
 
     uint256 public unmintedNoiBalance = 0;
+    uint256 public noiForRedeem = 0;
 
     event TreasuryReceiveNOI(uint256 _amount);
+    event TreasuryReceiveReedemableNOI(uint256 _amount);
 
     modifier onlyOwner() {
         if (msg.sender != owner) revert Treasury__NotOwner();
@@ -31,6 +35,12 @@ contract Treasury {
     modifier onlyCDPManagerContract() {
         if (msg.sender != CDPManagerContractAddress)
             revert Treasury__UnauthorizedCDPManager();
+        _;
+    }
+
+    modifier onlyShutdownModuleContract() {
+        if (msg.sender != ShutdownModuleContractAddress)
+            revert Treasury__UnauthorizedShutdownModule();
         _;
     }
 
@@ -54,6 +64,13 @@ contract Treasury {
         CDPManagerContractAddress = _CDPManagerContractAddress;
     }
 
+    function setShutdownModuleContractAddress(address _ShutdownModuleContractAddress)
+        public
+        onlyOwner
+    {
+        ShutdownModuleContractAddress = _ShutdownModuleContractAddress;
+    }
+
     /*
      * @notice sends requested funds to an authorized user
      * @param _amount amount of ETH requested
@@ -72,6 +89,11 @@ contract Treasury {
     function receiveUnmintedNoi(uint256 _amount) public onlyCDPManagerContract {
         unmintedNoiBalance += _amount;
         emit TreasuryReceiveNOI(_amount);
+    }
+
+    function receiveRedeemableNoi(uint256 _amount) public onlyShutdownModuleContract {
+        noiForRedeem += _amount;
+        emit TreasuryReceiveReedemableNOI(_amount);
     }
 
     receive() external payable {}

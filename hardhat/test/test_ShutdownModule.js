@@ -9,6 +9,7 @@ describe('ShutdownModule', function () {
     let deployer;
     let ShutdownModuleObj;
     let ParametersContractObj;
+    let provider;
 
     beforeEach(async () => {
         snapshot = await takeSnapshot();
@@ -24,6 +25,8 @@ describe('ShutdownModule', function () {
         ShutdownModuleObj = await ethers.getContract("ShutdownModule", deployer);
         ParametersContractObj = await ethers.getContract("Parameters", deployer);
         CDPManagerContractObj= await ethers.getContract("CDPManager", deployer);
+
+        provider=CDPManagerContractObj;
 
         senderAccounts.push((await hre.ethers.getSigners())[1]);
         senderAccounts.push((await hre.ethers.getSigners())[2]);
@@ -61,10 +64,19 @@ describe('ShutdownModule', function () {
         
         let shutdown  = await ShutdownModuleObj.connect(senderAccounts[0]).shutdown();
         const txParam= await ParametersContractObj.connect(senderAccounts[0]).setGlobalCRLimit(1100);
+        console.log(ethers.utils.formatEther(await waffle.provider.getBalance(senderAccounts[0].address)))
+        const txOpen=await CDPManagerContractObj.connect(senderAccounts[0]).openCDPandMint(senderAccounts[0].address,1000,{value: ethers.utils.parseEther("2")});
+        
         const txGShutdown = await ShutdownModuleObj.connect(senderAccounts[0]).startShutdown();
+
+        console.log(ethers.utils.formatEther(await waffle.provider.getBalance(senderAccounts[0].address)))
 
         shutdown  = await ShutdownModuleObj.connect(senderAccounts[0]).shutdown();
         assert.equal('true',shutdown.toString());
+
+        const txShutdownAll  = await ShutdownModuleObj.connect(senderAccounts[0]).shutdownAllContracts();
+
+        const txProcess  = await ShutdownModuleObj.connect(senderAccounts[0]).processSafe();
 
     });
 });

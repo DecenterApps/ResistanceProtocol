@@ -37,6 +37,11 @@ export const ABI= [
   },
   {
     "inputs": [],
+    "name": "CDPManager__NotActive",
+    "type": "error"
+  },
+  {
+    "inputs": [],
     "name": "CDPManager__NotAuthorized",
     "type": "error"
   },
@@ -902,11 +907,31 @@ export const ABI= [
     "inputs": [
       {
         "internalType": "address",
+        "name": "_shutdownModuleAddress",
+        "type": "address"
+      }
+    ],
+    "name": "setShutdownModuleAddress",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
         "name": "_treasuryContractAddress",
         "type": "address"
       }
     ],
     "name": "setTreasuryContractAddress",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "shutdown",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

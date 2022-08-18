@@ -17,6 +17,7 @@ error CDPManager__LiquidationRatioReached();
 error CDPManager__ZeroTokenMint();
 error CDPManager__UnknownParameter();
 error CDPManager__UnknownContract();
+error CDPManager__NotActive();
 
 contract CDPManager {
     struct CDP {
@@ -54,8 +55,11 @@ contract CDPManager {
     address liquidatorContractAddress;
     address parametersContractAddress;
     address treasuryContractAddress;
+    address shutdownModuleAddress;
 
     address public immutable owner;
+
+    bool private active=true;
 
     // --- Auth ---
     mapping(address => bool) public authorizedAccounts;
@@ -116,6 +120,12 @@ contract CDPManager {
         _;
     }
 
+    modifier isActive() {
+        if (!active && msg.sender!=shutdownModuleAddress)
+            revert CDPManager__NotActive();
+        _;
+    }
+
 
     constructor(address _owner, address _noiCoin) {
         owner = _owner;
@@ -129,12 +139,12 @@ contract CDPManager {
     }
 
 
-    function addAuthorization(address account) external onlyOwner {
+    function addAuthorization(address account) external onlyOwner isActive {
         authorizedAccounts[account] = true;
         emit AddAuthorization(account);
     }
 
-    function removeAuthorization(address account) external onlyOwner {
+    function removeAuthorization(address account) external onlyOwner isActive{
         authorizedAccounts[account] = false;
         emit RemoveAuthorization(account);
     }
@@ -145,6 +155,7 @@ contract CDPManager {
     function modifyParameters(bytes32 _parameter, uint256 _data)
         external
         onlyOwner
+        isActive
     {
         if (_parameter == "cdpi") cdpi = _data;
         else revert CDPManager__UnknownParameter();
@@ -182,6 +193,13 @@ contract CDPManager {
         onlyOwner
     {
         treasuryContractAddress = _treasuryContractAddress;
+    }
+
+    function setShutdownModuleAddress(address _shutdownModuleAddress)
+        public
+        onlyOwner
+    {
+        shutdownModuleAddress = _shutdownModuleAddress;
     }
 
     /// @notice adds new CDP to circular linked list of users CDPs
@@ -223,6 +241,7 @@ contract CDPManager {
         public
         payable
         HasAccess(_user)
+        isActive
         returns (uint256)
     {
         cdpi = cdpi + 1;
@@ -243,6 +262,7 @@ contract CDPManager {
     function openCDPandMint(address _user, uint256 _amount)
         public
         payable
+        isActive
         returns (uint256)
     {
         uint256 cdpIndex = openCDP(_user);
@@ -256,6 +276,7 @@ contract CDPManager {
     function transferCollateralToCDP(uint256 _cdpIndex)
         public
         payable
+        isActive
         CDPExists(_cdpIndex)
     {
         cdpList[_cdpIndex].lockedCollateral =
@@ -270,6 +291,7 @@ contract CDPManager {
     /// @param _cdpIndex index of cdp
     function withdrawCollateralFromCDP(uint256 _cdpIndex, uint256 _amount)
         public
+        isActive
         CDPExists(_cdpIndex)
         HasAccess(cdpList[_cdpIndex].owner)
     {
@@ -300,6 +322,7 @@ contract CDPManager {
     /// @param _amount amount of tokens to mint
     function mintFromCDP(uint256 _cdpIndex, uint256 _amount)
         public
+        isActive
         CDPExists(_cdpIndex)
         HasAccess(cdpList[_cdpIndex].owner)
     {
@@ -337,6 +360,7 @@ contract CDPManager {
     /// @param _cdpIndex index of cdp
     function closeCDP(uint256 _cdpIndex)
         public
+        isActive
         CDPExists(_cdpIndex)
         HasAccess(cdpList[_cdpIndex].owner)
     {
@@ -411,7 +435,7 @@ contract CDPManager {
         return cdpList[_cdpIndex].generatedDebt;        
     }
 
-    function recalculateSF(uint256 _cdpIndex) public {
+    function recalculateSF(uint256 _cdpIndex) public isActive{
         cdpList[_cdpIndex].accumulatedFee = getOnlySF(_cdpIndex);
         cdpList[_cdpIndex].updatedTime = block.timestamp;
     }
@@ -425,7 +449,7 @@ contract CDPManager {
         address _from,
         address _to,
         uint256 _cdpIndex
-    ) public CDPExists(_cdpIndex) HasAccess(_from) {
+    ) public CDPExists(_cdpIndex) HasAccess(_from) isActive{
         cdpList[_cdpIndex].owner = _to;
         emit OwnershipTransfer(_from, _to, _cdpIndex);
     }
@@ -448,6 +472,7 @@ contract CDPManager {
     function repayToCDP(uint256 _cdpIndex, uint256 _amount)
         public
         CDPExists(_cdpIndex)
+        isActive
     {
         uint256 amount = _amount;
         recalculateSF(_cdpIndex);
@@ -478,6 +503,7 @@ contract CDPManager {
     function repayAndCloseCDP(uint256 _cdpIndex)
         public
         CDPExists(_cdpIndex)
+        isActive
     {
         recalculateSF(_cdpIndex);
         transferUnmintedCoinToTreasury();
@@ -508,6 +534,7 @@ contract CDPManager {
         payable
         onlyLiquidatorContract
         CDPExists(_cdpIndex)
+        isActive
     {
         (bool sent, ) = payable(msg.sender).call{
             value: cdpList[_cdpIndex].lockedCollateral
@@ -533,7 +560,7 @@ contract CDPManager {
         emit CDPClose(cdpList[_cdpIndex].owner, _cdpIndex);
     }
 
-    function setEthRp(uint256 _ethRp) public isAuthorized {
+    function setEthRp(uint256 _ethRp) public isAuthorized isActive{
         ethRp = _ethRp;
     }
 
@@ -564,6 +591,41 @@ contract CDPManager {
 
     function getMyCDPs() public view returns(CDP[] memory){
         return getCDPsForAddress(msg.sender);
+    }
+
+    function shutdown() public isActive{
+        active=false;
+    }
+
+    function processCDP(uint256 _cdpId, uint256 _collateralDelta) public isAuthorized{
+        Treasury(payable(treasuryContractAddress)).receiveUnmintedNoi(cdpList[_cdpId].generatedDebt);
+        (bool sent, ) = payable(treasuryContractAddress).call{
+            value: _collateralDelta
+        }("");
+        if (sent == false) revert();
+
+        totalDebt-=cdpList[_cdpId].generatedDebt;
+        cdpList[_cdpId].generatedDebt=0;
+        cdpList[_cdpId].accumulatedFee=0;
+
+        totalSupply-=_collateralDelta;
+        cdpList[_cdpId].lockedCollateral=cdpList[_cdpId].lockedCollateral-_collateralDelta;
+    }
+
+    function freeCollateral(uint256 _cdpId) public isAuthorized{
+        if (getDebtWithSF(_cdpId) != 0) {
+            revert CDPManager__HasDebt();
+        }
+        (bool sent, ) = payable(cdpList[_cdpId].owner).call{
+            value: cdpList[_cdpId].lockedCollateral
+        }("");
+        if (sent == false) revert();
+        totalSupply = totalSupply - cdpList[_cdpId].lockedCollateral;
+        
+        removeFromLinkedList(_cdpId);
+        delete cdpList[_cdpId];
+
+        openCDPcount -= 1;
     }
 
 }

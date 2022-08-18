@@ -17,6 +17,7 @@ module.exports = async ({ getNamedAccounts }) => {
     const RateSetterContractObj = await ethers.getContract("RateSetter", deployer);
     const EthTwapFeed = await ethers.getContract("EthTwapFeed", deployer);
     const MarketTwapFeed = await ethers.getContract("MarketTwapFeed", deployer);
+    const ShutdownModule = await ethers.getContract("ShutdownModule", deployer);
 
     // add auth to cdpManager to mint and burn tokens from erc20
     await executeActionFromMSW(
@@ -89,6 +90,15 @@ module.exports = async ({ getNamedAccounts }) => {
         "setTreasuryContractAddress",
         ["address"],
         [TreasuryContractObj.address]
+    );
+
+    await executeActionFromMSW(
+        msw,
+        0,
+        cdpManagerContractObj.address,
+        "setShutdownModuleAddress",
+        ["address"],
+        [ShutdownModule.address]
     );
 
     await executeActionFromMSW(
