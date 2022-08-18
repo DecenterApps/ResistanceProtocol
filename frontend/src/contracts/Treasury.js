@@ -36,6 +36,11 @@ export const ABI= [
     "type": "error"
   },
   {
+    "inputs": [],
+    "name": "Treasury__UnauthorizedShutdownModule",
+    "type": "error"
+  },
+  {
     "anonymous": false,
     "inputs": [
       {
@@ -46,6 +51,19 @@ export const ABI= [
       }
     ],
     "name": "TreasuryReceiveNOI",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "TreasuryReceiveReedemableNOI",
     "type": "event"
   },
   {
@@ -89,6 +107,19 @@ export const ABI= [
   },
   {
     "inputs": [],
+    "name": "noiForRedeem",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "owner",
     "outputs": [
       {
@@ -98,6 +129,19 @@ export const ABI= [
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "receiveRedeemableNoi",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -135,6 +179,19 @@ export const ABI= [
       }
     ],
     "name": "setCDPManagerContractAddress",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_ShutdownModuleContractAddress",
+        "type": "address"
+      }
+    ],
+    "name": "setShutdownModuleContractAddress",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

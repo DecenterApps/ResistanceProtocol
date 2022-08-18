@@ -1,12 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0 <0.9.0;
 
+import "./NOI.sol";
+
 error Treasury__NotAuthorized();
 error Treasury__NotOwner();
 error Treasury__NotEnoughFunds();
 error Treasury__TransactionFailed();
 error Treasury__UnauthorizedCDPManager();
 error Treasury__UnauthorizedShutdownModule();
+error Treasury__NotEnoughNOIForReedem();
 
 contract Treasury {
     address public immutable owner;
@@ -14,6 +17,7 @@ contract Treasury {
 
     address CDPManagerContractAddress;
     address ShutdownModuleContractAddress;
+    address NOIContractAddress;
 
     uint256 public unmintedNoiBalance = 0;
     uint256 public noiForRedeem = 0;
@@ -57,6 +61,13 @@ contract Treasury {
         userAuthorized[_from] = false;
     }
 
+    function setNOIContractAddress(address _NOIContractAddress)
+        public
+        onlyOwner
+    {
+        NOIContractAddress = _NOIContractAddress;
+    }
+
     function setCDPManagerContractAddress(address _CDPManagerContractAddress)
         public
         onlyOwner
@@ -94,6 +105,18 @@ contract Treasury {
     function receiveRedeemableNoi(uint256 _amount) public onlyShutdownModuleContract {
         noiForRedeem += _amount;
         emit TreasuryReceiveReedemableNOI(_amount);
+    }
+
+    function reedemNoiForCollateral(uint256 _amount,address _to,uint256 _ethRp) public onlyShutdownModuleContract{
+        if(_amount>noiForRedeem)
+            revert Treasury__NotEnoughNOIForReedem();
+        NOI(NOIContractAddress).burn(_to,_amount);
+        noiForRedeem-=_amount;
+        uint256 col=_amount/_ethRp;
+        (bool sent, ) = payable(_to).call{value: col}("");
+        if (sent == false) revert Treasury__TransactionFailed();
+
+        //NOI_COIN.burn(msg.sender, onlyDebt);
     }
 
     receive() external payable {}

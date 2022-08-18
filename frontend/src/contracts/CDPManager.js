@@ -401,6 +401,19 @@ export const ABI= [
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "_cdpId",
+        "type": "uint256"
+      }
+    ],
+    "name": "freeCollateral",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "_address",
         "type": "address"
@@ -805,6 +818,24 @@ export const ABI= [
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_cdpId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_collateralDelta",
+        "type": "uint256"
+      }
+    ],
+    "name": "processCDP",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {

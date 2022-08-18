@@ -15,6 +15,7 @@ contract ShutdownModule {
 
     uint256 internal constant EIGHTEEN_DECIMAL_NUMBER = 10**18;
     bool public shutdown = false;
+    uint256 public forzenEthRp=0;
 
     modifier ShutdownInitiated() {
         if (!shutdown) revert ShutdownModule__ShutdownNotInitiated();
@@ -46,6 +47,7 @@ contract ShutdownModule {
         uint256 globalCRLimit = PARAMETERS_CONTRACT.getGlobalCRLimit();
         if (globalCR <= globalCRLimit) {
             shutdown = true;
+            forzenEthRp=CDPMANAGER_CONTRACT.ethRp();
         }
     }
 
@@ -60,8 +62,7 @@ contract ShutdownModule {
 
     function processCDP(uint256 _cdpId) public ShutdownInitiated {
         CDPManager.CDP memory cdp = CDPMANAGER_CONTRACT.getOneCDP(_cdpId);
-        uint256 ethRp = CDPMANAGER_CONTRACT.ethRp();
-        uint256 neededCol = cdp.generatedDebt / ethRp;
+        uint256 neededCol = cdp.generatedDebt / forzenEthRp;
         uint256 col = cdp.lockedCollateral;
 
         uint256 min = minimum(neededCol, col);
@@ -71,5 +72,9 @@ contract ShutdownModule {
 
     function freeCollateral(uint256 _cdpId) public ShutdownInitiated {
         CDPMANAGER_CONTRACT.freeCollateral(_cdpId);
+    }
+
+    function reedemCollateral(uint256 _amount) public ShutdownInitiated{
+        TREASURY_CONTRACT.reedemNoiForCollateral(_amount,msg.sender,forzenEthRp);
     }
 }

@@ -32,6 +32,15 @@ module.exports = async ({ getNamedAccounts }) => {
     await executeActionFromMSW(
         msw,
         0,
+        noiContract.address,
+        "addAuthorization",
+        ["address"],
+        [TreasuryContractObj.address]
+    );
+
+    await executeActionFromMSW(
+        msw,
+        0,
         LiquidatorContractObj.address,
         "setCdpManagerContractAddress",
         ["address"],
