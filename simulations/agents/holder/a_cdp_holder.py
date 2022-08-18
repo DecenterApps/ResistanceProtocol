@@ -123,12 +123,12 @@ def get_collateral_ratios(CONST):
 def get_holder_prediction(CONST):
     p = np.random.random()
     if p < CONST.PREDICTION_FAR:
-        return 100
+        return 300
     p -= CONST.PREDICTION_FAR
     if p < CONST.PREDICTION_MID:
-        return 50
+        return 150
     p -= CONST.PREDICTION_MID
-    return 25
+    return 50
 
 def get_holder_prediction_threshold(CONST):
     p = np.random.random()

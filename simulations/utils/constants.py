@@ -13,9 +13,9 @@ def update_one_eth(one_eth: int) -> None:
     POOL.NOI_AMOUNT = POOL.ETH_AMOUNT * ONE_ETH
 
 class PRICE_TRADER:
-    NUM = 10
+    NUM = 50
 
-    ETH_AMOUNT = 50
+    ETH_AMOUNT = 10
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
 
     # percentage of traders resource when trading
@@ -29,9 +29,9 @@ class PRICE_TRADER:
     BOUND_LOW = 1 - BOUND_HIGH - BOUND_MID
 
 class RATE_TRADER:
-    NUM = 0
+    NUM = 50
 
-    ETH_AMOUNT = 100000
+    ETH_AMOUNT = 10
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
 
     # percentage of traders resource when trading
@@ -49,7 +49,7 @@ class RATE_TRADER:
 class LEVERAGER:
     NUM = 0
 
-    ETH_AMOUNT = 4
+    ETH_AMOUNT = 10
 
     RISKY = 0.2
     MODERATE = 0.3
@@ -93,7 +93,7 @@ class LEVERAGER:
 class SAFE_OWNER:
     NUM = 0
 
-    ETH_AMOUNT = 100000
+    ETH_AMOUNT = 10
 
     RISKY = 0.2
     MODERATE = 0.3
@@ -195,7 +195,7 @@ class WHALE_LONGTERM_PRICE_SETTER:
     LONG_PERIOD = 1 - SHORT_PERIOD - MID_PERIOD
 
 class POOL:
-    ETH_AMOUNT = 200
+    ETH_AMOUNT = 1000
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
 
 class REDEMPTION_RATES:
@@ -219,4 +219,22 @@ INF = 10000000000
 
 TWAP_TIMESTAMPS = 100
 
-SIMULATION_TIMESTAMPS = 2500
+SIMULATION_TIMESTAMPS = 1500
+
+names = ['rate_trader', 'price_trader', 'leverager', 'safe_owner', 'whale_instant_price_setter',
+         'whale_instant_rate_setter', 'noi_truster', 'random_trader', 'whale_longterm_price_setter']
+
+agent_const_classes = [RATE_TRADER, PRICE_TRADER, LEVERAGER, SAFE_OWNER, WHALE_INSTANT_PRICE_SETTER, 
+                      WHALE_INSTANT_RATE_SETTER, NOI_TRUSTER, RANDOM_TRADER, WHALE_LONGTERM_PRICE_SETTER]
+
+nums = [RATE_TRADER.NUM, PRICE_TRADER.NUM, LEVERAGER.NUM, SAFE_OWNER.NUM, WHALE_INSTANT_PRICE_SETTER.NUM,
+        WHALE_INSTANT_RATE_SETTER.NUM, NOI_TRUSTER.NUM, RANDOM_TRADER.NUM, WHALE_LONGTERM_PRICE_SETTER.NUM]
+
+def update_constants(params):
+    global nums
+    for i in range(len(names)):
+        update_field(agent_const_classes[i], names[i], params)
+        nums[i] = agent_const_classes[i].NUM
+
+def update_field(CONST, name, params):
+    CONST.NUM = params[name] if name in params else CONST.NUM
