@@ -88,6 +88,8 @@ contract CDPManager {
     event RemoveAuthorization(address _account);
     event ModifyParameters(bytes32 indexed _parameter, uint256 _data);
     event ModifyContract(bytes32 indexed _contract, address _newAddress);
+    event CDPProcessed(uint256 _cdpId,uint256 _debtSettled, uint256 _collateralConsumed);
+    event CollateralReclaimed(uint256 _cdpId, uint256 _amount);
 
 
 
@@ -570,6 +572,8 @@ contract CDPManager {
         searchedCDP = cdpList[_cdpIndex];
     }
 
+    /// @notice view the state of all CDPs for address
+    /// @param _address address of owner
     function getCDPsForAddress(address _address) public view returns(CDP[] memory){
         uint256 len = userCDPcount[_address];
         CDP[] memory cdps = new CDP[](len);
@@ -582,14 +586,20 @@ contract CDPManager {
         return cdps;
     }
 
+    /// @notice view the state of all CDPs for msg.sender
     function getMyCDPs() public view returns(CDP[] memory){
         return getCDPsForAddress(msg.sender);
     }
 
+    /// @notice disable the contract
     function shutdown() public isActive{
         active=false;
     }
 
+
+    /// @notice process one CDP, settle debt and move some collateral to the treasury
+    /// @param _cdpId id of CDP
+    /// @param _collateralDelta amount of collateral which should be moved to the treasury
     function processCDP(uint256 _cdpId, uint256 _collateralDelta) public isAuthorized CDPExists(_cdpId){
         Treasury(payable(treasuryContractAddress)).receiveRedeemableNoi(cdpList[_cdpId].generatedDebt);
         (bool sent, ) = payable(treasuryContractAddress).call{
@@ -597,14 +607,18 @@ contract CDPManager {
         }("");
         if (sent == false) revert();
 
-        totalDebt-=cdpList[_cdpId].generatedDebt;
+        uint256 debtDelta=cdpList[_cdpId].generatedDebt;
+        totalDebt-=debtDelta;
         cdpList[_cdpId].generatedDebt=0;
         cdpList[_cdpId].accumulatedFee=0;
 
         totalSupply-=_collateralDelta;
         cdpList[_cdpId].lockedCollateral=cdpList[_cdpId].lockedCollateral-_collateralDelta;
+        emit CDPProcessed(_cdpId,debtDelta, _collateralDelta);
     }
 
+    /// @notice reclaim the remaining collateral in a processed CDP
+    /// @param _cdpId id of CDP
     function freeCollateral(uint256 _cdpId) public isAuthorized CDPExists(_cdpId){ 
         if (getDebtWithSF(_cdpId) != 0) {
             revert CDPManager__HasDebt();
@@ -613,12 +627,14 @@ contract CDPManager {
             value: cdpList[_cdpId].lockedCollateral
         }("");
         if (sent == false) revert();
+        uint256 amount=cdpList[_cdpId].lockedCollateral;
         totalSupply = totalSupply - cdpList[_cdpId].lockedCollateral;
         
         removeFromLinkedList(_cdpId);
         delete cdpList[_cdpId];
 
         openCDPcount -= 1;
+        emit CollateralReclaimed(_cdpId,amount);
     }
 
 }

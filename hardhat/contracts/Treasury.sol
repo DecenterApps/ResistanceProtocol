@@ -26,6 +26,7 @@ contract Treasury {
 
     event TreasuryReceiveNOI(uint256 _amount);
     event TreasuryReceiveReedemableNOI(uint256 _amount);
+    event NOIRedeemed(uint256 _amountRedeemed,uint256 _amountGained,address _to);
 
     modifier onlyOwner() {
         if (msg.sender != owner) revert Treasury__NotOwner();
@@ -117,6 +118,8 @@ contract Treasury {
         uint256 col=_amount * EIGHTEEN_DECIMAL_NUMBER/_ethRp;
         (bool sent, ) = payable(_to).call{value: col}("");
         if (sent == false) revert Treasury__TransactionFailed();
+
+        emit NOIRedeemed(_amount,col,_to);
     }
 
     receive() external payable {}

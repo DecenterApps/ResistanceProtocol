@@ -11,6 +11,7 @@ import "./EthTwapFeed.sol";
 import "./MarketTwapFeed.sol";
 
 error ShutdownModule__ShutdownNotInitiated();
+error ShutdownModule__ShutdownInitiated();
 error ShutdownModule__OnlyOwnerAuthorization();
 error ShutdownModule__NotPhaseOne();
 error ShutdownModule__NotPhaseTwo();
@@ -36,15 +37,18 @@ contract ShutdownModule {
     uint256 timeForPhaseOne = SECONDS_IN_A_DAY*2;
     uint256 timeForPhaseTwo = SECONDS_IN_A_DAY*2;
 
-    modifier ShutdownInitiated() {
-        if (!shutdown) revert ShutdownModule__ShutdownNotInitiated();
-        _;
-    }
-
     constructor(address _owner) {
         owner=_owner;
         shutdownTime=block.timestamp;
     }
+
+    // EVENTS
+
+    event ShutdownStarted(uint256 _time);
+    event CDPProcessed(uint256 _cdpId,uint256 _debtSettled, uint256 _collateralConsumed);
+    event CollateralReclaimed(uint256 _cdpId);
+    event NOIRedeemed(uint256 _amount,address _to);
+    event ModifyParameters(bytes32 _parameter,uint256 _data);
 
     //Modifiers
 
@@ -63,7 +67,28 @@ contract ShutdownModule {
         _;
     }
 
+    modifier ShutdownInitiated() {
+        if (!shutdown) revert ShutdownModule__ShutdownNotInitiated();
+        _;
+    }
+
+    modifier ShutdownNotInitiated() {
+        if (shutdown) revert ShutdownModule__ShutdownInitiated();
+        _;
+    }
+
     // Parameters
+
+    function modifyParameters(bytes32 _parameter, uint256 _data)
+        external
+        onlyOwner
+        ShutdownNotInitiated
+    {
+        if (_parameter == "timeForPhaseOne") timeForPhaseOne = _data;
+        else if(_parameter == "timeForPhaseTwo") timeForPhaseTwo = _data; 
+        else revert CDPManager__UnknownParameter();
+        emit ModifyParameters(_parameter, _data);
+    }
 
     function setParametersAddress(address _parametersAddress)
         public
@@ -116,6 +141,7 @@ contract ShutdownModule {
 
     //PHASE 0
 
+    /// @notice calculates global collateralisation ratio
     function calculateGlobalCR() public view returns (uint256) {
         CDPManager CDPMANAGER_CONTRACT=CDPManager(cdpmanagerAddress);
         uint256 totalSupply = CDPMANAGER_CONTRACT.getTotalSupply();
@@ -127,6 +153,7 @@ contract ShutdownModule {
             EIGHTEEN_DECIMAL_NUMBER;
     }
 
+    /// @notice starts the process of shutdown if global collateralisation ratio is under the allowed limit
     function startShutdown() public {
         uint256 globalCR = calculateGlobalCR();
         uint256 globalCRLimit = Parameters(parametersAddress).getGlobalCRLimit();
@@ -135,6 +162,7 @@ contract ShutdownModule {
             shutdownTime=block.timestamp;
             forzenEthRp=CDPManager(cdpmanagerAddress).ethRp();
             shutdownAllContracts();
+            emit ShutdownStarted(block.timestamp);
         }
     }
 
@@ -153,6 +181,8 @@ contract ShutdownModule {
         return _n2;
     }
 
+    /// @notice process one CDP, settle debt and move some collateral to the treasury
+    /// @param _cdpId id of the CDP
     function processCDP(uint256 _cdpId) public ShutdownInitiated isPhaseOne {
         CDPManager CDPMANAGER_CONTRACT = CDPManager(cdpmanagerAddress);
         CDPManager.CDP memory cdp = CDPMANAGER_CONTRACT.getOneCDP(_cdpId);
@@ -161,15 +191,22 @@ contract ShutdownModule {
         uint256 min = minimum(neededCol, col);
 
         CDPMANAGER_CONTRACT.processCDP(_cdpId, min);
+        emit CDPProcessed(_cdpId,cdp.generatedDebt,min);
     }
 
+    /// @notice reclaim the remaining collateral in a processed CDP
+    /// @param _cdpId id of the CDP
     function freeCollateral(uint256 _cdpId) public ShutdownInitiated isPhaseOne {
         CDPManager(cdpmanagerAddress).freeCollateral(_cdpId);
+        emit CollateralReclaimed(_cdpId);
     }
 
     //PHASE 2
 
+    /// @notice redeem NOI in msg.sender wallet for collateral in the treasury
+    /// @param _amount amount of NOI to redeem
     function reedemNOI(uint256 _amount) public ShutdownInitiated isPhaseTwo {
         Treasury(payable(treasuryAddress)).reedemNoiForCollateral(_amount,msg.sender,forzenEthRp);
+        emit NOIRedeemed(_amount,msg.sender);
     }
 }

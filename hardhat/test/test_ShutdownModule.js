@@ -1,6 +1,8 @@
 const hre = require("hardhat");
 const { assert, expect } = require("chai");
 const { takeSnapshot, revertToSnapshot } = require("../utils/snapshot");
+const { ethers } = require("hardhat");
+const { executeActionFromMSW } = require("../utils/multiSigAction");
 
 describe("ShutdownModule", function () {
   const senderAccounts = [];
@@ -11,6 +13,7 @@ describe("ShutdownModule", function () {
   let ParametersContractObj;
   let NOIContract;
   let TreasuryContract;
+  let msw;
 
   beforeEach(async () => {
     snapshot = await takeSnapshot();
@@ -28,6 +31,7 @@ describe("ShutdownModule", function () {
     CDPManagerContractObj = await ethers.getContract("CDPManager", deployer);
     NOIContract = await ethers.getContract("NOI", deployer);
     TreasuryContract = await ethers.getContract("Treasury", deployer);
+    msw = await ethers.getContract("MultiSigWallet", deployer);
 
     senderAccounts.push((await hre.ethers.getSigners())[1]);
     senderAccounts.push((await hre.ethers.getSigners())[2]);
@@ -76,9 +80,20 @@ describe("ShutdownModule", function () {
       senderAccounts[0]
     ).setGlobalCRLimit(1100);
 
+    await executeActionFromMSW(
+      msw,
+      0,
+      ShutdownModuleObj.address,
+      "modifyParameters",
+      ["bytes32", "uint256"],
+      [ethers.utils.formatBytes32String("timeForPhaseOne"), "10"]
+    );
+
+    const amount="1000000000000000000000";
+
     const txOpen = await CDPManagerContractObj.connect(
       senderAccounts[0]
-    ).openCDPandMint(senderAccounts[0].address, "1000000000000000000000", {
+    ).openCDPandMint(senderAccounts[0].address, amount, {
       value: ethers.utils.parseEther("2"),
     });
 
@@ -129,13 +144,15 @@ describe("ShutdownModule", function () {
 
     const txApprove = await NOIContract.connect(senderAccounts[0]).approve(
       TreasuryContract.address,
-      "1000000000000000000000"
+      amount
     );
-    await txApprove.wait();
+
+    await network.provider.send("evm_increaseTime", [10]);
+    await network.provider.send("evm_mine");
 
     const txRedeem = await ShutdownModuleObj.connect(
       senderAccounts[0]
-    ).reedemNOI("1000000000000000000000");
+    ).reedemNOI(amount);
 
     newUserBalance = ethers.utils.formatEther(
       await waffle.provider.getBalance(senderAccounts[0].address)
