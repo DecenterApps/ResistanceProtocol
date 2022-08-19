@@ -43,6 +43,19 @@ export const ABI= [
   },
   {
     "inputs": [],
+    "name": "getGlobalCRLimit",
+    "outputs": [
+      {
+        "internalType": "uint16",
+        "name": "",
+        "type": "uint16"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "getLR",
     "outputs": [
       {
@@ -69,6 +82,19 @@ export const ABI= [
   },
   {
     "inputs": [],
+    "name": "globalCRLimit",
+    "outputs": [
+      {
+        "internalType": "uint16",
+        "name": "",
+        "type": "uint16"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "owner",
     "outputs": [
       {
@@ -78,6 +104,19 @@ export const ABI= [
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint16",
+        "name": "_globalCRLimit",
+        "type": "uint16"
+      }
+    ],
+    "name": "setGlobalCRLimit",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -107,4 +146,4 @@ export const ABI= [
     "type": "function"
   }
 ]
-export const address= "0xCd7c00Ac6dc51e8dCc773971Ac9221cC582F3b1b"
+export const address= "0x94fFA1C7330845646CE9128450F8e6c3B5e44F86"

@@ -8,7 +8,7 @@ contract Parameters{
 
     uint8 public LR=120; // Liquidation Ratio percentage
     uint8 public SF=2; // Stability Fee percentage
-
+    uint16 public globalCRLimit=130; // Global CR limit percentage
     address public immutable owner;
 
     modifier onlyOwner() {
@@ -28,6 +28,10 @@ contract Parameters{
         SF = _SF;
     }
 
+    function setGlobalCRLimit(uint16 _globalCRLimit) public {
+        globalCRLimit = _globalCRLimit;
+    }
+
     function getSF() public view returns (uint8) {
         return SF;
     }
@@ -35,4 +39,9 @@ contract Parameters{
     function getLR() public view returns (uint8) {
         return LR;
     }
+
+    function getGlobalCRLimit() public view returns (uint16) {
+        return globalCRLimit;
+    }
+
 }

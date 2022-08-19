@@ -10,6 +10,8 @@ error Liquidator__CDPNotEligibleForLiquidation();
 
 error Liquidator__SendToTreasuryFailed();
 error Liquidator__SendToUserFailed();
+error Liquidator__NotActive();
+error Liquidator__NotShutdownModule();
 
 contract Liquidator{
 
@@ -18,11 +20,14 @@ contract Liquidator{
     address rateSetterContractAddress;
     address treasuryContractAddress;
     address noiContractAddress;
+    address shutdownModuleContractAddress;
     uint8 treasuryPercent = 25; // percent of profit from liquidation
 
     address public owner;
 
     uint256 internal constant EIGHTEEN_DECIMAL_NUMBER = 10**18;
+
+    bool active=true;
 
 
     constructor(address _owner){
@@ -32,6 +37,18 @@ contract Liquidator{
     modifier onlyOwner(){
         if (msg.sender != owner)
             revert Parameters_NotAuthorized();
+        _;
+    }
+
+    modifier onlyActive(){
+        if (!active)
+            revert Liquidator__NotActive();
+        _;
+    }
+
+    modifier onlyShutdownModule(){
+        if (msg.sender!=shutdownModuleContractAddress)
+            revert Liquidator__NotShutdownModule();
         _;
     }
 
@@ -46,7 +63,7 @@ contract Liquidator{
         return CR < LR;
     }
 
-    function liquidateCDP(uint256 _cdpIndex) public {
+    function liquidateCDP(uint256 _cdpIndex) public onlyActive{
         CDPManager cdpManager = CDPManager(cdpManagerContractAddress);
         CDPManager.CDP memory cdp = cdpManager.getOneCDP(_cdpIndex);
 
@@ -98,6 +115,12 @@ contract Liquidator{
     function setNoiContractAddress(address _noiContractAddress) public onlyOwner{
         noiContractAddress = _noiContractAddress;
     } 
+    function setShutdownModuleContractAddress(address _shutdownModuleContractAddress) public onlyOwner{
+        shutdownModuleContractAddress = _shutdownModuleContractAddress;
+    } 
+    function shutdown() public onlyShutdownModule{
+        active=false;
+    }
 
 
     receive() external payable{

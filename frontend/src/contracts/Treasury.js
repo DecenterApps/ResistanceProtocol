@@ -22,6 +22,11 @@ export const ABI= [
   },
   {
     "inputs": [],
+    "name": "Treasury__NotEnoughNOIForReedem",
+    "type": "error"
+  },
+  {
+    "inputs": [],
     "name": "Treasury__NotOwner",
     "type": "error"
   },
@@ -36,6 +41,11 @@ export const ABI= [
     "type": "error"
   },
   {
+    "inputs": [],
+    "name": "Treasury__UnauthorizedShutdownModule",
+    "type": "error"
+  },
+  {
     "anonymous": false,
     "inputs": [
       {
@@ -46,6 +56,19 @@ export const ABI= [
       }
     ],
     "name": "TreasuryReceiveNOI",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "TreasuryReceiveReedemableNOI",
     "type": "event"
   },
   {
@@ -89,6 +112,19 @@ export const ABI= [
   },
   {
     "inputs": [],
+    "name": "noiForRedeem",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "owner",
     "outputs": [
       {
@@ -108,7 +144,43 @@ export const ABI= [
         "type": "uint256"
       }
     ],
+    "name": "receiveRedeemableNoi",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      }
+    ],
     "name": "receiveUnmintedNoi",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "_to",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_ethRp",
+        "type": "uint256"
+      }
+    ],
+    "name": "reedemNoiForCollateral",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -140,6 +212,32 @@ export const ABI= [
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_NOIContractAddress",
+        "type": "address"
+      }
+    ],
+    "name": "setNOIContractAddress",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_ShutdownModuleContractAddress",
+        "type": "address"
+      }
+    ],
+    "name": "setShutdownModuleContractAddress",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "unmintedNoiBalance",
     "outputs": [
@@ -157,4 +255,4 @@ export const ABI= [
     "type": "receive"
   }
 ]
-export const address= "0x572316aC11CB4bc5daf6BDae68f43EA3CCE3aE0e"
+export const address= "0x4593ed9CbE6003e687e5e77368534bb04b162503"
