@@ -2,7 +2,7 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-error AbsPiController__NotAuthorized();
+error AbsPiController__NotRateSetter();
 error AbsPiController__NotOwner();
 error AbsPiController__TooSoon();
 error AbsPiController__ContractNotEnabled();
@@ -20,6 +20,12 @@ contract AbsPiController {
 
     modifier isContractEnabled() {
         if (!contractEnabled) revert AbsPiController__ContractNotEnabled();
+        _;
+    }
+
+    modifier isRateSetter() {
+        if(msg.sender != rateSetterContractAddress) 
+            revert AbsPiController__NotRateSetter();
         _;
     }
 
@@ -55,6 +61,8 @@ contract AbsPiController {
         TWENTY_SEVEN_DECIMAL_NUMBER - 1;
     uint256 internal constant TWENTY_SEVEN_DECIMAL_NUMBER = 10**27;
     uint256 internal constant EIGHTEEN_DECIMAL_NUMBER = 10**18;
+
+    address rateSetterContractAddress;
 
     constructor(
         address _owner,
@@ -95,6 +103,10 @@ contract AbsPiController {
 
     function setEnabled(bool _enabled) public isOwner {
         contractEnabled = _enabled;
+    }
+
+    function setRateSetterContractAddress(address _address) external isOwner{
+        rateSetterContractAddress = _address;
     }
 
     function modifyIntParameter(bytes32 parameter, int256 data)
@@ -257,13 +269,17 @@ contract AbsPiController {
         uint _marketPrice,
         uint _redemptionPrice,
         uint _accumulatedLeak
-    ) external isContractEnabled returns (uint256) {
+    ) external 
+        isContractEnabled 
+        isRateSetter 
+        returns (uint256) 
+    {
         if (block.timestamp - lastUpdateTime < integralPeriodSize) {
             revert AbsPiController__TooSoon();
         }
         int256 proportionalTerm = int(_redemptionPrice) -
             int(_marketPrice) *
-            int(10**9);
+            int(10**19);
         updateDeviationHistory(proportionalTerm, _accumulatedLeak);
         lastUpdateTime = block.timestamp;
         int256 piOutput = getGainAdjustedPIOutput(

@@ -46,7 +46,7 @@ contract RateSetter {
     }
 
     modifier isMarketTwapFeed() {
-        if (msg.sender != marketTwapFeedContractAddress && msg.sender != owner)
+        if (msg.sender != marketTwapFeedContractAddress)
             revert RateSetter__NotMarketTwapFeed();
         _;
     }
