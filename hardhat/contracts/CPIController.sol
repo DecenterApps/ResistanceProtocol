@@ -58,7 +58,7 @@ contract CPIController {
     }
 
     modifier isRateSetter(){
-        if (msg.sender != rateSetterContractAddress && msg.sender != owner)
+        if (msg.sender != rateSetterContractAddress)
             revert CPIController__NotRateSetter();
         _;   
     }

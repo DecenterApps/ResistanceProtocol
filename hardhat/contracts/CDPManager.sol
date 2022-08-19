@@ -97,7 +97,7 @@ contract CDPManager {
     }
 
     modifier isRateSetter() {
-        if (msg.sender != rateSetterContractAddress && msg.sender != owner)
+        if (msg.sender != rateSetterContractAddress)
             revert CDPManager__NotRateSetter();
         _;
     }
