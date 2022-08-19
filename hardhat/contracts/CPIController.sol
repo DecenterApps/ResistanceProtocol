@@ -300,6 +300,7 @@ contract CPIController {
     }
 
     // --- PI Specific Math ---
+    
     function riemannSum(int256 _x, int256 _y) internal pure returns (int256) {
         return (_x + _y) / 2;
     }
