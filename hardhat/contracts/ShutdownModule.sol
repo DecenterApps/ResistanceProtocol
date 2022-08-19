@@ -11,6 +11,9 @@ import "./EthTwapFeed.sol";
 import "./MarketTwapFeed.sol";
 
 error ShutdownModule__ShutdownNotInitiated();
+error ShutdownModule__OnlyOwnerAuthorization();
+error ShutdownModule__NotPhaseOne();
+error ShutdownModule__NotPhaseTwo();
 
 contract ShutdownModule {
     address private parametersAddress;
@@ -28,8 +31,10 @@ contract ShutdownModule {
     uint256 internal constant EIGHTEEN_DECIMAL_NUMBER = 10**18;
     bool public shutdown = false;
     uint256 public forzenEthRp=0;
+    uint256 public shutdownTime;
 
     uint256 timeForPhaseOne = SECONDS_IN_A_DAY*2;
+    uint256 timeForPhaseTwo = SECONDS_IN_A_DAY*2;
 
     modifier ShutdownInitiated() {
         if (!shutdown) revert ShutdownModule__ShutdownNotInitiated();
@@ -38,12 +43,23 @@ contract ShutdownModule {
 
     constructor(address _owner) {
         owner=_owner;
+        shutdownTime=block.timestamp;
     }
 
     //Modifiers
 
     modifier onlyOwner() {
-        if (msg.sender != owner) revert CDPManager__OnlyOwnerAuthorization();
+        if (msg.sender != owner) revert ShutdownModule__OnlyOwnerAuthorization();
+        _;
+    }
+
+    modifier isPhaseOne() {
+        if (block.timestamp <= shutdownTime || block.timestamp > shutdownTime + timeForPhaseOne) revert ShutdownModule__NotPhaseOne();
+        _;
+    }
+
+    modifier isPhaseTwo() {
+        if (block.timestamp <= shutdownTime + timeForPhaseOne || block.timestamp > shutdownTime + timeForPhaseOne + timeForPhaseTwo) revert ShutdownModule__NotPhaseTwo();
         _;
     }
 
@@ -116,6 +132,7 @@ contract ShutdownModule {
         uint256 globalCRLimit = Parameters(parametersAddress).getGlobalCRLimit();
         if (globalCR <= globalCRLimit) {
             shutdown = true;
+            shutdownTime=block.timestamp;
             forzenEthRp=CDPManager(cdpmanagerAddress).ethRp();
             shutdownAllContracts();
         }
@@ -136,8 +153,8 @@ contract ShutdownModule {
         return _n2;
     }
 
-    function processCDP(uint256 _cdpId) public ShutdownInitiated {
-        CDPManager CDPMANAGER_CONTRACT=CDPManager(cdpmanagerAddress);
+    function processCDP(uint256 _cdpId) public ShutdownInitiated isPhaseOne {
+        CDPManager CDPMANAGER_CONTRACT = CDPManager(cdpmanagerAddress);
         CDPManager.CDP memory cdp = CDPMANAGER_CONTRACT.getOneCDP(_cdpId);
         uint256 neededCol = cdp.generatedDebt * EIGHTEEN_DECIMAL_NUMBER / forzenEthRp;
         uint256 col = cdp.lockedCollateral;
@@ -146,13 +163,13 @@ contract ShutdownModule {
         CDPMANAGER_CONTRACT.processCDP(_cdpId, min);
     }
 
-    function freeCollateral(uint256 _cdpId) public ShutdownInitiated {
+    function freeCollateral(uint256 _cdpId) public ShutdownInitiated isPhaseOne {
         CDPManager(cdpmanagerAddress).freeCollateral(_cdpId);
     }
 
     //PHASE 2
 
-    function reedemNOI(uint256 _amount) public ShutdownInitiated{
+    function reedemNOI(uint256 _amount) public ShutdownInitiated isPhaseTwo {
         Treasury(payable(treasuryAddress)).reedemNoiForCollateral(_amount,msg.sender,forzenEthRp);
     }
 }
