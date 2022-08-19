@@ -13,7 +13,7 @@ def calculate_rp_and_rr(market_twap, redemption_price, accumulated_leak_stable, 
     if err_stable_perc > 0.1:
         w_stable = 1
     elif err_stable_perc > 0:
-        w_stable = 0.95 + 0.05 * err_stable_perc/0.1
+        w_stable = 0.85 + 0.05 * err_stable_perc/0.1
         w_stable = w_stable + (1 - w_stable) * err_stable_perc/(err_stable_perc + err_cpi_perc)
     w_cpi = 1 - w_stable
     rr = w_stable * rr_stable + w_cpi * rr_cpi

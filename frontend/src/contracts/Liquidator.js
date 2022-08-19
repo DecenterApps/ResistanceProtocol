@@ -17,6 +17,16 @@ export const ABI= [
   },
   {
     "inputs": [],
+    "name": "Liquidator__SendToTreasuryFailed",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "Liquidator__SendToUserFailed",
+    "type": "error"
+  },
+  {
+    "inputs": [],
     "name": "Parameters_NotAuthorized",
     "type": "error"
   },
@@ -166,4 +176,4 @@ export const ABI= [
     "type": "receive"
   }
 ]
-export const address= "0x7580708993de7CA120E957A62f26A5dDD4b3D8aC"
+export const address= "0x975Ab64F4901Af5f0C96636deA0b9de3419D0c2F"

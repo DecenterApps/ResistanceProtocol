@@ -37,7 +37,7 @@ import { useWeb3React } from "@web3-react/core";
 import { ethers } from "ethers";
 import Decimal from "decimal.js";
 import FirebaseService from "../../services/FirebaseService";
-import InfoService from '../../services/InfoService'
+import InfoService from "../../services/InfoService";
 
 ChartJS.register(
   CategoryScale,
@@ -53,7 +53,15 @@ ChartJS.register(
 
 export const options = {
   responsive: true,
-  plugins: {},
+  plugins: {
+    tooltips: {
+      callbacks: {
+        label: function (tooltipItem, data) {
+          return "dsad";
+        },
+      },
+    },
+  },
 };
 
 export default function Dashboard({ bAnimation, setBAnimation }) {
@@ -74,8 +82,8 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
   const [redemptionRateHistory, setRedemptionRateHistory] = useState([]);
   const [redemptionPriceHistory, setRedemptionPriceHistory] = useState([]);
   const [marketPriceHistory, setMarketPriceHistory] = useState([]);
-
-  
+  const [noiSurplus,setNoiSurplus]=useState(0);
+  const [noiInTreasury,setNoiInTreasury]=useState(0);
 
   useEffect(() => {
     FirebaseService.setUpNOITracking(setNOISupplyHistory);
@@ -102,9 +110,11 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
     setRedemptionPrice(await InfoService.getRedemptionPrice(signer));
     setMarketPrice(await InfoService.getMarketPrice(signer));
     setNOISupply(await InfoService.getNOISupply(signer));
+    setCdpCount(await InfoService.getCdpCount(signer));
+    setNoiInTreasury(await InfoService.getTreasuryNoi(signer));
+    setNoiSurplus(await InfoService.getNoiSurplus(signer));
     setPTerm(await InfoService.getProportionalTerm(signer));
     setITerm(await InfoService.getIntegralTerm(signer));
-    setCdpCount(await InfoService.getCdpCount(signer));
   };
 
   useEffect(() => {
@@ -137,13 +147,8 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
                 />
                 <div>Total ETH locked</div>
                 <div className="bold-text">
-                  {ethers.utils.formatEther(
-                    new Decimal(totalEth.toString()).toString()
-                  )}{" "}
-                  ($
-                  {ethers.utils.formatEther(
-                    new Decimal(totalEth.toString()).toString()
-                  ) * ethPrice}
+                  {new Decimal(totalEth.toString()).div(10**18).toString()} ($
+                  {new Decimal(totalEth.toString()).div(10**18).mul(ethPrice).toString()}
                   ){" "}
                 </div>
               </VStack>
@@ -166,9 +171,9 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
                 />
                 <div>Outstanding NOI</div>
                 <div className="bold-text">
-                  {ethers.utils.formatEther(
-                    new Decimal(noiSupply.toString()).toString()
-                  )}
+                  {
+                    new Decimal(noiSupply.toString()).add(new Decimal(noiSurplus.toString())).div(10**18).toPrecision(15).toString()
+                  }
                 </div>
               </VStack>
             </Box>
@@ -221,15 +226,18 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
                   <VStack>
                     <div>Redemption rate</div>
                     <div className="bold-text">
-                      {new Decimal(rr.toString()).div(10 ** 27).toString()}%
+                      {new Decimal(rr.toString())
+                        .div(10 ** 27)
+                        .sub(1)
+                        .toPrecision(5)
+                        .toString()}
+                      %
                     </div>
                     <div>
-                      <b>pRate</b>:
-                      {new Decimal(pTerm.toString()).div(10 ** 27).toString()}%
+                      <b>pRate</b>:{pTerm}%
                     </div>
                     <div>
-                      <b>iRate</b>:{" "}
-                      {new Decimal(iTerm.toString()).div(10 ** 27).toString()}%
+                      <b>iRate</b>: {iTerm}%
                     </div>
                   </VStack>
                 </Box>
@@ -263,9 +271,9 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
                     <VStack>
                       <div>ERC20 NOI Supply</div>
                       <div className="bold-text">
-                        {ethers.utils.formatEther(
-                          new Decimal(noiSupply.toString()).toString()
-                        )}
+                        {
+                          new Decimal(noiSupply.toString()).div(10**18).toPrecision(15).toString()
+                        }
                       </div>
                     </VStack>
                   </Box>
@@ -294,7 +302,7 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
                     </div>
                     <VStack>
                       <div>NOI surplus</div>
-                      <div className="bold-text">TO DO</div>
+                      <div className="bold-text">{new Decimal(noiSurplus.toString()).div(10**18).toPrecision(15).toString()}</div>
                     </VStack>
                   </Box>
                   <Box className="div-indiv2-line2 ">
@@ -307,7 +315,7 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
                     </div>
                     <VStack>
                       <div>NOI in treasury</div>
-                      <div className="bold-text">TO DO</div>
+                      <div className="bold-text">{new Decimal(noiInTreasury.toString()).div(10**18).toPrecision(15).toString()}</div>
                     </VStack>
                   </Box>
                 </HStack>
@@ -331,7 +339,7 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
                     <div className="bold-text">
                       {" "}
                       {new Decimal(marketPrice.toString())
-                        .div(10 ** 8)
+                        .div(10 ** 8).toPrecision(5)
                         .toString()}{" "}
                       USD
                     </div>
@@ -349,7 +357,7 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
                     <div>NOI Redemption Price</div>
                     <div className="bold-text">
                       {new Decimal(redemptionPrice.toString())
-                        .div(10 ** 27)
+                        .div(10 ** 27).toPrecision(8)
                         .toString()}{" "}
                       USD
                     </div>
@@ -370,7 +378,7 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
                         .div(10 ** 8)
                         .sub(
                           new Decimal(redemptionPrice.toString()).div(10 ** 27)
-                        )
+                        ).toPrecision(5)
                         .toString()}{" "}
                       USD
                     </div>
@@ -403,7 +411,9 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
                     {
                       fill: true,
                       label: "NOI issued",
-                      data: noiSupplyHistory.map((e) => e["supply"]),
+                      data: noiSupplyHistory.map((e) =>
+                        new Decimal(e["supply"]).div(10 ** 18).toString()
+                      ),
                       borderColor: "rgb(53, 162, 235)",
                       backgroundColor: "rgba(53, 162, 235, 0.5)",
                     },
@@ -420,8 +430,10 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
                   datasets: [
                     {
                       label: "Redemption rate",
-                      data: redemptionRateHistory.map(
-                        (e) => e["redemptionRate"]
+                      data: redemptionRateHistory.map((e) =>
+                        new Decimal(e["redemptionRate"])
+                          .div(10 ** 27)
+                          .toString()
                       ),
                       backgroundColor: "rgba(53, 162, 235, 0.5)",
                     },
@@ -441,14 +453,18 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
                     {
                       fill: true,
                       label: "Market price",
-                      data: marketPriceHistory.map((e) => new Decimal(e["price"]).div(10**8).toString()),
+                      data: marketPriceHistory.map((e) =>
+                        new Decimal(e["price"]).div(10 ** 8).toString()
+                      ),
                       borderColor: "rgb(53, 162, 235)",
                       backgroundColor: "rgba(53, 162, 235, 0.5)",
                     },
                     {
                       fill: true,
                       label: "Redemption price",
-                      data: redemptionPriceHistory.map((e) => new Decimal(e["price"]).div(10**27).toString()),
+                      data: redemptionPriceHistory.map((e) =>
+                        new Decimal(e["price"]).div(10 ** 27).toString()
+                      ),
                       borderColor: "rgb(255, 99, 132)",
                       backgroundColor: "rgba(255, 99, 132, 0.5)",
                     },

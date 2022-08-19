@@ -23,6 +23,14 @@ class Full_Graph(Graph):
     def plot(self, ext_data: ExtData):
         Graph.plotGraph1(self, 'images/full_graph.png', ext_data, 'full_graph')
         self.plot_controllers('images/controller_values.png')
+    
+    def save_main_axis(self, ext_data: ExtData):
+        return self.m_prices, self.r_prices, self.market_twap_prices
+        # axis.plot(self.m_prices)
+        # axis.plot(self.r_prices, color='red')
+        # axis.plot(self.market_twap_prices, color='greenyellow')
+        # axis.legend(['market price', 'redemption price', 'market twap price'])
+        # axis.set_title("Market price, Redemption price, Market twap price")
 
     def plot_controllers(self, filename):
         figure, axis = plt.subplots(2, 1, figsize=(15,8))

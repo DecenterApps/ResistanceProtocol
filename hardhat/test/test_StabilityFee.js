@@ -47,6 +47,7 @@ describe("StabilityFee", function () {
 
     it("... pay debt with SF", async () => {
 
+
         let cdpIndex = await openAndMintFromCDP(CDPManagerContractObj,senderAccounts[1],"15",10000);
         
         await network.provider.send("evm_increaseTime", [31536000])
@@ -60,8 +61,6 @@ describe("StabilityFee", function () {
         const totalDebt2 = await CDPManagerContractObj.connect(senderAccounts[1]).getDebtWithSF(cdpIndex);
         assert.isTrue(BigNumber(totalDebt2.toString()).subtract(BigNumber(10).pow(18).mult(200)).lt(BigNumber(10).pow(15)));
 
-        let unmintedNoiBalance = await TreasuryContractObj.unmintedNoiBalance();
-        assert.equal(totalDebt2,unmintedNoiBalance.toString());
     });
 
 });

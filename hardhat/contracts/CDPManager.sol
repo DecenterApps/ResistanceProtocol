@@ -289,12 +289,13 @@ contract CDPManager {
         if (CR < LR) revert CDPManager__LiquidationRatioReached();
 
         cdpList[_cdpIndex].lockedCollateral -= _amount;
-
-        (bool sent, ) = payable(cdpList[_cdpIndex].owner).call{value: _amount}(
-            ""
-        );
-        if (sent == false) revert();
         totalSupply -= _amount;
+        
+        (bool sent, ) = payable(cdpList[_cdpIndex].owner).call{
+            value: _amount
+        }("");
+
+        if (sent == false) revert();
 
         emit WithdrawCollateral(cdpList[_cdpIndex].owner, _cdpIndex, _amount);
     }
@@ -319,11 +320,10 @@ contract CDPManager {
         if (CR < LR) revert CDPManager__LiquidationRatioReached();
 
         recalculateSF(_cdpIndex);
-        transferSFtoTreasury();
+        transferUnmintedCoinToTreasury();
 
         cdpList[_cdpIndex].generatedDebt += _amount;
         totalDebt = totalDebt + _amount;
-
         NOI_COIN.mint(user_cdp.owner, _amount);
         emit MintCDP(cdpList[_cdpIndex].owner, _cdpIndex, _amount);
     }
@@ -427,7 +427,7 @@ contract CDPManager {
         emit OwnershipTransfer(_from, _to, _cdpIndex);
     }
 
-    function transferSFtoTreasury() private returns (uint256) {
+    function transferUnmintedCoinToTreasury() private returns (uint256) {
         uint8 SF = Parameters(parametersContractAddress).getSF();
         uint256 amount = (totalDebt *
             SF *
@@ -435,6 +435,7 @@ contract CDPManager {
             (SECONDS_PER_YEAR * 100);
         lastUnmintedNOICalculationTimestamp = block.timestamp;
         Treasury(payable(treasuryContractAddress)).receiveUnmintedNoi(amount);
+
         return amount;
     }
 
@@ -450,18 +451,22 @@ contract CDPManager {
         uint256 totalUserDebt = cdpList[_cdpIndex].generatedDebt +
             cdpList[_cdpIndex].accumulatedFee;
 
-        transferSFtoTreasury();
+        transferUnmintedCoinToTreasury();
 
+        uint256 onlyDebt = 0;
+        uint256 fee = cdpList[_cdpIndex].accumulatedFee;
         if (amount > totalUserDebt) amount = totalUserDebt;
         if (amount <= cdpList[_cdpIndex].accumulatedFee) {
             cdpList[_cdpIndex].accumulatedFee -= amount;
+            fee = amount;
         } else {
-            uint256 onlyDebt = amount - cdpList[_cdpIndex].accumulatedFee;
+            onlyDebt = amount - cdpList[_cdpIndex].accumulatedFee;
             cdpList[_cdpIndex].accumulatedFee = 0;
             cdpList[_cdpIndex].generatedDebt -= onlyDebt;
             totalDebt -= onlyDebt;
         }
-        NOI_COIN.burn(msg.sender, amount);
+        NOI_COIN.transferFrom(msg.sender,treasuryContractAddress,fee);
+        NOI_COIN.burn(msg.sender, onlyDebt);
         emit RepayCDP(cdpList[_cdpIndex].owner, _cdpIndex, amount);
     }
 
@@ -469,16 +474,21 @@ contract CDPManager {
     /// @param _cdpIndex index of cdp
     function repayAndCloseCDP(uint256 _cdpIndex) public CDPExists(_cdpIndex) {
         recalculateSF(_cdpIndex);
-        uint256 amount = cdpList[_cdpIndex].accumulatedFee +
-            cdpList[_cdpIndex].generatedDebt;
-        transferSFtoTreasury();
 
-        NOI_COIN.burn(msg.sender, amount);
+        transferUnmintedCoinToTreasury();
+
+        uint256 fee = cdpList[_cdpIndex].accumulatedFee;
+        uint256 debt =  cdpList[_cdpIndex].generatedDebt;
+
+        totalDebt -= debt;
+
+        NOI_COIN.transferFrom(msg.sender,treasuryContractAddress,fee);
+        NOI_COIN.burn(msg.sender, debt);
 
         cdpList[_cdpIndex].accumulatedFee = 0;
         cdpList[_cdpIndex].generatedDebt = 0;
 
-        emit RepayCDP(cdpList[_cdpIndex].owner, _cdpIndex, amount);
+        emit RepayCDP(cdpList[_cdpIndex].owner, _cdpIndex, fee+debt);
         emit CDPClose(cdpList[_cdpIndex].owner, _cdpIndex);
 
         closeCDP(_cdpIndex);
@@ -499,8 +509,15 @@ contract CDPManager {
         if (sent == false) revert();
         totalSupply = totalSupply - cdpList[_cdpIndex].lockedCollateral;
 
-        // burn dept from liquidator balance
-        NOI_COIN.burn(_liquidatorUsr, getDebtWithSF(_cdpIndex));
+        uint256 debt = cdpList[_cdpIndex].generatedDebt;
+        transferUnmintedCoinToTreasury();
+        totalDebt-= debt;
+
+        // burn dept from liquidator balance, but only minted coins
+
+        NOI_COIN.transferFrom(_liquidatorUsr,treasuryContractAddress,getOnlySF(_cdpIndex));
+        NOI_COIN.burn(_liquidatorUsr, debt);
+
 
         removeFromLinkedList(_cdpIndex);
         delete cdpList[_cdpIndex];
