@@ -190,8 +190,8 @@ export default function CDPs({ bAnimation, setBAnimation }) {
                           .toString()
                       )
                         .div(10 ** 18)
-                        .toPrecision(10)
-                        .toString()}
+                        .toDP(5)
+                        .toString()} NOI
                   </div>
                 </VStack>
               </Box>
@@ -225,7 +225,7 @@ export default function CDPs({ bAnimation, setBAnimation }) {
                           )
                           .toString()
                       ).div(10 ** 18)
-                      .toPrecision(10)
+                      .toDP(8)
                       .toString()}
                   </div>
                 </VStack>
@@ -266,7 +266,7 @@ export default function CDPs({ bAnimation, setBAnimation }) {
                               <div>Debt</div>
                               <div>
                                 {
-                                  new Decimal(c.debt.toString()).div(10**18).toPrecision(10).toString()
+                                  new Decimal(c.debt.toString()).div(10**18).toDP(5).toString()
                                 }{" "}
                               </div>
                             </VStack>
@@ -275,7 +275,7 @@ export default function CDPs({ bAnimation, setBAnimation }) {
                               <div>
                                 {c.sf !== undefined
                                   ? 
-                                      new Decimal(c.sf.toString()).div(10**18).toPrecision(10).toString()
+                                      new Decimal(c.sf.toString()).div(10**18).toDP(8).toString()
                                     
                                   : "Calculating..."}
                               </div>

@@ -29,6 +29,10 @@ import {
   ABI as ABI_TREASURY,
   address as address_TREASURY,
 } from "../contracts/Treasury";
+import {
+  ABI as ABI_SHUTDOWN,
+  address as address_SHUTDOWN,
+} from "../contracts/ShutdownModule";
 
 const contractCDPManager = new ethers.Contract(
   address_CDPMANAGER,
@@ -51,12 +55,9 @@ const contractMARKET = new ethers.Contract(address_MARKET, ABI_MARKET);
 
 const contractNOI = new ethers.Contract(address_NOI, ABI_NOI);
 
-const contractTREASURY= new ethers.Contract(address_TREASURY,ABI_TREASURY);
+const contractTREASURY = new ethers.Contract(address_TREASURY, ABI_TREASURY);
 
-const contractCONTROLLER = new ethers.Contract(
-  address_CONTROLLER,
-  ABI_CONTROLLER
-);
+const contractSHUTDOWN = new ethers.Contract(address_SHUTDOWN,ABI_SHUTDOWN);
 
 const getEthPrice = async (signer) => {
   const ethResponse = await ethTwapFeedContract.connect(signer).getTwap();
@@ -130,14 +131,32 @@ const getCdpCount = async (signer) => {
 };
 
 const getNoiSurplus = async (signer) => {
-  const surplusResponse=await contractTREASURY.connect(signer).unmintedNoiBalance();
+  const surplusResponse = await contractTREASURY
+    .connect(signer)
+    .unmintedNoiBalance();
   return surplusResponse;
-}
+};
 
-const getTreasuryNoi = async (signer) =>{
-  const treasuryResponse=await contractNOI.connect(signer).balanceOf(address_TREASURY);
+const getTreasuryNoi = async (signer) => {
+  const treasuryResponse = await contractNOI
+    .connect(signer)
+    .balanceOf(address_TREASURY);
   return treasuryResponse;
-}
+};
+
+const getGlobalCR = async (signer) => {
+  const globalCR = await contractSHUTDOWN
+    .connect(signer)
+    .calculateGlobalCR();
+  return globalCR;
+};
+
+const getCRLimit = async (signer) => {
+  const crLimit = await contractPARAMETERS
+    .connect(signer)
+    .getGlobalCRLimit();
+  return crLimit;
+};
 
 export default {
   getCdpCount,
@@ -153,4 +172,6 @@ export default {
   getEthPrice,
   getNoiSurplus,
   getTreasuryNoi,
+  getGlobalCR,
+  getCRLimit
 };
