@@ -590,8 +590,8 @@ contract CDPManager {
         active=false;
     }
 
-    function processCDP(uint256 _cdpId, uint256 _collateralDelta) public isAuthorized{
-        Treasury(payable(treasuryContractAddress)).receiveUnmintedNoi(cdpList[_cdpId].generatedDebt);
+    function processCDP(uint256 _cdpId, uint256 _collateralDelta) public isAuthorized CDPExists(_cdpId){
+        Treasury(payable(treasuryContractAddress)).receiveRedeemableNoi(cdpList[_cdpId].generatedDebt);
         (bool sent, ) = payable(treasuryContractAddress).call{
             value: _collateralDelta
         }("");
@@ -605,7 +605,7 @@ contract CDPManager {
         cdpList[_cdpId].lockedCollateral=cdpList[_cdpId].lockedCollateral-_collateralDelta;
     }
 
-    function freeCollateral(uint256 _cdpId) public isAuthorized{
+    function freeCollateral(uint256 _cdpId) public isAuthorized CDPExists(_cdpId){ 
         if (getDebtWithSF(_cdpId) != 0) {
             revert CDPManager__HasDebt();
         }

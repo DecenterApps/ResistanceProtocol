@@ -115,14 +115,6 @@ module.exports = async ({ getNamedAccounts }) => {
         [TreasuryContractObj.address]
     );
 
-    await executeActionFromMSW(
-        msw,
-        0,
-        TreasuryContractObj.address,
-        "setCDPManagerContractAddress",
-        ["address"],
-        [cdpManagerContractObj.address]
-    );
 
     await executeActionFromMSW(
         msw,
@@ -142,7 +134,7 @@ module.exports = async ({ getNamedAccounts }) => {
         [ShutdownModule.address]
     );
 
-    // authorize updateBot
+    // Treasury
     await executeActionFromMSW(
         msw,
         0,
@@ -150,6 +142,33 @@ module.exports = async ({ getNamedAccounts }) => {
         "addAuthorization",
         ["address"],
         [process.env.UPDATE_BOT_ACCOUNT]
+    );
+
+    await executeActionFromMSW(
+        msw,
+        0,
+        TreasuryContractObj.address,
+        "setCDPManagerContractAddress",
+        ["address"],
+        [cdpManagerContractObj.address]
+    );
+
+    await executeActionFromMSW(
+        msw,
+        0,
+        TreasuryContractObj.address,
+        "setShutdownModuleContractAddress",
+        ["address"],
+        [ShutdownModule.address]
+    );
+
+    await executeActionFromMSW(
+        msw,
+        0,
+        TreasuryContractObj.address,
+        "setNOIContractAddress",
+        ["address"],
+        [noiContract.address]
     );
 
     // Market TWAP Feed

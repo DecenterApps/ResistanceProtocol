@@ -22,6 +22,8 @@ contract Treasury {
     uint256 public unmintedNoiBalance = 0;
     uint256 public noiForRedeem = 0;
 
+    uint256 internal constant EIGHTEEN_DECIMAL_NUMBER = 10**18;
+
     event TreasuryReceiveNOI(uint256 _amount);
     event TreasuryReceiveReedemableNOI(uint256 _amount);
 
@@ -102,7 +104,7 @@ contract Treasury {
         emit TreasuryReceiveNOI(_amount);
     }
 
-    function receiveRedeemableNoi(uint256 _amount) public onlyShutdownModuleContract {
+    function receiveRedeemableNoi(uint256 _amount) public onlyCDPManagerContract {
         noiForRedeem += _amount;
         emit TreasuryReceiveReedemableNOI(_amount);
     }
@@ -112,11 +114,9 @@ contract Treasury {
             revert Treasury__NotEnoughNOIForReedem();
         NOI(NOIContractAddress).burn(_to,_amount);
         noiForRedeem-=_amount;
-        uint256 col=_amount/_ethRp;
+        uint256 col=_amount * EIGHTEEN_DECIMAL_NUMBER/_ethRp;
         (bool sent, ) = payable(_to).call{value: col}("");
         if (sent == false) revert Treasury__TransactionFailed();
-
-        //NOI_COIN.burn(msg.sender, onlyDebt);
     }
 
     receive() external payable {}

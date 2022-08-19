@@ -139,9 +139,8 @@ contract ShutdownModule {
     function processCDP(uint256 _cdpId) public ShutdownInitiated {
         CDPManager CDPMANAGER_CONTRACT=CDPManager(cdpmanagerAddress);
         CDPManager.CDP memory cdp = CDPMANAGER_CONTRACT.getOneCDP(_cdpId);
-        uint256 neededCol = cdp.generatedDebt / forzenEthRp;
+        uint256 neededCol = cdp.generatedDebt * EIGHTEEN_DECIMAL_NUMBER / forzenEthRp;
         uint256 col = cdp.lockedCollateral;
-
         uint256 min = minimum(neededCol, col);
 
         CDPMANAGER_CONTRACT.processCDP(_cdpId, min);
