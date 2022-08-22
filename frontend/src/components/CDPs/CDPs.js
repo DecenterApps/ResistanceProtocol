@@ -246,7 +246,7 @@ export default function CDPs({ bAnimation, setBAnimation }) {
                 <Box className="cdp-line2-holder">
                   <VStack spacing="2vh">
                     {cdps.map((c) => (
-                      <Box className="per-cdp" key={c.cdpId}>
+                      <Box className={c.cr-c.lr<10 ? c.cr<c.lr ? "per-cdp danger" : "per-cdp warning" : "per-cdp"} key={c.cdpId}>
                         <HStack>
                           <HStack spacing="1vw" className="per-cdp-left">
                             <VStack>
@@ -280,9 +280,13 @@ export default function CDPs({ bAnimation, setBAnimation }) {
                                   : "Calculating..."}
                               </div>
                             </VStack>
-                            <VStack>
+                            <VStack className={c.cr-c.lr<10 && (c.cr<c.lr ? "danger-text" : "warning-text")}>
                               <div>CR</div>
                               <div>{c.cr}%</div>
+                            </VStack>
+                            <VStack>
+                              <div>LR</div>
+                              <div>{c.lr}%</div>
                             </VStack>
                           </HStack>
                           <HStack className="per-cdp-center">
