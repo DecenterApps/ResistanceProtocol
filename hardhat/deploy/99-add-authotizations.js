@@ -17,6 +17,8 @@ module.exports = async ({ getNamedAccounts }) => {
     const RateSetterContractObj = await ethers.getContract("RateSetter", deployer);
     const EthTwapFeed = await ethers.getContract("EthTwapFeed", deployer);
     const MarketTwapFeed = await ethers.getContract("MarketTwapFeed", deployer);
+    const AbsPIController = await ethers.getContract("AbsPiController", deployer);
+    const CPIController = await ethers.getContract("CPIController", deployer);
 
     // add auth to cdpManager to mint and burn tokens from erc20
     await executeActionFromMSW(
@@ -125,6 +127,24 @@ module.exports = async ({ getNamedAccounts }) => {
         "setMarketTwapFeedContractAddress",
         ["address"],
         [MarketTwapFeed.address]
+    );
+
+    await executeActionFromMSW(
+        msw, 
+        0,
+        AbsPIController.address,
+        "setRateSetterContractAddress",
+        ["address"],
+        [RateSetterContractObj.address]
+    );
+
+    await executeActionFromMSW(
+        msw, 
+        0,
+        CPIController.address,
+        "setRateSetterContractAddress",
+        ["address"],
+        [RateSetterContractObj.address]
     );
 };
 
