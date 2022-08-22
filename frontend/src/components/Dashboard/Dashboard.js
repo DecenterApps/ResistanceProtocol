@@ -53,11 +53,18 @@ ChartJS.register(
 
 export const options = {
   responsive: true,
+  scales: {
+    x: {
+      ticks: {
+        display: false,
+      },
+    },
+  },
   plugins: {
-    tooltips: {
+    tooltip: {
       callbacks: {
-        label: function (tooltipItem, data) {
-          return "dsad";
+        label: function (context) {
+          return context.parsed.y;
         },
       },
     },
@@ -477,7 +484,7 @@ export default function Dashboard({
                 <Line
                   options={options}
                   data={{
-                    labels: noiSupplyHistory.map((e) => e["timestamp"]),
+                    labels: noiSupplyHistory.map((e) => new Date(e["timestamp"] * 1000).toLocaleString("en-US")),
                     datasets: [
                       {
                         fill: true,
@@ -497,7 +504,7 @@ export default function Dashboard({
                 <Bar
                   options={options}
                   data={{
-                    labels: redemptionRateHistory.map((e) => e["timestamp"]),
+                    labels: redemptionRateHistory.map((e) => new Date(e["timestamp"] * 1000).toLocaleString("en-US")),
                     datasets: [
                       {
                         label: "Redemption rate",
@@ -517,9 +524,13 @@ export default function Dashboard({
               <Box className="div-line2">
                 <h2 className="h-test">Prices</h2>
                 <Line
-                  options={options}
+                  options={{
+                    ...options,
+                  }}
                   data={{
-                    labels: marketPriceHistory.map((e) => e["timestamp"]),
+                    labels: marketPriceHistory.map((e) =>
+                      new Date(e["timestamp"] * 1000).toLocaleString("en-US")
+                    ),
                     datasets: [
                       {
                         fill: true,
