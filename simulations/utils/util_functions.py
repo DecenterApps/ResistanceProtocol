@@ -1,5 +1,6 @@
 import csv
 import matplotlib.pyplot as plt
+import math
 
 def get_data_from_csv(file_name):
     with open(file_name, 'r') as csvfile:
@@ -20,8 +21,8 @@ def plot_all_graphs():
             else:
                 full_graphs.append({'one': one, 'two': two, 'three': three})
             duz += 1
-        plot_arr('images/timestamp_graphs.png', timestamp_graphs)
-        plot_arr('images/full_graphs.png', full_graphs)
+        plot_arr('images/timestamp_graphs.png', timestamp_graphs, 'cpi', 'Inflation value')
+        plot_arr('images/full_graphs.png', full_graphs, 'market twap', 'Market twap')
 
 def parse_array(arr):
     arr = arr[1:-1].split()
@@ -29,14 +30,17 @@ def parse_array(arr):
         arr[i] = float(arr[i][:-1]) if arr[i][-1] == ',' else float(arr[i])
     return arr
 
-def plot_arr(filename, arr):
-    _, axis = plt.subplots(3, 3, figsize=(15,15))
+def plot_arr(filename, arr, t1, t2):
+    size = math.ceil(math.sqrt(len(arr)))
+    if size == 1:
+        size = 2
+    _, axis = plt.subplots(size, size, figsize=(15,15))
     for i in range(len(arr)):
-        one, two, three = arr[i]['one'], arr[i]['two'], arr[i//3]['three']
-        axis[i//3][i%3].plot(one)
-        axis[i//3][i%3].plot(two, color='red')
-        axis[i//3][i%3].plot(three, color='greenyellow')
-        axis[i//3][i%3].legend(['market price', 'redemption price', 'cpi'])
-        axis[i//3][i%3].set_title("Market price, Redemption price, Inflation value")
+        one, two, three = arr[i]['one'], arr[i]['two'], arr[i]['three']
+        axis[i//size][i%size].plot(one)
+        axis[i//size][i%size].plot(two, color='red')
+        axis[i//size][i%size].plot(three, color='greenyellow')
+        axis[i//size][i%size].legend(['market price', 'redemption price', t1])
+        axis[i//size][i%size].set_title("Market price, Redemption price, " + t2)
     plt.tight_layout()
     plt.savefig(filename)
