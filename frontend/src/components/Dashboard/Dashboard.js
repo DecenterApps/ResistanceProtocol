@@ -200,13 +200,21 @@ export default function Dashboard({
                     borderRadius="3px"
                   />
                   <div>Outstanding NOI</div>
-                  <div className="bold-text">
-                    {new Decimal(noiSupply.toString())
+                  <Tooltip
+                    placement="auto"
+                    label={new Decimal(noiSupply.toString())
                       .add(new Decimal(noiSurplus.toString()))
                       .div(10 ** 18)
-                      .toDP(5)
                       .toString()}
-                  </div>
+                  >
+                    <div className="bold-text">
+                      {new Decimal(noiSupply.toString())
+                        .add(new Decimal(noiSurplus.toString()))
+                        .div(10 ** 18)
+                        .toDP(5)
+                        .toString()}
+                    </div>
+                  </Tooltip>
                 </VStack>
               </Box>
               <Box className="div-line1">
@@ -258,14 +266,22 @@ export default function Dashboard({
                       </div>
                       <VStack>
                         <div>Redemption rate</div>
-                        <div className="bold-text">
-                          {new Decimal(rr.toString())
+                        <Tooltip
+                          placement="auto"
+                          label={new Decimal(rr.toString())
                             .div(10 ** 27)
                             .sub(1)
-                            .toDP(5)
                             .toString()}
-                          %
-                        </div>
+                        >
+                          <div className="bold-text">
+                            {new Decimal(rr.toString())
+                              .div(10 ** 27)
+                              .sub(1)
+                              .toDP(5)
+                              .toString()}
+                            %
+                          </div>
+                        </Tooltip>
                         <div>
                           <b>pRate</b>:{pTerm}%
                         </div>
@@ -332,12 +348,19 @@ export default function Dashboard({
                       </div>
                       <VStack>
                         <div>ERC20 NOI Supply</div>
-                        <div className="bold-text">
-                          {new Decimal(noiSupply.toString())
+                        <Tooltip
+                          placement="auto"
+                          label={new Decimal(noiSupply.toString())
                             .div(10 ** 18)
-                            .toDP(2)
                             .toString()}
-                        </div>
+                        >
+                          <div className="bold-text">
+                            {new Decimal(noiSupply.toString())
+                              .div(10 ** 18)
+                              .toDP(2)
+                              .toString()}
+                          </div>
+                        </Tooltip>
                       </VStack>
                     </Box>
                     <Box className="div-indiv2-line2 ">
@@ -365,12 +388,19 @@ export default function Dashboard({
                       </div>
                       <VStack>
                         <div>NOI surplus</div>
-                        <div className="bold-text">
-                          {new Decimal(noiSurplus.toString())
+                        <Tooltip
+                          placement="auto"
+                          label={new Decimal(noiSurplus.toString())
                             .div(10 ** 18)
-                            .toDP(5)
                             .toString()}
-                        </div>
+                        >
+                          <div className="bold-text">
+                            {new Decimal(noiSurplus.toString())
+                              .div(10 ** 18)
+                              .toDP(5)
+                              .toString()}
+                          </div>
+                        </Tooltip>
                       </VStack>
                     </Box>
                     <Box className="div-indiv2-line2 ">
@@ -383,12 +413,19 @@ export default function Dashboard({
                       </div>
                       <VStack>
                         <div>NOI in treasury</div>
-                        <div className="bold-text">
-                          {new Decimal(noiInTreasury.toString())
+                        <Tooltip
+                          placement="auto"
+                          label={new Decimal(noiInTreasury.toString())
                             .div(10 ** 18)
-                            .toDP(2)
                             .toString()}
-                        </div>
+                        >
+                          <div className="bold-text">
+                            {new Decimal(noiInTreasury.toString())
+                              .div(10 ** 18)
+                              .toDP(2)
+                              .toString()}
+                          </div>
+                        </Tooltip>
                       </VStack>
                     </Box>
                   </HStack>
@@ -409,14 +446,21 @@ export default function Dashboard({
                     </div>
                     <VStack>
                       <div>NOI Market Price (TWAP)</div>
-                      <div className="bold-text">
-                        {" "}
-                        {new Decimal(marketPrice.toString())
+                      <Tooltip
+                        placement="auto"
+                        label={new Decimal(marketPrice.toString())
                           .div(10 ** 8)
-                          .toDP(5)
-                          .toString()}{" "}
-                        USD
-                      </div>
+                          .toString()}
+                      >
+                        <div className="bold-text">
+                          {" "}
+                          {new Decimal(marketPrice.toString())
+                            .div(10 ** 8)
+                            .toDP(5)
+                            .toString()}{" "}
+                          USD
+                        </div>
+                      </Tooltip>
                     </VStack>
                   </Box>
                   <Box className="div-indiv-line3 ">
@@ -429,13 +473,20 @@ export default function Dashboard({
                     </div>
                     <VStack>
                       <div>NOI Redemption Price</div>
-                      <div className="bold-text">
-                        {new Decimal(redemptionPrice.toString())
+                      <Tooltip
+                        placement="auto"
+                        label={new Decimal(redemptionPrice.toString())
                           .div(10 ** 27)
-                          .toDP(8)
-                          .toString()}{" "}
-                        USD
-                      </div>
+                          .toString()}
+                      >
+                        <div className="bold-text">
+                          {new Decimal(redemptionPrice.toString())
+                            .div(10 ** 27)
+                            .toDP(5)
+                            .toString()}{" "}
+                          USD
+                        </div>
+                      </Tooltip>
                     </VStack>
                   </Box>
                   <Box className="div-indiv-line3 ">
@@ -448,18 +499,30 @@ export default function Dashboard({
                     </div>
                     <VStack>
                       <div>Market/Redemption Delta (TWAP)</div>
-                      <div className="bold-text">
-                        {new Decimal(marketPrice.toString())
+                      <Tooltip
+                        placement="auto"
+                        label={new Decimal(marketPrice.toString())
                           .div(10 ** 8)
                           .sub(
                             new Decimal(redemptionPrice.toString()).div(
                               10 ** 27
                             )
                           )
-                          .toDP(5)
-                          .toString()}{" "}
-                        USD
-                      </div>
+                          .toString()}
+                      >
+                        <div className="bold-text">
+                          {new Decimal(marketPrice.toString())
+                            .div(10 ** 8)
+                            .sub(
+                              new Decimal(redemptionPrice.toString()).div(
+                                10 ** 27
+                              )
+                            )
+                            .toDP(5)
+                            .toString()}{" "}
+                          USD
+                        </div>
+                      </Tooltip>
                     </VStack>
                   </Box>
                   <Box className="div-indiv-line3 ">
@@ -484,7 +547,9 @@ export default function Dashboard({
                 <Line
                   options={options}
                   data={{
-                    labels: noiSupplyHistory.map((e) => new Date(e["timestamp"] * 1000).toLocaleString("en-US")),
+                    labels: noiSupplyHistory.map((e) =>
+                      new Date(e["timestamp"] * 1000).toLocaleString("en-US")
+                    ),
                     datasets: [
                       {
                         fill: true,
@@ -504,7 +569,9 @@ export default function Dashboard({
                 <Bar
                   options={options}
                   data={{
-                    labels: redemptionRateHistory.map((e) => new Date(e["timestamp"] * 1000).toLocaleString("en-US")),
+                    labels: redemptionRateHistory.map((e) =>
+                      new Date(e["timestamp"] * 1000).toLocaleString("en-US")
+                    ),
                     datasets: [
                       {
                         label: "Redemption rate",
