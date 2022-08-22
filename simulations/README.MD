@@ -87,6 +87,7 @@ There are several agents in the simulation. They are divided into 2 main groups.
 
 ## Traders
 Traders are agents who only make transactions to the ETH/NOI pool, and don't open positions. They buy/sell NOI at market price value, and make decisions based on the market and redemption price gap, and redemption rate.
+
 ---
 ## Rate Trader
 
@@ -146,16 +147,23 @@ Safe holders are agents who open CDP positions, and try to maintain initial CR o
 ## Leverager
 
 Leverager is a Safe owner which leverages its ETH collateral. It opens a position when the redemption price is lower than market price more then some threshold relative difference, or when ETH has a growing trend. It can also close its position otherwise. To maintain its CR, it does boost and repay actions. In boost operation, leverager firstly takes out more loan in NOI, change that NOI to ETH on the market, and then put it in collateral. That increases its exposure to ETH. When leverager does the repay action, it takes out some amount from the collateral, change that to NOI on the market price, and use it to pay back part of the debt.
-
+||
+|:---:|
 ![](documentation_images/leverager_actions.png?raw=true "Leverager actions")
 
 But why are there different values for the collateral and debt? That is because we take out NOI at redemption price, and sell it at market price, or buy it at market price, and then pay back the loan at redemption price. To calculate how much NOI we need to take out to boost our position to a targetted CR, we need to solve this system of equations:
+||
+|:---:|
 ![](documentation_images/leverager_equations.png?raw=true "Equations")
 
 When we substitute y in the first equation we get:
+||
+|:---:|
 ![](documentation_images/equation.png?raw=true "Equations")
 
 This is a classic quadratic equation:
+||
+|:---:|
 ![](documentation_images/quadratic_equation.png?raw=true "Equations")
 
 Similar goes for repay action.
@@ -165,5 +173,6 @@ Similar goes for repay action.
 Safe owner is similar to a Leverager, but its boost and repay actions are different. When a safe owner boosts its position, it takes out some amout of collateral and keeps it for himself. For repay, it takes some of its internal funds, buys NOI on the market, and pays back a part of the debt.
 
 # Architecture
-
+||
+|:---:|
 ![](documentation_images/architecture.png?raw=true "Architecture")
