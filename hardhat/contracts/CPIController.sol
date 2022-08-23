@@ -5,19 +5,19 @@ import "./RedemptionRateController.sol";
 
 error CPIController__TooSoon();
 error CPIController__NotOwner();
-error CPIController__NotRateSetter();
+error CPIController__NotFuzzyModule();
 
 contract CPIController is RedemptionRateController{
 
     // --- Modifiers ---
-    modifier isOwner() override{
+    modifier onlyOwner() override{
         if (owner != msg.sender) revert CPIController__NotOwner();
         _;
     }
 
-    modifier isRateSetter() override{
-        if (msg.sender != rateSetterContractAddress)
-            revert CPIController__NotRateSetter();
+    modifier onlyFuzzyModule() override{
+        if (msg.sender != fuzzyModuleContractAddress)
+            revert CPIController__NotFuzzyModule();
         _;   
     }
 
@@ -50,7 +50,7 @@ contract CPIController is RedemptionRateController{
         uint256 _marketValue,
         uint256 _redemptionValue
     ) override external 
-        isRateSetter
+        onlyFuzzyModule
         returns (uint256)
     {
         if (block.timestamp - lastUpdateTime < integralPeriodSize) {

@@ -15,7 +15,7 @@ contract FuzzyModule {
     uint256 public alphaStable;
     uint256 public alphaCPI;
 
-    uint256 constant NINETEEN_DIGIT_NUMBER = 10**19;
+    uint256 constant EIGHTEEN_DIGIT_NUMBER = 10**18;
     uint256 constant TWENTY_SEVEN_DIGIT_NUMBER = 10**27;
     uint256 constant ONE = TWENTY_SEVEN_DIGIT_NUMBER;
 
@@ -55,9 +55,9 @@ contract FuzzyModule {
             .computeRate(_marketValue, _redemptionPrice, alphaCPI);
 
         uint256 percErrorStable = 
-            absolute(int256(_marketPrice * NINETEEN_DIGIT_NUMBER) - int256(_redemptionPrice)) * ONE / _redemptionPrice;
+            absolute(int256(_marketPrice * EIGHTEEN_DIGIT_NUMBER) - int256(_redemptionPrice)) * ONE / _redemptionPrice;
         uint256 percErrorCPI = 
-            absolute(int256(_redemptionPrice) - int256(_marketValue * NINETEEN_DIGIT_NUMBER)) * ONE / _redemptionPrice;
+            absolute(int256(_redemptionPrice) - int256(_marketValue * EIGHTEEN_DIGIT_NUMBER)) * ONE / _redemptionPrice;
         
         uint256 weightStable = percent(ONE, 50);
         if (percErrorStable > percent(ONE, 10))

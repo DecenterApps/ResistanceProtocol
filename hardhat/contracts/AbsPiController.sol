@@ -3,20 +3,20 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import "./RedemptionRateController.sol";
 
-error AbsPiController__NotRateSetter();
+error AbsPiController__NotFuzzyModule();
 error AbsPiController__NotOwner();
 error AbsPiController__TooSoon();
 
 contract AbsPiController is RedemptionRateController{
 
-    modifier isOwner() override {
+    modifier onlyOwner() override {
         if (owner != msg.sender) revert AbsPiController__NotOwner();
         _;
     }
 
-    modifier isRateSetter() override {
-        if(msg.sender != rateSetterContractAddress) 
-            revert AbsPiController__NotRateSetter();
+    modifier onlyFuzzyModule() override {
+        if(msg.sender != fuzzyModuleContractAddress) 
+            revert AbsPiController__NotFuzzyModule();
         _;
     }
 
@@ -50,7 +50,7 @@ contract AbsPiController is RedemptionRateController{
         uint256 _marketPrice,
         uint256 _redemptionPrice
     ) override external 
-        isRateSetter 
+        onlyFuzzyModule 
         returns (uint256) 
     {
         if (block.timestamp - lastUpdateTime < integralPeriodSize) {

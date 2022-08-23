@@ -136,18 +136,18 @@ module.exports = async ({ getNamedAccounts }) => {
         msw, 
         0,
         AbsPIController.address,
-        "setRateSetterContractAddress",
+        "setFuzzyModuleContractAddress",
         ["address"],
-        [RateSetterContractObj.address]
+        [FuzzyModule.address]
     );
 
     await executeActionFromMSW(
         msw, 
         0,
         CPIController.address,
-        "setRateSetterContractAddress",
+        "setFuzzyModuleContractAddress",
         ["address"],
-        [RateSetterContractObj.address]
+        [FuzzyModule.address]
     );
 
     await executeActionFromMSW(

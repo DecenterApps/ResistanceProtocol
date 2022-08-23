@@ -31,7 +31,7 @@ abstract contract RedemptionRateController {
 
     // --- Auth ---
     address public immutable owner;
-    address public rateSetterContractAddress;
+    address public fuzzyModuleContractAddress;
 
     // --- Fluctuating/Dynamic Variables ---
     DeviationObservation[] internal deviationObservations;
@@ -41,8 +41,8 @@ abstract contract RedemptionRateController {
     event ModifyIntParameter(bytes32 parameter, int256 data);
 
     // --- Modifiers ---
-    modifier isOwner() virtual;
-    modifier isRateSetter() virtual;
+    modifier onlyOwner() virtual;
+    modifier onlyFuzzyModule() virtual;
 
     // --- Functions ---    
     constructor(
@@ -90,7 +90,7 @@ abstract contract RedemptionRateController {
     // --- Util functions ---
     function modifyIntParameter(bytes32 _parameter, int256 _value)
         external
-        isOwner
+        onlyOwner
     {
         if (_parameter == "Kp") Kp = _value;
         else if (_parameter == "Ki") Ki = _value;
@@ -102,7 +102,7 @@ abstract contract RedemptionRateController {
 
     function modifyUintParameter(bytes32 _parameter, uint256 _value)
         external
-        isOwner
+        onlyOwner
     {
         if (_parameter == "feedbackOutputUpperBound")
             feedbackOutputUpperBound = _value;
@@ -150,8 +150,8 @@ abstract contract RedemptionRateController {
         return elapsed;
     }
 
-    function setRateSetterContractAddress(address _address) external isOwner{
-        rateSetterContractAddress = _address;
+    function setFuzzyModuleContractAddress(address _address) external onlyOwner{
+        fuzzyModuleContractAddress = _address;
     }
 
     function getLastProportionalTerm() public view returns (int256) {
