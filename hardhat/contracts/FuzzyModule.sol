@@ -29,8 +29,10 @@ contract FuzzyModule {
         _;
     }
 
-    constructor(address _owner) {
+    constructor(address _owner, address _absPiAddress, address _CPIaddress) {
         owner = _owner;
+        CPIControllerContractAddress = _CPIaddress;
+        absPiControllerContractAddress = _absPiAddress;
     }
 
     function modifyAddressParameter(bytes32 _parameter, address _value) external onlyOwner {
