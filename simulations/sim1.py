@@ -17,7 +17,6 @@ from tqdm import tqdm
 from parameters import parameters
 import csv
 
-
 INIT_REDEMPTION_PRICE = 2
 
 ext_data = ExtData()

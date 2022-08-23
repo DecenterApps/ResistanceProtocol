@@ -1,17 +1,37 @@
 
 parameters = [{
-    'leverager': 5,
-    'safe_owner': 5
+    'rate_trader': 10,
+    'price_trader': 10,
+    'leverager': 100,
+    'safe_owner': 100,
+    'gap': 0.02
 },
 {
-    'leverager': 0,
-    'safe_owner': 0
+    'rate_trader': 10,
+    'price_trader': 10,
+    'leverager': 100,
+    'safe_owner': 100,
+    'gap': 0.05
 },
 {
-    'leverager': 15,
-    'safe_owner': 15
+    'rate_trader': 10,
+    'price_trader': 10,
+    'leverager': 100,
+    'safe_owner': 100,
+    'gap': 0.1
 },
 {
-    'leverager': 10,
-    'safe_owner': 10
-}]
+    'rate_trader': 10,
+    'price_trader': 10,
+    'leverager': 100,
+    'safe_owner': 100,
+    'gap': 0.2
+},
+{
+    'rate_trader': 10,
+    'price_trader': 10,
+    'leverager': 100,
+    'safe_owner': 100,
+    'gap': 0.4
+},
+]

@@ -1,6 +1,8 @@
 #how much noi for one eth
 ONE_ETH = 500
 
+REL_GAP = 0.1
+
 def update_one_eth(one_eth: int) -> None:
     global ONE_ETH
     ONE_ETH = one_eth
@@ -13,9 +15,9 @@ def update_one_eth(one_eth: int) -> None:
     POOL.NOI_AMOUNT = POOL.ETH_AMOUNT * ONE_ETH
 
 class PRICE_TRADER:
-    NUM = 50
+    NUM = 100
 
-    ETH_AMOUNT = 10
+    ETH_AMOUNT = 5
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
 
     # percentage of traders resource when trading
@@ -29,9 +31,9 @@ class PRICE_TRADER:
     BOUND_LOW = 1 - BOUND_HIGH - BOUND_MID
 
 class RATE_TRADER:
-    NUM = 50
+    NUM = 100
 
-    ETH_AMOUNT = 10
+    ETH_AMOUNT = 5
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
 
     # percentage of traders resource when trading
@@ -47,7 +49,7 @@ class RATE_TRADER:
     RR_LOW = 1 - RR_HIGH - RR_MID
 
 class LEVERAGER:
-    NUM = 0
+    NUM = 100
 
     ETH_AMOUNT = 10
 
@@ -71,7 +73,7 @@ class LEVERAGER:
     S_COLLATERAL = 0.5
 
     # gap between market price and redemption price when leverager opens/closes a position
-    RELATIVE_GAP_RISKY = 0.5
+    RELATIVE_GAP_RISKY = 1
     RELATIVE_GAP_MODERATE = 0.25
     RELATIVE_GAP_SAFE = 1 - RELATIVE_GAP_RISKY - RELATIVE_GAP_MODERATE
 
@@ -91,7 +93,7 @@ class LEVERAGER:
 
 
 class SAFE_OWNER:
-    NUM = 0
+    NUM = 100
 
     ETH_AMOUNT = 10
 
@@ -115,7 +117,7 @@ class SAFE_OWNER:
     S_COLLATERAL = 0.5
 
     #gap between market price and redemption price when safe owner opens a position
-    RELATIVE_GAP_RISKY = 0.5
+    RELATIVE_GAP_RISKY = 1
     RELATIVE_GAP_MODERATE = 0.25
     RELATIVE_GAP_SAFE = 0.5
 
@@ -195,7 +197,7 @@ class WHALE_LONGTERM_PRICE_SETTER:
     LONG_PERIOD = 1 - SHORT_PERIOD - MID_PERIOD
 
 class POOL:
-    ETH_AMOUNT = 1000
+    ETH_AMOUNT = 1500
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
 
 class REDEMPTION_RATES:
@@ -219,7 +221,7 @@ INF = 10000000000
 
 TWAP_TIMESTAMPS = 100
 
-SIMULATION_TIMESTAMPS = 1500
+SIMULATION_TIMESTAMPS = 3000
 
 names = ['rate_trader', 'price_trader', 'leverager', 'safe_owner', 'whale_instant_price_setter',
          'whale_instant_rate_setter', 'noi_truster', 'random_trader', 'whale_longterm_price_setter']
@@ -238,3 +240,6 @@ def update_constants(params):
 
 def update_field(CONST, name, params):
     CONST.NUM = params[name] if name in params else CONST.NUM
+    if CONST != LEVERAGER and CONST != SAFE_OWNER:
+        return
+    # REL_GAP = params['gap'] if 'gap' in params else REL_GAP
