@@ -6,17 +6,11 @@ import "./RedemptionRateController.sol";
 error AbsPiController__NotRateSetter();
 error AbsPiController__NotOwner();
 error AbsPiController__TooSoon();
-error AbsPiController__ContractNotEnabled();
 
 contract AbsPiController is RedemptionRateController{
 
     modifier isOwner() override {
         if (owner != msg.sender) revert AbsPiController__NotOwner();
-        _;
-    }
-
-    modifier isContractEnabled() override {
-        if (!contractEnabled) revert AbsPiController__ContractNotEnabled();
         _;
     }
 
@@ -28,6 +22,7 @@ contract AbsPiController is RedemptionRateController{
 
     constructor(
         address _owner,
+        uint256 _alpha,
         int256 _Kp,
         int256 _Ki,
         uint256 _feedbackOutputUpperBound,
@@ -37,6 +32,7 @@ contract AbsPiController is RedemptionRateController{
     ) 
     RedemptionRateController(
         _owner, 
+        _alpha,
         _Kp,
         _Ki,
         _feedbackOutputUpperBound,
@@ -50,23 +46,19 @@ contract AbsPiController is RedemptionRateController{
     ///@notice calculates new redemption rate based on market and redemption values using PI controller logic
     ///@param _marketPrice last recorded market price of NOI
     ///@param _redemptionPrice last recorded redemption price of NOI
-    ///@param _accumulatedLeak coefficient for weighing combined previous integral terms
     function computeRate(
-        uint _marketPrice,
-        uint _redemptionPrice,
-        uint _accumulatedLeak
+        uint256 _marketPrice,
+        uint256 _redemptionPrice
     ) override external 
-        isContractEnabled 
         isRateSetter 
         returns (uint256) 
     {
         if (block.timestamp - lastUpdateTime < integralPeriodSize) {
             revert AbsPiController__TooSoon();
         }
-        alpha = _accumulatedLeak;
-        int256 proportionalTerm = int(_redemptionPrice) -
-            int(_marketPrice) *
-            int(10**19);
+        int256 proportionalTerm = int256(_redemptionPrice) -
+            int256(_marketPrice) *
+            int256(10**19);
         updateDeviationHistory(proportionalTerm);
         lastUpdateTime = block.timestamp;
         int256 piOutput = getGainAdjustedPIOutput(
@@ -74,13 +66,10 @@ contract AbsPiController is RedemptionRateController{
             prevIntegralTerms
         );
         if (piOutput != 0) {
-            uint newRedemptionRate = getBoundedRedemptionRate(piOutput);
+            uint256 newRedemptionRate = getBoundedRedemptionRate(piOutput);
             return newRedemptionRate;
         } else {
             return TWENTY_SEVEN_DECIMAL_NUMBER;
         }
-    }
-
-    
-    
+    }    
 }

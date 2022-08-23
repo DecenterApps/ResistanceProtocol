@@ -5,7 +5,6 @@ import "./RedemptionRateController.sol";
 
 error CPIController__TooSoon();
 error CPIController__NotOwner();
-error CPIController__ContractNotEnabled();
 error CPIController__NotRateSetter();
 
 contract CPIController is RedemptionRateController{
@@ -16,11 +15,6 @@ contract CPIController is RedemptionRateController{
         _;
     }
 
-    modifier isContractEnabled() override{
-        if (!contractEnabled) revert CPIController__ContractNotEnabled();
-        _;
-    }
-
     modifier isRateSetter() override{
         if (msg.sender != rateSetterContractAddress)
             revert CPIController__NotRateSetter();
@@ -28,6 +22,7 @@ contract CPIController is RedemptionRateController{
     }
 
     constructor(address _owner,
+        uint256 _alpha,
         int256  _Kp,
         int256  _Ki,
         uint256 _feedbackOutputUpperBound,
@@ -37,6 +32,7 @@ contract CPIController is RedemptionRateController{
     )
     RedemptionRateController(
         _owner, 
+        _alpha,
         _Kp,
         _Ki,
         _feedbackOutputUpperBound,
@@ -50,20 +46,16 @@ contract CPIController is RedemptionRateController{
     ///@notice calculates new redemption rate based on market and redemption values using PI controller logic
     ///@param _marketValue last recorded market value of post-inflation NOI
     ///@param _redemptionValue last recorded redemption value of post-inflation NOI
-    ///@param _accumulatedLeak coefficient for weighing combined previous integral terms
     function computeRate(
         uint256 _marketValue,
-        uint256 _redemptionValue,
-        uint256 _accumulatedLeak
+        uint256 _redemptionValue
     ) override external 
-        isContractEnabled 
         isRateSetter
         returns (uint256)
     {
         if (block.timestamp - lastUpdateTime < integralPeriodSize) {
             revert CPIController__TooSoon();
         }
-        alpha = _accumulatedLeak;
         int256 proportionalTerm = int256(_redemptionValue) -
             int256(_marketValue) *
             int256(10**19);

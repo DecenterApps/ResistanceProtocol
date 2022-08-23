@@ -32,7 +32,6 @@ abstract contract RedemptionRateController {
     // --- Auth ---
     address public immutable owner;
     address public rateSetterContractAddress;
-    bool public contractEnabled;
 
     // --- Fluctuating/Dynamic Variables ---
     DeviationObservation[] internal deviationObservations;
@@ -43,12 +42,12 @@ abstract contract RedemptionRateController {
 
     // --- Modifiers ---
     modifier isOwner() virtual;
-    modifier isContractEnabled() virtual; 
     modifier isRateSetter() virtual;
 
     // --- Functions ---    
     constructor(
         address _owner,
+        uint256 _alpha,
         int256 _Kp,
         int256 _Ki,
         uint256 _feedbackOutputUpperBound,
@@ -57,7 +56,7 @@ abstract contract RedemptionRateController {
         uint256 _perSecondCumulativeLeak
     ) {
         owner = _owner;
-        contractEnabled = true;
+        alpha = _alpha;
         defaultRedemptionRate = TWENTY_SEVEN_DECIMAL_NUMBER;
         Kp = _Kp;
         Ki = _Ki;
@@ -92,7 +91,6 @@ abstract contract RedemptionRateController {
     function modifyIntParameter(bytes32 _parameter, int256 _value)
         external
         isOwner
-        isContractEnabled
     {
         if (_parameter == "Kp") Kp = _value;
         else if (_parameter == "Ki") Ki = _value;
@@ -105,37 +103,30 @@ abstract contract RedemptionRateController {
     function modifyUintParameter(bytes32 _parameter, uint256 _value)
         external
         isOwner
-        isContractEnabled
     {
         if (_parameter == "feedbackOutputUpperBound")
             feedbackOutputUpperBound = _value;
         else if (_parameter == "integralPeriodSize") integralPeriodSize = _value;
+        else if (_parameter ==  "alpha") alpha = _value;
         else if (_parameter == "perSecondCumulativeLeak")
             perSecondCumulativeLeak = _value;
         emit ModifyUintParameter(_parameter, _value);
     }
 
-    function setEnabled(bool _enabled) public isOwner {
-        contractEnabled = _enabled;
-    }
 
     // --- Computation ---
 
     ///@notice calculates new redemption rate based on market and redemption values using PI controller logic
     ///@param _marketValue last recorded market value of post-inflation NOI
     ///@param _redemptionValue last recorded redemption value of post-inflation NOI
-    ///@param _accumulatedLeak coefficient for weighing combined previous integral terms
     function computeRate(
         uint256 _marketValue,
-        uint256 _redemptionValue,
-        uint256 _accumulatedLeak
+        uint256 _redemptionValue
     )virtual external returns (uint256);
 
     ///@notice calculates new integral term and records current deviation
     ///@param _proportionalTerm proportional term in controller
-    function updateDeviationHistory(int256 _proportionalTerm)
-        internal
-    {
+    function updateDeviationHistory(int256 _proportionalTerm) internal {
         int256 virtualDeviationCumulative = getNextPriceDeviationCumulative(
             _proportionalTerm
         );
