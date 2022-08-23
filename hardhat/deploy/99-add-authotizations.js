@@ -1,3 +1,5 @@
+const ethersUtils = require("ethers-utils");
+const { formatBytes32String } = require("ethers/lib/utils");
 const { getNamedAccounts, deployments, network, ethers } = require("hardhat");
 const { networkConfig, developmentChains } = require("../helper-hardhat-config");
 const { executeActionFromMSW } = require("../utils/multiSigAction");
@@ -19,6 +21,7 @@ module.exports = async ({ getNamedAccounts }) => {
     const MarketTwapFeed = await ethers.getContract("MarketTwapFeed", deployer);
     const AbsPIController = await ethers.getContract("AbsPiController", deployer);
     const CPIController = await ethers.getContract("CPIController", deployer);
+    const FuzzyModule = await ethers.getContract("FuzzyModule", deployer);
 
     // add auth to cdpManager to mint and burn tokens from erc20
     await executeActionFromMSW(
@@ -145,6 +148,15 @@ module.exports = async ({ getNamedAccounts }) => {
         "setRateSetterContractAddress",
         ["address"],
         [RateSetterContractObj.address]
+    );
+
+    await executeActionFromMSW(
+        msw, 
+        0,
+        FuzzyModule.address,
+        "modifyAddressParameter",
+        ["bytes32,address"],
+        [formatBytes32String("rateSetterContractAddress"),RateSetterContractObj.address]
     );
 };
 
