@@ -114,7 +114,7 @@ contract RateSetter {
 
         // reward caller
         uint256 tlv = AbsPiController_CONTRACT.tlv();
-        uint256 iapcr = rpower(AbsPiController_CONTRACT.pscl(), tlv, RAY);
+        uint256 iapcr = rpower(AbsPiController_CONTRACT.perSecondCumulativeLeak(), tlv, RAY);
         uint256 validated = AbsPiController_CONTRACT.computeRate(
             _noiMarketPrice,
             redemptionPrice,
