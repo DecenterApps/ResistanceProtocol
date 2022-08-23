@@ -24,8 +24,8 @@ def plot_all_graphs():
             else:
                 full_graphs.append({'one': one, 'two': two, 'three': three})
             duz += 1
-        plot_arr('images/timestamp_graphs.png', timestamp_graphs, 'cpi', 'Inflation value', True)
-        plot_arr('images/full_graphs.png', full_graphs, 'market twap', 'Market twap', True)
+        plot_arr('images/timestamp_graphs.png', timestamp_graphs, 'cpi', 'Inflation value', False)
+        plot_arr('images/full_graphs.png', full_graphs, 'market twap', 'Market twap', False)
 
 def parse_array(arr):
     arr = arr[1:-1].split()

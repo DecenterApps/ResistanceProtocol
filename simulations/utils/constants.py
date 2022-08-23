@@ -1,8 +1,6 @@
 #how much noi for one eth
 ONE_ETH = 500
 
-REL_GAP = 0.1
-
 def update_one_eth(one_eth: int) -> None:
     global ONE_ETH
     ONE_ETH = one_eth
@@ -68,12 +66,12 @@ class LEVERAGER:
     S_CR = 2.5
 
     # percent of leveragers(risky leveragers put more percent of their money in collateral)
-    R_COLLATERAL = 1
-    M_COLLATERAL = 0.7
+    R_COLLATERAL = 0.2
+    M_COLLATERAL = 0.5
     S_COLLATERAL = 0.5
 
     # gap between market price and redemption price when leverager opens/closes a position
-    RELATIVE_GAP_RISKY = 1
+    RELATIVE_GAP_RISKY = 0.5
     RELATIVE_GAP_MODERATE = 0.25
     RELATIVE_GAP_SAFE = 1 - RELATIVE_GAP_RISKY - RELATIVE_GAP_MODERATE
 
@@ -91,6 +89,9 @@ class LEVERAGER:
     PREDICTION_THRESHOLD_MID = 0.15
     PREDICTION_THRESHOLD_LOW = 0.09
 
+    # _R_DIFF = 0.1
+    # _R_CR = 0.1
+
 
 class SAFE_OWNER:
     NUM = 100
@@ -106,18 +107,21 @@ class SAFE_OWNER:
     M_DIFF = 0.25
     S_DIFF = 0.5
 
+    # _R_DIFF = 0.1
+    # _R_CR = 0.1
+
     #initial cr of safe owner
     R_CR = 1.7
     M_CR = 2.2
     S_CR = 3
 
     #percent of safe owners(risky safe owners put more percent of their money in collateral)
-    R_COLLATERAL = 1
-    M_COLLATERAL = 0.7
+    R_COLLATERAL = 0.2
+    M_COLLATERAL = 0.5
     S_COLLATERAL = 0.5
 
     #gap between market price and redemption price when safe owner opens a position
-    RELATIVE_GAP_RISKY = 1
+    RELATIVE_GAP_RISKY = 0.5
     RELATIVE_GAP_MODERATE = 0.25
     RELATIVE_GAP_SAFE = 0.5
 
@@ -197,7 +201,7 @@ class WHALE_LONGTERM_PRICE_SETTER:
     LONG_PERIOD = 1 - SHORT_PERIOD - MID_PERIOD
 
 class POOL:
-    ETH_AMOUNT = 1500
+    ETH_AMOUNT = 1000
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
 
 class REDEMPTION_RATES:
@@ -233,13 +237,19 @@ nums = [RATE_TRADER.NUM, PRICE_TRADER.NUM, LEVERAGER.NUM, SAFE_OWNER.NUM, WHALE_
         WHALE_INSTANT_RATE_SETTER.NUM, NOI_TRUSTER.NUM, RANDOM_TRADER.NUM, WHALE_LONGTERM_PRICE_SETTER.NUM]
 
 def update_constants(params):
+    print(params)
     global nums
+    # LEVERAGER._R_DIFF = params['r_diff'] if 'r_diff' in params else LEVERAGER._R_DIFF
+    # SAFE_OWNER._R_DIFF = params['r_diff'] if 'r_diff' in params else SAFE_OWNER._R_DIFF
+    # LEVERAGER._R_CR = params['r_cr'] if 'r_cr' in params else LEVERAGER._R_CR
+    # SAFE_OWNER._R_CR = params['r_cr'] if 'r_cr' in params else SAFE_OWNER._R_CR
     for i in range(len(names)):
         update_field(agent_const_classes[i], names[i], params)
         nums[i] = agent_const_classes[i].NUM
 
 def update_field(CONST, name, params):
     CONST.NUM = params[name] if name in params else CONST.NUM
-    if CONST != LEVERAGER and CONST != SAFE_OWNER:
-        return
-    # REL_GAP = params['gap'] if 'gap' in params else REL_GAP
+    # if CONST != LEVERAGER and CONST != SAFE_OWNER:
+    #     return
+    LEVERAGER.RISKY = 1
+    SAFE_OWNER.RISKY = 1

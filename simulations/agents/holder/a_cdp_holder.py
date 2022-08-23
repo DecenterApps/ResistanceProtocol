@@ -77,7 +77,7 @@ def update_holder(agents, price_station: PriceStation, pool: Pool, ext_data: Ext
                 holder.repay(ext_data, price_station, pool)
     else:
         
-        if (relative_gap > 0.02 and price_station.rp < price_station.mp and holder.eth > 0) or \
+        if (relative_gap > holder.relative_gap and price_station.rp < price_station.mp and holder.eth > 0) or \
             (relative_eth_difference > holder.prediction_threshold and predicted_eth_price > curr_eth_price):
             holder.open_position(ext_data, price_station, pool)
     
@@ -86,6 +86,7 @@ def update_holder(agents, price_station: PriceStation, pool: Pool, ext_data: Ext
 def get_holder_values(CONST):
     p = np.random.random()
     if p < CONST.RISKY:
+        # return CONST._R_DIFF, CONST._R_CR
         return CONST.R_DIFF, CONST.R_CR
     p -= CONST.RISKY
     if p < CONST.MODERATE:
@@ -106,7 +107,7 @@ def get_holder_perc_amount(CONST) -> float:
 def get_holder_relative_gap(CONST):
     p = np.random.random()
     if p < CONST.RELATIVE_GAP_RISKY:
-        return REL_GAP
+        return 0.02
     p -= CONST.RELATIVE_GAP_RISKY
     if p < CONST.RELATIVE_GAP_MODERATE:
         return 0.05
