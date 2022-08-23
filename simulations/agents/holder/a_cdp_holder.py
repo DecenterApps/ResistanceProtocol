@@ -86,6 +86,7 @@ def update_holder(agents, price_station: PriceStation, pool: Pool, ext_data: Ext
 def get_holder_values(CONST):
     p = np.random.random()
     if p < CONST.RISKY:
+        # return CONST._R_DIFF, CONST._R_CR
         return CONST.R_DIFF, CONST.R_CR
     p -= CONST.RISKY
     if p < CONST.MODERATE:

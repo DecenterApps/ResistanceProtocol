@@ -1,9 +1,20 @@
 
-parameters = {
-    'leverager': 5,
-    'safe_owner': 5
+parameters = [{
+    'rate_trader': 10,
+    'price_trader': 10,
+    'leverager': 100,
+    'safe_owner': 100,
 },
 {
-    'leverager': 0,
-    'safe_owner': 0
+    'rate_trader': 20,
+    'price_trader': 20,
+    'leverager': 100,
+    'safe_owner': 100,
 },
+{
+    'rate_trader': 30,
+    'price_trader': 30,
+    'leverager': 100,
+    'safe_owner': 100,
+},
+]
