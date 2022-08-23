@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useIntl } from "react-intl";
 import "./MainContent.css";
 import Dashboard from "../Dashboard/Dashboard";
-import { Button } from "@chakra-ui/react";
+import { Button, Progress } from "@chakra-ui/react";
 import CDPs from "../CDPs/CDPs";
 import animations from "../../utils/animations";
 
@@ -11,6 +11,7 @@ export default function MainContent({ onJoin, show }) {
 
   const [join, setJoin] = useState(false);
   const [bAnimation, setBAnimation] = useState(true);
+  const [loading, setLoading] = useState(true);
 
   const joinTheFight = () => {
     setJoin(true);
@@ -31,12 +32,14 @@ export default function MainContent({ onJoin, show }) {
       <div className="test-center">
         <div className={join ? "container2" : "container1"}>
           <div className="subcontainer animated bounceIn">
-            {bAnimation &&<div className="content">
-              <div className="top-left"></div>
-              <div className="left-bot"></div>
-              <div className="bot-right"></div>
-              <div className="right-top"></div>
-            </div>}
+            {bAnimation && (
+              <div className="content">
+                <div className="top-left"></div>
+                <div className="left-bot"></div>
+                <div className="bot-right"></div>
+                <div className="right-top"></div>
+              </div>
+            )}
             <div className="block  style-11">
               {!join && (
                 <>
@@ -46,8 +49,14 @@ export default function MainContent({ onJoin, show }) {
                     className="btn"
                     onClick={joinTheFight}
                   >
-                    Fight inflation with us
+                    Fight the inflation
                   </Button>
+                </>
+              )}
+              {loading && join && (
+                <>
+                  <h1>Loading...</h1>
+                  <Progress size="xs" isIndeterminate className="progress"/>
                 </>
               )}
             </div>
@@ -59,6 +68,7 @@ export default function MainContent({ onJoin, show }) {
                   <Dashboard
                     bAnimation={bAnimation}
                     setBAnimation={setBAnimation}
+                    parentSetLoading={setLoading}
                   />
                 )}
                 {show === "CDPs" && (

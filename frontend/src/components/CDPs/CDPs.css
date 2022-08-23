@@ -39,6 +39,24 @@
   box-shadow: 0 0.5em 0.5em -0.4em black;
 }
 
+.warning{
+  border-width: 2px;
+  border-color: orange;
+}
+
+.warning-text{
+  color: orange;
+}
+
+.danger{
+  border-width: 2px;
+  border-color: red;
+}
+
+.danger-text{
+  color: red;
+}
+
 .per-cdp-right {
   display: flex;
   -webkit-box-pack: end;

@@ -2,9 +2,18 @@ import { useWeb3React } from "@web3-react/core";
 import { ethers } from "ethers";
 import { ABI, address } from "../contracts/CDPManager";
 import { ABI as ABI_NOI, address as address_NOI } from "../contracts/NOI";
+import {
+  ABI as ABI_PARAMETERS,
+  address as address_PARAMETERS,
+} from "../contracts/Parameters";
 import Decimal from "decimal.js";
 
 const contractCDPManager = new ethers.Contract(address, ABI);
+
+const contractPARAMETERS = new ethers.Contract(
+  address_PARAMETERS,
+  ABI_PARAMETERS
+);
 
 function listenForTransactionMine(transactionResponse, provider) {
   console.log(`Mining ${transactionResponse.hash}...`);
@@ -30,6 +39,7 @@ const loadCDPsForUser = async (user, library, setCDPs) => {
       let left = await contractCDPManager
         .connect(library.getSigner())
         .maxMintAmount(c["cdpIndex"]);
+      const lr = await contractPARAMETERS.connect(library.getSigner()).getLR();
       return {
         col: new Decimal(c["lockedCollateral"].toString()),
         owner: c["owner"],
@@ -38,11 +48,12 @@ const loadCDPsForUser = async (user, library, setCDPs) => {
         cdpId: new Decimal(c["cdpIndex"].toString()).toString(),
         cr: new Decimal(cr.toString()).toString(),
         left: new Decimal(left.toString()).toString(),
+        lr: new Decimal(lr.toString()).toString()
       };
     })
   );
-  console.log(formatted);
-  setCDPs(formatted);
+
+  setCDPs(formatted.sort((a, b) => a.cr - b.cr));
 };
 
 const getCRs = async (library, cdps, setCDPs) => {
@@ -57,7 +68,7 @@ const getCRs = async (library, cdps, setCDPs) => {
 
 const mintCDP = async (amount, library, selectedCDP) => {
   const contractCDPManager = new ethers.Contract(address, ABI);
-  console.log(ethers.utils.parseEther(amount.toString()))
+  console.log(ethers.utils.parseEther(amount.toString()));
   const txMint = await contractCDPManager
     .connect(library.getSigner())
     .mintFromCDP(selectedCDP, ethers.utils.parseEther(amount.toString()));

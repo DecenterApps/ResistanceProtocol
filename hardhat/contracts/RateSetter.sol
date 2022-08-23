@@ -15,6 +15,7 @@ error RateSetter__UnknownParameter();
 error RateSetter__UnknownContract();
 error RateSetter__NotOwner();
 error RateSetter__NotAuthorized();
+error RateSetter__NotActive();
 
 contract RateSetter {
     address public immutable owner;
@@ -34,6 +35,8 @@ contract RateSetter {
 
     CPITrackerOracle private cpiDataFeed;
 
+    bool active=true;
+
     // EVENTS
 
     event ModifyParameters(bytes32 indexed _parameter, uint256 _data);
@@ -45,6 +48,12 @@ contract RateSetter {
 
     modifier isOwner() {
         if (owner != msg.sender) revert RateSetter__NotOwner();
+        _;
+    }
+
+    modifier isActive() {
+        if (!active)
+            revert RateSetter__NotActive();
         _;
     }
 
@@ -74,6 +83,7 @@ contract RateSetter {
     function modifyParameters(bytes32 _parameter, uint256 _data)
         external
         isOwner
+        isActive
     {
         if (_parameter == "redemptionPriceUpdateTime")
             redemptionPriceUpdateTime = _data;
@@ -89,6 +99,7 @@ contract RateSetter {
     function modifyContracts(bytes32 _contract, address _newAddress)
         external
         isOwner
+        isActive
     {
         if (_contract == "CDPManager")
             CDPManager_CONTRACT = CDPManager(_newAddress);
@@ -127,7 +138,11 @@ contract RateSetter {
     /*
      * @notice updates rates with values gathered from PI controllers
      */
-    function updatePrices(uint256 _ethTwapPrice, uint256 _noiMarketPrice) public isAuthorized{
+    function updatePrices(uint256 _ethTwapPrice, uint256 _noiMarketPrice)
+        public
+        isAuthorized
+        isActive
+    {
 
         ethPrice = nextEthPrice;
         nextEthPrice = _ethTwapPrice;
@@ -162,8 +177,6 @@ contract RateSetter {
         );
     }
 
-    function updateRatesInternal() public {}
-
     function getCpiData() public view returns (uint256) {
         uint256 data = cpiDataFeed.currPegPrice();
         return data;
@@ -195,6 +208,10 @@ contract RateSetter {
 
     function getRedemptionPrice() public view returns (uint256) {
         return redemptionPrice;
+    }
+
+    function shutdown()public isAuthorized{
+        active=false;
     }
 
     function rpower(

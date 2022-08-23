@@ -37,6 +37,11 @@ export const ABI= [
   },
   {
     "inputs": [],
+    "name": "CDPManager__NotActive",
+    "type": "error"
+  },
+  {
+    "inputs": [],
     "name": "CDPManager__NotAuthorized",
     "type": "error"
   },
@@ -120,6 +125,50 @@ export const ABI= [
       }
     ],
     "name": "CDPOpen",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_cdpId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_debtSettled",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_collateralConsumed",
+        "type": "uint256"
+      }
+    ],
+    "name": "CDPProcessed",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_cdpId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "CollateralReclaimed",
     "type": "event"
   },
   {
@@ -396,6 +445,19 @@ export const ABI= [
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "_cdpId",
+        "type": "uint256"
+      }
+    ],
+    "name": "freeCollateral",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "_address",
         "type": "address"
@@ -618,6 +680,19 @@ export const ABI= [
   },
   {
     "inputs": [],
+    "name": "getTotalDebt",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "getTotalSupply",
     "outputs": [
       {
@@ -793,6 +868,24 @@ export const ABI= [
     "inputs": [
       {
         "internalType": "uint256",
+        "name": "_cdpId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_collateralDelta",
+        "type": "uint256"
+      }
+    ],
+    "name": "processCDP",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
         "name": "_cdpIndex",
         "type": "uint256"
       }
@@ -899,6 +992,13 @@ export const ABI= [
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "shutdown",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "uint256",
@@ -953,4 +1053,4 @@ export const ABI= [
     "type": "function"
   }
 ]
-export const address= "0x7580708993de7CA120E957A62f26A5dDD4b3D8aC"
+export const address= "0x572316aC11CB4bc5daf6BDae68f43EA3CCE3aE0e"

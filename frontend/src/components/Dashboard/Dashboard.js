@@ -53,18 +53,29 @@ ChartJS.register(
 
 export const options = {
   responsive: true,
+  scales: {
+    x: {
+      ticks: {
+        display: false,
+      },
+    },
+  },
   plugins: {
-    tooltips: {
+    tooltip: {
       callbacks: {
-        label: function (tooltipItem, data) {
-          return "dsad";
+        label: function (context) {
+          return context.parsed.y;
         },
       },
     },
   },
 };
 
-export default function Dashboard({ bAnimation, setBAnimation }) {
+export default function Dashboard({
+  bAnimation,
+  setBAnimation,
+  parentSetLoading,
+}) {
   const { library, chainId, account, activate, deactivate, active } =
     useWeb3React();
   const [ethPrice, setEthPrice] = useState(0);
@@ -82,8 +93,11 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
   const [redemptionRateHistory, setRedemptionRateHistory] = useState([]);
   const [redemptionPriceHistory, setRedemptionPriceHistory] = useState([]);
   const [marketPriceHistory, setMarketPriceHistory] = useState([]);
-  const [noiSurplus,setNoiSurplus]=useState(0);
-  const [noiInTreasury,setNoiInTreasury]=useState(0);
+  const [noiSurplus, setNoiSurplus] = useState(0);
+  const [noiInTreasury, setNoiInTreasury] = useState(0);
+  const [globalCR, setGlobalCR] = useState(0);
+  const [limitCR, setLimitCR] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     FirebaseService.setUpNOITracking(setNOISupplyHistory);
@@ -113,154 +127,316 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
     setCdpCount(await InfoService.getCdpCount(signer));
     setNoiInTreasury(await InfoService.getTreasuryNoi(signer));
     setNoiSurplus(await InfoService.getNoiSurplus(signer));
-    setPTerm(await InfoService.getProportionalTerm(signer));
-    setITerm(await InfoService.getIntegralTerm(signer));
+    setGlobalCR(await InfoService.getGlobalCR(signer));
+    setLimitCR(await InfoService.getCRLimit(signer));
+    try {
+      setPTerm(await InfoService.getProportionalTerm(signer));
+      setITerm(await InfoService.getIntegralTerm(signer));
+    } catch {}
+
+    setLoading(false);
+    parentSetLoading(false);
   };
 
   useEffect(() => {
+    setLoading(true);
+    parentSetLoading(true);
     updateInfo();
     setInterval(async () => {
       await updateInfo();
     }, 5000 * 60);
   }, [library]);
 
-  return (
-    <div className="dashboard animated bounceIn">
-      <Box>
-        <VStack spacing="7vh">
-          <HStack spacing="5vw" marginTop={"2vh"}>
-            <Box className="div-line1">
-              <div className="div-info ">
-                <Tooltip label="TO DO: WRITE INFO" placement="right">
-                  <div>
-                    <FcInfo></FcInfo>
-                  </div>
-                </Tooltip>
-              </div>
-              <VStack>
-                <Image
-                  src="eth.png"
-                  alt=""
-                  width={30}
-                  height={30}
-                  borderRadius="3px"
-                />
-                <div>Total ETH locked</div>
-                <div className="bold-text">
-                  {new Decimal(totalEth.toString()).div(10**18).toString()} ($
-                  {new Decimal(totalEth.toString()).div(10**18).mul(ethPrice).toString()}
-                  ){" "}
+  if (loading) {
+    return <></>;
+  } else {
+    return (
+      <div className="dashboard animated bounceIn">
+        <Box>
+          <VStack spacing="7vh">
+            <HStack spacing="5vw" marginTop={"2vh"}>
+              <Box className="div-line1">
+                <div className="div-info ">
+                  <Tooltip label="TO DO: WRITE INFO" placement="right">
+                    <div>
+                      <FcInfo></FcInfo>
+                    </div>
+                  </Tooltip>
                 </div>
-              </VStack>
-            </Box>
-            <Box className="div-line1">
-              <div className="div-info ">
-                <Tooltip label="TO DO: WRITE INFO" placement="right">
-                  <div>
-                    <FcInfo></FcInfo>
+                <VStack>
+                  <Image
+                    src="eth.png"
+                    alt=""
+                    width={30}
+                    height={30}
+                    borderRadius="3px"
+                  />
+                  <div>Total ETH locked</div>
+                  <div className="bold-text">
+                    {new Decimal(totalEth.toString()).div(10 ** 18).toString()}{" "}
+                    ($
+                    {new Decimal(totalEth.toString())
+                      .div(10 ** 18)
+                      .mul(ethPrice)
+                      .toString()}
+                    ){" "}
                   </div>
-                </Tooltip>
-              </div>
-              <VStack>
-                <Image
-                  src="dai.png"
-                  alt=""
-                  width={30}
-                  height={30}
-                  borderRadius="3px"
-                />
-                <div>Outstanding NOI</div>
-                <div className="bold-text">
-                  {
-                    new Decimal(noiSupply.toString()).add(new Decimal(noiSurplus.toString())).div(10**18).toPrecision(15).toString()
-                  }
+                </VStack>
+              </Box>
+              <Box className="div-line1">
+                <div className="div-info ">
+                  <Tooltip label="TO DO: WRITE INFO" placement="right">
+                    <div>
+                      <FcInfo></FcInfo>
+                    </div>
+                  </Tooltip>
                 </div>
-              </VStack>
-            </Box>
-            <Box className="div-line1">
-              <div className="div-info ">
-                <Tooltip label="TO DO: WRITE INFO" placement="right">
-                  <div>
-                    <FcInfo></FcInfo>
-                  </div>
-                </Tooltip>
-              </div>
-              <VStack>
-                <Image
-                  src="eth.png"
-                  alt=""
-                  width={30}
-                  height={30}
-                  borderRadius="3px"
-                />
-                <div>Active CDPs</div>
-                <div className="bold-text">{cdpCount.toString()}</div>
-              </VStack>
-            </Box>
-          </HStack>
-          <HStack spacing="5vw" marginTop={"2vh"}>
-            <Box className="div-line2">
-              <h2 className="h-test">System rates</h2>
-              <HStack spacing="2vw">
-                <Box className="div-indiv-line2 ">
-                  <div className="div-info ">
-                    <Tooltip label="TO DO: WRITE INFO" placement="right">
-                      <div>
-                        <FcInfo></FcInfo>
-                      </div>
-                    </Tooltip>
-                  </div>
-                  <VStack>
-                    <div>Stability fee</div>
-                    <div className="bold-text">{sf}%</div>
-                  </VStack>
-                </Box>
-                <Box className="div-indiv-line2 ">
-                  <div className="div-info ">
-                    <Tooltip label="TO DO: WRITE INFO" placement="right">
-                      <div>
-                        <FcInfo></FcInfo>
-                      </div>
-                    </Tooltip>
-                  </div>
-                  <VStack>
-                    <div>Redemption rate</div>
+                <VStack>
+                  <Image
+                    src="dai.png"
+                    alt=""
+                    width={30}
+                    height={30}
+                    borderRadius="3px"
+                  />
+                  <div>Outstanding NOI</div>
+                  <Tooltip
+                    placement="auto"
+                    label={new Decimal(noiSupply.toString())
+                      .add(new Decimal(noiSurplus.toString()))
+                      .div(10 ** 18)
+                      .toString()}
+                  >
                     <div className="bold-text">
-                      {new Decimal(rr.toString())
-                        .div(10 ** 27)
-                        .sub(1)
-                        .toPrecision(5)
+                      {new Decimal(noiSupply.toString())
+                        .add(new Decimal(noiSurplus.toString()))
+                        .div(10 ** 18)
+                        .toDP(5)
                         .toString()}
-                      %
                     </div>
+                  </Tooltip>
+                </VStack>
+              </Box>
+              <Box className="div-line1">
+                <div className="div-info ">
+                  <Tooltip label="TO DO: WRITE INFO" placement="right">
                     <div>
-                      <b>pRate</b>:{pTerm}%
+                      <FcInfo></FcInfo>
                     </div>
-                    <div>
-                      <b>iRate</b>: {iTerm}%
-                    </div>
-                  </VStack>
-                </Box>
-                <Box className="div-indiv-line2 ">
-                  <div className="div-info ">
-                    <Tooltip label="TO DO: WRITE INFO" placement="right">
-                      <div>
-                        <FcInfo></FcInfo>
+                  </Tooltip>
+                </div>
+                <VStack>
+                  <Image
+                    src="eth.png"
+                    alt=""
+                    width={30}
+                    height={30}
+                    borderRadius="3px"
+                  />
+                  <div>Active CDPs</div>
+                  <div className="bold-text">{cdpCount.toString()}</div>
+                </VStack>
+              </Box>
+            </HStack>
+            <HStack spacing="5vw" marginTop={"2vh"}>
+              <Box className="div-line2">
+                <h2 className="h-test">System rates</h2>
+                <VStack spacing="2vh">
+                  <HStack spacing="2vw">
+                    <Box className="div-indiv-line2 ">
+                      <div className="div-info ">
+                        <Tooltip label="TO DO: WRITE INFO" placement="right">
+                          <div>
+                            <FcInfo></FcInfo>
+                          </div>
+                        </Tooltip>
                       </div>
-                    </Tooltip>
-                  </div>
-                  <VStack>
-                    <div>Liquidation ratio</div>
-                    <div className="bold-text">{lr}%</div>
-                  </VStack>
-                </Box>
-              </HStack>
-            </Box>
-            <Box className="div-line2">
-              <h2 className="h-test">System info</h2>
-              <VStack spacing="2vh">
+                      <VStack>
+                        <div>Stability fee</div>
+                        <div className="bold-text">{sf}%</div>
+                      </VStack>
+                    </Box>
+                    <Box className="div-indiv-line2 ">
+                      <div className="div-info ">
+                        <Tooltip label="TO DO: WRITE INFO" placement="right">
+                          <div>
+                            <FcInfo></FcInfo>
+                          </div>
+                        </Tooltip>
+                      </div>
+                      <VStack>
+                        <div>Redemption rate</div>
+                        <Tooltip
+                          placement="auto"
+                          label={new Decimal(rr.toString())
+                            .div(10 ** 27)
+                            .sub(1)
+                            .toString()}
+                        >
+                          <div className="bold-text">
+                            {new Decimal(rr.toString())
+                              .div(10 ** 27)
+                              .sub(1)
+                              .toDP(5)
+                              .toString()}
+                            %
+                          </div>
+                        </Tooltip>
+                        <div>
+                          <b>pRate</b>:{pTerm}%
+                        </div>
+                        <div>
+                          <b>iRate</b>: {iTerm}%
+                        </div>
+                      </VStack>
+                    </Box>
+                    <Box className="div-indiv-line2 ">
+                      <div className="div-info ">
+                        <Tooltip label="TO DO: WRITE INFO" placement="right">
+                          <div>
+                            <FcInfo></FcInfo>
+                          </div>
+                        </Tooltip>
+                      </div>
+                      <VStack>
+                        <div>Liquidation ratio</div>
+                        <div className="bold-text">{lr}%</div>
+                      </VStack>
+                    </Box>
+                  </HStack>
+                  <HStack spacing="2vw">
+                    <Box className="div-indiv2-line2 ">
+                      <div className="div-info ">
+                        <Tooltip label="TO DO: WRITE INFO" placement="right">
+                          <div>
+                            <FcInfo></FcInfo>
+                          </div>
+                        </Tooltip>
+                      </div>
+                      <VStack>
+                        <div>Global CR</div>
+                        <div className="bold-text">{globalCR.toString()} %</div>
+                      </VStack>
+                    </Box>
+                    <Box className="div-indiv2-line2 ">
+                      <div className="div-info ">
+                        <Tooltip label="TO DO: WRITE INFO" placement="right">
+                          <div>
+                            <FcInfo></FcInfo>
+                          </div>
+                        </Tooltip>
+                      </div>
+                      <VStack>
+                        <div>Limit For Global CR</div>
+                        <div className="bold-text">{limitCR.toString()} %</div>
+                      </VStack>
+                    </Box>
+                  </HStack>
+                </VStack>
+              </Box>
+              <Box className="div-line2">
+                <h2 className="h-test">System info</h2>
+                <VStack spacing="2vh">
+                  <HStack spacing="2vw">
+                    <Box className="div-indiv2-line2 ">
+                      <div className="div-info ">
+                        <Tooltip label="TO DO: WRITE INFO" placement="right">
+                          <div>
+                            <FcInfo></FcInfo>
+                          </div>
+                        </Tooltip>
+                      </div>
+                      <VStack>
+                        <div>ERC20 NOI Supply</div>
+                        <Tooltip
+                          placement="auto"
+                          label={new Decimal(noiSupply.toString())
+                            .div(10 ** 18)
+                            .toString()}
+                        >
+                          <div className="bold-text">
+                            {new Decimal(noiSupply.toString())
+                              .div(10 ** 18)
+                              .toDP(2)
+                              .toString()}
+                          </div>
+                        </Tooltip>
+                      </VStack>
+                    </Box>
+                    <Box className="div-indiv2-line2 ">
+                      <div className="div-info ">
+                        <Tooltip label="TO DO: WRITE INFO" placement="right">
+                          <div>
+                            <FcInfo></FcInfo>
+                          </div>
+                        </Tooltip>
+                      </div>
+                      <VStack>
+                        <div>NOI in Uniswap V2 (NOI/ETH)</div>
+                        <div className="bold-text">TO DO</div>
+                      </VStack>
+                    </Box>
+                  </HStack>
+                  <HStack spacing="2vw">
+                    <Box className="div-indiv2-line2 ">
+                      <div className="div-info ">
+                        <Tooltip label="TO DO: WRITE INFO" placement="right">
+                          <div>
+                            <FcInfo></FcInfo>
+                          </div>
+                        </Tooltip>
+                      </div>
+                      <VStack>
+                        <div>NOI surplus</div>
+                        <Tooltip
+                          placement="auto"
+                          label={new Decimal(noiSurplus.toString())
+                            .div(10 ** 18)
+                            .toString()}
+                        >
+                          <div className="bold-text">
+                            {new Decimal(noiSurplus.toString())
+                              .div(10 ** 18)
+                              .toDP(5)
+                              .toString()}
+                          </div>
+                        </Tooltip>
+                      </VStack>
+                    </Box>
+                    <Box className="div-indiv2-line2 ">
+                      <div className="div-info ">
+                        <Tooltip label="TO DO: WRITE INFO" placement="right">
+                          <div>
+                            <FcInfo></FcInfo>
+                          </div>
+                        </Tooltip>
+                      </div>
+                      <VStack>
+                        <div>NOI in treasury</div>
+                        <Tooltip
+                          placement="auto"
+                          label={new Decimal(noiInTreasury.toString())
+                            .div(10 ** 18)
+                            .toString()}
+                        >
+                          <div className="bold-text">
+                            {new Decimal(noiInTreasury.toString())
+                              .div(10 ** 18)
+                              .toDP(2)
+                              .toString()}
+                          </div>
+                        </Tooltip>
+                      </VStack>
+                    </Box>
+                  </HStack>
+                </VStack>
+              </Box>
+            </HStack>
+            <HStack>
+              <Box className="div-line3">
+                <h2 className="h-test">Prices</h2>
                 <HStack spacing="2vw">
-                  <Box className="div-indiv2-line2 ">
+                  <Box className="div-indiv-line3 ">
                     <div className="div-info ">
                       <Tooltip label="TO DO: WRITE INFO" placement="right">
                         <div>
@@ -269,15 +445,25 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
                       </Tooltip>
                     </div>
                     <VStack>
-                      <div>ERC20 NOI Supply</div>
-                      <div className="bold-text">
-                        {
-                          new Decimal(noiSupply.toString()).div(10**18).toPrecision(15).toString()
-                        }
-                      </div>
+                      <div>NOI Market Price (TWAP)</div>
+                      <Tooltip
+                        placement="auto"
+                        label={new Decimal(marketPrice.toString())
+                          .div(10 ** 8)
+                          .toString()}
+                      >
+                        <div className="bold-text">
+                          {" "}
+                          {new Decimal(marketPrice.toString())
+                            .div(10 ** 8)
+                            .toDP(5)
+                            .toString()}{" "}
+                          USD
+                        </div>
+                      </Tooltip>
                     </VStack>
                   </Box>
-                  <Box className="div-indiv2-line2 ">
+                  <Box className="div-indiv-line3 ">
                     <div className="div-info ">
                       <Tooltip label="TO DO: WRITE INFO" placement="right">
                         <div>
@@ -286,197 +472,161 @@ export default function Dashboard({ bAnimation, setBAnimation }) {
                       </Tooltip>
                     </div>
                     <VStack>
-                      <div>NOI in Uniswap V2 (NOI/ETH)</div>
-                      <div className="bold-text">TO DO</div>
-                    </VStack>
-                  </Box>
-                </HStack>
-                <HStack spacing="2vw">
-                  <Box className="div-indiv2-line2 ">
-                    <div className="div-info ">
-                      <Tooltip label="TO DO: WRITE INFO" placement="right">
-                        <div>
-                          <FcInfo></FcInfo>
-                        </div>
-                      </Tooltip>
-                    </div>
-                    <VStack>
-                      <div>NOI surplus</div>
-                      <div className="bold-text">{new Decimal(noiSurplus.toString()).div(10**18).toPrecision(15).toString()}</div>
-                    </VStack>
-                  </Box>
-                  <Box className="div-indiv2-line2 ">
-                    <div className="div-info ">
-                      <Tooltip label="TO DO: WRITE INFO" placement="right">
-                        <div>
-                          <FcInfo></FcInfo>
-                        </div>
-                      </Tooltip>
-                    </div>
-                    <VStack>
-                      <div>NOI in treasury</div>
-                      <div className="bold-text">{new Decimal(noiInTreasury.toString()).div(10**18).toPrecision(15).toString()}</div>
-                    </VStack>
-                  </Box>
-                </HStack>
-              </VStack>
-            </Box>
-          </HStack>
-          <HStack>
-            <Box className="div-line3">
-              <h2 className="h-test">Prices</h2>
-              <HStack spacing="2vw">
-                <Box className="div-indiv-line3 ">
-                  <div className="div-info ">
-                    <Tooltip label="TO DO: WRITE INFO" placement="right">
-                      <div>
-                        <FcInfo></FcInfo>
-                      </div>
-                    </Tooltip>
-                  </div>
-                  <VStack>
-                    <div>NOI Market Price (TWAP)</div>
-                    <div className="bold-text">
-                      {" "}
-                      {new Decimal(marketPrice.toString())
-                        .div(10 ** 8).toPrecision(5)
-                        .toString()}{" "}
-                      USD
-                    </div>
-                  </VStack>
-                </Box>
-                <Box className="div-indiv-line3 ">
-                  <div className="div-info ">
-                    <Tooltip label="TO DO: WRITE INFO" placement="right">
-                      <div>
-                        <FcInfo></FcInfo>
-                      </div>
-                    </Tooltip>
-                  </div>
-                  <VStack>
-                    <div>NOI Redemption Price</div>
-                    <div className="bold-text">
-                      {new Decimal(redemptionPrice.toString())
-                        .div(10 ** 27).toPrecision(8)
-                        .toString()}{" "}
-                      USD
-                    </div>
-                  </VStack>
-                </Box>
-                <Box className="div-indiv-line3 ">
-                  <div className="div-info ">
-                    <Tooltip label="TO DO: WRITE INFO" placement="right">
-                      <div>
-                        <FcInfo></FcInfo>
-                      </div>
-                    </Tooltip>
-                  </div>
-                  <VStack>
-                    <div>Market/Redemption Delta (TWAP)</div>
-                    <div className="bold-text">
-                      {new Decimal(marketPrice.toString())
-                        .div(10 ** 8)
-                        .sub(
-                          new Decimal(redemptionPrice.toString()).div(10 ** 27)
-                        ).toPrecision(5)
-                        .toString()}{" "}
-                      USD
-                    </div>
-                  </VStack>
-                </Box>
-                <Box className="div-indiv-line3 ">
-                  <div className="div-info ">
-                    <Tooltip label="TO DO: WRITE INFO" placement="right">
-                      <div>
-                        <FcInfo></FcInfo>
-                      </div>
-                    </Tooltip>
-                  </div>
-                  <VStack>
-                    <div>ETH Price</div>
-                    <div className="bold-text">{ethPrice} USD</div>
-                  </VStack>
-                </Box>
-              </HStack>
-            </Box>
-          </HStack>
-          <HStack spacing="5vw">
-            <Box className="div-line2">
-              <h2 className="h-test">NOI issued</h2>
-              <Line
-                options={options}
-                data={{
-                  labels: noiSupplyHistory.map((e) => e["timestamp"]),
-                  datasets: [
-                    {
-                      fill: true,
-                      label: "NOI issued",
-                      data: noiSupplyHistory.map((e) =>
-                        new Decimal(e["supply"]).div(10 ** 18).toString()
-                      ),
-                      borderColor: "rgb(53, 162, 235)",
-                      backgroundColor: "rgba(53, 162, 235, 0.5)",
-                    },
-                  ],
-                }}
-              />
-            </Box>
-            <Box className="div-line2">
-              <h2 className="h-test">Redemption Rate</h2>
-              <Bar
-                options={options}
-                data={{
-                  labels: redemptionRateHistory.map((e) => e["timestamp"]),
-                  datasets: [
-                    {
-                      label: "Redemption rate",
-                      data: redemptionRateHistory.map((e) =>
-                        new Decimal(e["redemptionRate"])
+                      <div>NOI Redemption Price</div>
+                      <Tooltip
+                        placement="auto"
+                        label={new Decimal(redemptionPrice.toString())
                           .div(10 ** 27)
-                          .toString()
-                      ),
-                      backgroundColor: "rgba(53, 162, 235, 0.5)",
-                    },
-                  ],
-                }}
-              />
-            </Box>
-          </HStack>
-          <HStack spacing="5vw">
-            <Box className="div-line2">
-              <h2 className="h-test">Prices</h2>
-              <Line
-                options={options}
-                data={{
-                  labels: marketPriceHistory.map((e) => e["timestamp"]),
-                  datasets: [
-                    {
-                      fill: true,
-                      label: "Market price",
-                      data: marketPriceHistory.map((e) =>
-                        new Decimal(e["price"]).div(10 ** 8).toString()
-                      ),
-                      borderColor: "rgb(53, 162, 235)",
-                      backgroundColor: "rgba(53, 162, 235, 0.5)",
-                    },
-                    {
-                      fill: true,
-                      label: "Redemption price",
-                      data: redemptionPriceHistory.map((e) =>
-                        new Decimal(e["price"]).div(10 ** 27).toString()
-                      ),
-                      borderColor: "rgb(255, 99, 132)",
-                      backgroundColor: "rgba(255, 99, 132, 0.5)",
-                    },
-                  ],
-                }}
-              />
-            </Box>
-          </HStack>
-        </VStack>
-      </Box>
-      <br></br>
-      <Footer bAnimation={bAnimation} setBAnimation={setBAnimation}></Footer>
-    </div>
-  );
+                          .toString()}
+                      >
+                        <div className="bold-text">
+                          {new Decimal(redemptionPrice.toString())
+                            .div(10 ** 27)
+                            .toDP(5)
+                            .toString()}{" "}
+                          USD
+                        </div>
+                      </Tooltip>
+                    </VStack>
+                  </Box>
+                  <Box className="div-indiv-line3 ">
+                    <div className="div-info ">
+                      <Tooltip label="TO DO: WRITE INFO" placement="right">
+                        <div>
+                          <FcInfo></FcInfo>
+                        </div>
+                      </Tooltip>
+                    </div>
+                    <VStack>
+                      <div>Market/Redemption Delta (TWAP)</div>
+                      <Tooltip
+                        placement="auto"
+                        label={new Decimal(marketPrice.toString())
+                          .div(10 ** 8)
+                          .sub(
+                            new Decimal(redemptionPrice.toString()).div(
+                              10 ** 27
+                            )
+                          )
+                          .toString()}
+                      >
+                        <div className="bold-text">
+                          {new Decimal(marketPrice.toString())
+                            .div(10 ** 8)
+                            .sub(
+                              new Decimal(redemptionPrice.toString()).div(
+                                10 ** 27
+                              )
+                            )
+                            .toDP(5)
+                            .toString()}{" "}
+                          USD
+                        </div>
+                      </Tooltip>
+                    </VStack>
+                  </Box>
+                  <Box className="div-indiv-line3 ">
+                    <div className="div-info ">
+                      <Tooltip label="TO DO: WRITE INFO" placement="right">
+                        <div>
+                          <FcInfo></FcInfo>
+                        </div>
+                      </Tooltip>
+                    </div>
+                    <VStack>
+                      <div>ETH Price</div>
+                      <div className="bold-text">{ethPrice} USD</div>
+                    </VStack>
+                  </Box>
+                </HStack>
+              </Box>
+            </HStack>
+            <HStack spacing="5vw">
+              <Box className="div-line2">
+                <h2 className="h-test">NOI issued</h2>
+                <Line
+                  options={options}
+                  data={{
+                    labels: noiSupplyHistory.map((e) =>
+                      new Date(e["timestamp"] * 1000).toLocaleString("en-US")
+                    ),
+                    datasets: [
+                      {
+                        fill: true,
+                        label: "NOI issued",
+                        data: noiSupplyHistory.map((e) =>
+                          new Decimal(e["supply"]).div(10 ** 18).toString()
+                        ),
+                        borderColor: "rgb(53, 162, 235)",
+                        backgroundColor: "rgba(53, 162, 235, 0.5)",
+                      },
+                    ],
+                  }}
+                />
+              </Box>
+              <Box className="div-line2">
+                <h2 className="h-test">Redemption Rate</h2>
+                <Bar
+                  options={options}
+                  data={{
+                    labels: redemptionRateHistory.map((e) =>
+                      new Date(e["timestamp"] * 1000).toLocaleString("en-US")
+                    ),
+                    datasets: [
+                      {
+                        label: "Redemption rate",
+                        data: redemptionRateHistory.map((e) =>
+                          new Decimal(e["redemptionRate"])
+                            .div(10 ** 27)
+                            .toString()
+                        ),
+                        backgroundColor: "rgba(53, 162, 235, 0.5)",
+                      },
+                    ],
+                  }}
+                />
+              </Box>
+            </HStack>
+            <HStack spacing="5vw">
+              <Box className="div-line2">
+                <h2 className="h-test">Prices</h2>
+                <Line
+                  options={{
+                    ...options,
+                  }}
+                  data={{
+                    labels: marketPriceHistory.map((e) =>
+                      new Date(e["timestamp"] * 1000).toLocaleString("en-US")
+                    ),
+                    datasets: [
+                      {
+                        fill: true,
+                        label: "Market price",
+                        data: marketPriceHistory.map((e) =>
+                          new Decimal(e["price"]).div(10 ** 8).toString()
+                        ),
+                        borderColor: "rgb(53, 162, 235)",
+                        backgroundColor: "rgba(53, 162, 235, 0.5)",
+                      },
+                      {
+                        fill: true,
+                        label: "Redemption price",
+                        data: redemptionPriceHistory.map((e) =>
+                          new Decimal(e["price"]).div(10 ** 27).toString()
+                        ),
+                        borderColor: "rgb(255, 99, 132)",
+                        backgroundColor: "rgba(255, 99, 132, 0.5)",
+                      },
+                    ],
+                  }}
+                />
+              </Box>
+            </HStack>
+          </VStack>
+        </Box>
+        <br></br>
+        <Footer bAnimation={bAnimation} setBAnimation={setBAnimation}></Footer>
+      </div>
+    );
+  }
 }

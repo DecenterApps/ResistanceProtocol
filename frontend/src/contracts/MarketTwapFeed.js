@@ -25,10 +25,30 @@ export const ABI= [
         "internalType": "address",
         "name": "_rateSetter",
         "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_owner",
+        "type": "address"
       }
     ],
     "stateMutability": "nonpayable",
     "type": "constructor"
+  },
+  {
+    "inputs": [],
+    "name": "MarketTwapFeed__NotActive",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "MarketTwapFeed__NotAuthorized",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "MarketTwapFeed__NotOwner",
+    "type": "error"
   },
   {
     "inputs": [],
@@ -65,6 +85,38 @@ export const ABI= [
     ],
     "name": "UpdateValues",
     "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
+    ],
+    "name": "addAuthorization",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "authorizedAccounts",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
   },
   {
     "inputs": [],
@@ -133,6 +185,39 @@ export const ABI= [
   },
   {
     "inputs": [],
+    "name": "owner",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
+    ],
+    "name": "removeAuthorization",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "shutdown",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "twapWindowSize",
     "outputs": [
       {
@@ -165,4 +250,4 @@ export const ABI= [
     "type": "function"
   }
 ]
-export const address= "0x94fFA1C7330845646CE9128450F8e6c3B5e44F86"
+export const address= "0xdF46e54aAadC1d55198A4a8b4674D7a4c927097A"
