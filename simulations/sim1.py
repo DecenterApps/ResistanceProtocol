@@ -17,7 +17,6 @@ from tqdm import tqdm
 from parameters import parameters
 import csv
 
-
 INIT_REDEMPTION_PRICE = 2
 
 ext_data = ExtData()
@@ -99,14 +98,12 @@ def update_agents(params, substep, state_history, previous_state, policy_input):
 
     if previous_state['timestep'] == SIMULATION_TIMESTAMPS - 1:
         plot_graphs(full_graph, timestamp_graph, br)
-        print('poceo spor')
         with open('dataset/graphs.csv', 'a') as f:
             writer = csv.writer(f)
             one, two, three = timestamp_graph.save_main_axis(ext_data)
             writer.writerow([one, two, three])
             one, two, three = full_graph.save_main_axis(ext_data)
             writer.writerow([one, two, three])
-        print('kraj spor')
     
     pbar.update(1)
 
@@ -127,9 +124,8 @@ sim_config_dict = {
     'T': range(SIMULATION_TIMESTAMPS),
     'N': 1,
     'M': {
-        'parameters': [
+        'parameters':
             parameters
-        ]
     }
 }
 

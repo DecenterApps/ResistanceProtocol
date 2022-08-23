@@ -20,7 +20,7 @@ class Full_Graph(Graph):
         self.w_stable.append(w_stable1)
         self.rr_cpi.append(rr_cpi1)
         self.rr_stable.append(rr_stable1)
-        self.out_rr.append((w_cpi1 * rr_cpi1 + w_stable1 * rr_stable1) ** 3153.6)
+        # self.out_rr.append((w_cpi1 * rr_cpi1 + w_stable1 * rr_stable1) ** 3153.6)
 
     def plot(self, ext_data: ExtData):
         Graph.plotGraph1(self, 'images/full_graph.png', ext_data, 'full_graph')
