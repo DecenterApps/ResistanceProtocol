@@ -5,7 +5,7 @@ const BigNumber = require("big-number");
 
 const { takeSnapshot, revertToSnapshot } = require("../utils/snapshot");
 
-const {openAndMintFromCDP, repayToCDP} = require("../utils/positionActions");
+const {openAndMintFromCDP, repayToCDP, getSFperSecond} = require("../utils/positionActions");
 const bigNumber = require("big-number");
 
 
@@ -53,13 +53,22 @@ describe("StabilityFee", function () {
         await network.provider.send("evm_increaseTime", [31536000])
         await network.provider.send("evm_mine") 
         
+        const debt = new BigNumber(10).pow(18).mult(10000);
+        const fee = new BigNumber(10).pow(18).mult(200);
+        const total = new BigNumber(debt).add(fee);
+
         const totalDebt = await CDPManagerContractObj.connect(senderAccounts[1]).getDebtWithSF(cdpIndex);
-        assert.equal(totalDebt.toString(), BigNumber(10).pow(18).mult(10000).mult(102).div(100).toString());
+        assert.equal(totalDebt.toString(),total.toString());
+
+        const sfps = await getSFperSecond(CDPManagerContractObj,cdpIndex);
         
         let receipt = await repayToCDP(CDPManagerContractObj,noiContractObj,cdpIndex,senderAccounts[1],10000)
         
         const totalDebt2 = await CDPManagerContractObj.connect(senderAccounts[1]).getDebtWithSF(cdpIndex);
-        assert.isTrue(BigNumber(totalDebt2.toString()).subtract(BigNumber(10).pow(18).mult(200)).lt(BigNumber(10).pow(15)));
+        assert.isTrue(BigNumber(totalDebt2.toString()).subtract(total).lt(10*sfps));
+
+        const balance = await noiContractObj.balanceOf(TreasuryContractObj.address);
+        assert.isTrue(new BigNumber(balance.toString()).subtract(fee).lt(10*sfps));
 
     });
 

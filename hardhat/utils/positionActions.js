@@ -1,17 +1,10 @@
 const BigNumber = require('big-number');
+const { assert } = require('chai');
 
 async function openAndMintFromCDP(CDPManagerContractObj, account, collateral, debt){
 
     collateral = collateral.toString();
     debt = BigNumber(10).pow(18).mult(debt).toString();
-
-    // const txOpenCDP = await CDPManagerContractObj.connect(account).openCDP(account.address, {value: ethers.utils.parseEther(collateral)});
-    // await txOpenCDP.wait();
-    // const getCDPIndex = await CDPManagerContractObj.connect(account).cdpi();
-    // const cdpIndex = getCDPIndex.toString();
-
-    // const txmintFromCDPManager = await CDPManagerContractObj.connect(account).mintFromCDP(cdpIndex, debt);
-    // await txmintFromCDPManager.wait();
     
     const txOpenCDP = await CDPManagerContractObj.connect(account).openCDPandMint(account.address, debt,  {value: ethers.utils.parseEther(collateral)});
     await txOpenCDP.wait();
@@ -21,6 +14,26 @@ async function openAndMintFromCDP(CDPManagerContractObj, account, collateral, de
 
 
     return cdpIndex;
+}
+
+async function openAndMintFromCDPatCR(CDPManagerContractObj, account, collateral, cr){
+
+    collateral = collateral.toString();
+    const ethRp = (await CDPManagerContractObj.connect(account).ethRp()).toString();
+    debt = new BigNumber(collateral).mult(ethRp.toString()).div(BigNumber(cr)).mult(100).toString();
+
+    
+    const txOpenCDP = await CDPManagerContractObj.connect(account).openCDPandMint(account.address, debt,  {value: ethers.utils.parseEther(collateral)});
+    await txOpenCDP.wait();
+
+    const getCDPIndex = await CDPManagerContractObj.connect(account).cdpi();
+    const cdpIndex = getCDPIndex.toString();
+
+    const CR = await CDPManagerContractObj.connect(account).getCR(cdpIndex);
+    assert.equal(CR.toString(),cr.toString());
+    
+    return cdpIndex;
+    
 }
 
 async function approveAndLiquidatePosition(LiquidatorContractObj,noiContractObj,cdpIndex, account,amount){
@@ -71,5 +84,6 @@ module.exports = {
     repayToCDP,
     repayAndCloseCDP,
     expectToFailWithError,
-    getSFperSecond
+    getSFperSecond,
+    openAndMintFromCDPatCR
 }

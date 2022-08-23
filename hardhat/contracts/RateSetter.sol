@@ -22,6 +22,7 @@ contract RateSetter {
     uint256 CPI;
     uint256 redemptionRate;
     uint256 ethPrice;
+    uint256 nextEthPrice;
 
     uint256 public constant RAY = 10**27;
     uint256 public constant SECONDS_IN_A_YEAR = 31556926;
@@ -126,13 +127,11 @@ contract RateSetter {
     /*
      * @notice updates rates with values gathered from PI controllers
      */
-    function updatePrices(uint256 _ethTwapPrice, uint256 _noiMarketPrice)
-        public
-        isAuthorized
-    {
-        ethPrice = _ethTwapPrice;
+    function updatePrices(uint256 _ethTwapPrice, uint256 _noiMarketPrice) public isAuthorized{
 
-        // reward caller
+        ethPrice = nextEthPrice;
+        nextEthPrice = _ethTwapPrice;
+        // reward caller 
         uint256 tlv = AbsPiController_CONTRACT.tlv();
         uint256 iapcr = rpower(AbsPiController_CONTRACT.pscl(), tlv, RAY);
         uint256 validated = AbsPiController_CONTRACT.computeRate(
