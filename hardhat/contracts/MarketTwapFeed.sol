@@ -16,7 +16,7 @@ abstract contract LendingPoolLike {
         virtual
         returns (
             uint256 noiCount,
-            uint256 daiCount,
+            uint256 coinCount,
             uint256 timestamp
         );
 }
@@ -27,7 +27,7 @@ contract MarketTwapFeed {
     uint256 public immutable twapWindowSize;
 
     // hardcode Chainlink NOI/USD Price Feed
-    AggregatorV3Interface public daiPriceFeed;
+    AggregatorV3Interface public coinPriceFeed;
     LendingPoolLike private lendingPool;
     EthTwapFeed private ethTwapFeed;
     RateSetter private rateSetter;
@@ -67,27 +67,42 @@ contract MarketTwapFeed {
         uint256 _twapWindowSize,
         address _lendingPool,
         address _ethTwapFeed,
-        address _rateSetter
+        address _rateSetter,
+        address _coinPriceFeed
     ) {
         lastUpdateTimestamp = block.timestamp;
 
-        daiPriceFeed = AggregatorV3Interface(
-            0xCBBe2A5c3A22BE749D5DDF24e9534f98951983e2
-        );
+        coinPriceFeed = AggregatorV3Interface(_coinPriceFeed);
         // dai contract
         //0xAed0c38402a5d19df6E4c03F4E2DceD6e29c1ee9
 
         updateTimeInterval = _updateTimeInterval;
-        twapWindowSize = _twapWindowSize + 1;
+        twapWindowSize = _twapWindowSize;
         lendingPool = LendingPoolLike(_lendingPool);
         ethTwapFeed = EthTwapFeed(_ethTwapFeed);
         rateSetter = RateSetter(_rateSetter);
 
         // set initial stuff
-        snapshotHistory.push(Snapshot(0, block.timestamp));
         uint256 price = getMarketPrice();
         prevPrice = price;
         marketTwapPrice = price;
+
+        uint256 timeTmp = block.timestamp -
+            _updateTimeInterval *
+            _twapWindowSize;
+
+        uint256 cumulativeVal = 0;
+
+        for (uint256 i = 0; i < _twapWindowSize; i++) {
+            cumulativeVal = cumulativeVal + price * _updateTimeInterval;
+            snapshotHistory.push(
+                Snapshot(
+                    cumulativeVal,
+                    timeTmp + _updateTimeInterval * (i + 1)
+                )
+            );
+        }
+        prevCumulativeValue = cumulativeVal;
     }
 
     /*
@@ -100,22 +115,12 @@ contract MarketTwapFeed {
             prevPrice *
             timePassed;
 
-        Snapshot memory snap;
-
-        // if array is not full get the first snap and push the current
-        if (twapWindowSize != snapshotHistory.length) {
-            snapshotHistory.push(
-                Snapshot(nextCumulativeValue, block.timestamp)
-            );
-            historyIndx = 0;
-            snap = snapshotHistory[0];
-        } else {
-            snap = snapshotHistory[historyIndx];
-            snapshotHistory[historyIndx] = Snapshot(
-                nextCumulativeValue,
-                block.timestamp
-            );
-        }
+        // get past snap and set the new cumulative value
+        Snapshot memory snap = snapshotHistory[historyIndx];
+        snapshotHistory[historyIndx] = Snapshot(
+            nextCumulativeValue,
+            block.timestamp
+        );
 
         uint256 tmpMarketTwapPrice = (nextCumulativeValue -
             snap.cumulativeValue) / (block.timestamp - snap.timestamp);
@@ -123,7 +128,7 @@ contract MarketTwapFeed {
         marketTwapPrice = tmpMarketTwapPrice;
 
         // prepare for next iteration
-        historyIndx = (historyIndx + 1) % (twapWindowSize - 1);
+        historyIndx = (historyIndx + 1) % twapWindowSize;
         prevCumulativeValue = nextCumulativeValue;
         uint256 marketPrice = getMarketPrice();
         prevPrice = marketPrice;
@@ -154,18 +159,18 @@ contract MarketTwapFeed {
      * @notice calculate the market price
      */
     function getMarketPrice() public view returns (uint256) {
-        (uint256 noiCount, uint256 daiCount, ) = lendingPool.getReserves();
+        (uint256 noiCount, uint256 coinCount, ) = lendingPool.getReserves();
 
-        uint256 daiPrice = getDaiPrice();
+        uint256 coinPrice = getCoinPrice();
 
-        return (daiCount * daiPrice) / noiCount;
+        return (coinPrice * coinCount) / noiCount;
     }
 
     /*
-     * @notice get dai price in usd
+     * @notice get coin price in usd
      */
-    function getDaiPrice() public view returns (uint256) {
-        (, int256 price, , , ) = daiPriceFeed.latestRoundData();
+    function getCoinPrice() public view returns (uint256) {
+        (, int256 price, , , ) = coinPriceFeed.latestRoundData();
         return uint256(price);
     }
 }

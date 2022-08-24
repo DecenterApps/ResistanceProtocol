@@ -77,14 +77,26 @@ contract EthTwapFeed {
         lastUpdateTimestamp = block.timestamp;
 
         updateTimeInterval = _updateTimeInterval;
-        twapWindowSize = _twapWindowSize + 1;
+        twapWindowSize = _twapWindowSize;
         ethPriceFeed = AggregatorV3Interface(_ethPriceFeed);
 
-        // set initial stuff
-        snapshotHistory.push(Snapshot(0, block.timestamp));
         uint256 price = getEthPrice();
         prevEthPrice = price;
         ethTwapPrice = price;
+
+        uint256 timeTmp = block.timestamp -
+            _updateTimeInterval *
+            _twapWindowSize;
+
+        uint256 cumulativeVal = 0;
+
+        for (uint256 i = 0; i < _twapWindowSize; i++) {
+            cumulativeVal = cumulativeVal + price * _updateTimeInterval;
+            snapshotHistory.push(
+                Snapshot(cumulativeVal, timeTmp + _updateTimeInterval * (i + 1))
+            );
+        }
+        prevCumulativeValue = cumulativeVal;
     }
 
     /*
@@ -102,22 +114,11 @@ contract EthTwapFeed {
             prevEthPrice *
             timePassed;
 
-        Snapshot memory snap;
-
-        // if array is not full get the first snap and push the current
-        if (twapWindowSize != snapshotHistory.length) {
-            snapshotHistory.push(
-                Snapshot(nextCumulativeValue, block.timestamp)
-            );
-            historyIndx = 0;
-            snap = snapshotHistory[0];
-        } else {
-            snap = snapshotHistory[historyIndx];
-            snapshotHistory[historyIndx] = Snapshot(
-                nextCumulativeValue,
-                block.timestamp
-            );
-        }
+        Snapshot memory snap = snapshotHistory[historyIndx];
+        snapshotHistory[historyIndx] = Snapshot(
+            nextCumulativeValue,
+            block.timestamp
+        );
 
         uint256 tmpEthTwapPrice = (nextCumulativeValue - snap.cumulativeValue) /
             (block.timestamp - snap.timestamp);
@@ -125,7 +126,7 @@ contract EthTwapFeed {
         ethTwapPrice = tmpEthTwapPrice;
 
         // prepare for next iteration
-        historyIndx = (historyIndx + 1) % (twapWindowSize - 1);
+        historyIndx = (historyIndx + 1) % twapWindowSize;
         prevCumulativeValue = nextCumulativeValue;
         uint256 currentEthPrice = getEthPrice();
         prevEthPrice = currentEthPrice;
