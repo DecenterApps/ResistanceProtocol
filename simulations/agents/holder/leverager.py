@@ -7,10 +7,12 @@ class Leverager(CDP_Holder):
         return self.cdp_position.calculate_cr(ext_data, price_station)
 
     def boost(self, ext_data: ExtData, price_station: PriceStation, pool: Pool):
-        self.cdp_position.dfs_boost_position(ext_data, price_station, pool)
+        if not self.cdp_position.dfs_boost_position(ext_data, price_station, pool):
+            self.liquidation(pool,price_station, ext_data)
 
     def repay(self, ext_data: ExtData, price_station: PriceStation, pool: Pool):
-        self.cdp_position.dfs_repay_position(ext_data, price_station, pool)
+        if not self.cdp_position.dfs_repay_position(ext_data, price_station, pool):
+            self.liquidation(pool,price_station, ext_data)
 
     def close_position(self, ext_data: ExtData, price_station: PriceStation, pool: Pool):
         self.opened_position = False
@@ -22,9 +24,12 @@ class Leverager(CDP_Holder):
         self.eth += added_eth
         self.debt_noi = self.debt_noi - added_noi
 
-    def liquidation(self):
+    def liquidation(self, pool: Pool,price_station, ext_data):
         self.opened_position = False
+        eth_add, _ = pool.put_noi_get_eth(max(0,self.cdp_position.debt_noi), price_station, ext_data)
+        self.eth += eth_add
         self.debt_noi = 0
+        self.noi = 0
 
 def update_leverager(agents, price_station: PriceStation, pool: Pool, ext_data: ExtData):
     update_holder(agents, price_station, pool, ext_data, 'leverager', LEVERAGER)
