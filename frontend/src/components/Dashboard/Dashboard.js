@@ -142,10 +142,16 @@ export default function Dashboard({
     setLoading(true);
     parentSetLoading(true);
     updateInfo();
-    setInterval(async () => {
+    let intervalID=setInterval(async () => {
       await updateInfo();
     }, 5000 * 60);
+
+    return () => {
+      clearInterval(intervalID);
+    }
+
   }, [library]);
+  
 
   if (loading) {
     return <></>;

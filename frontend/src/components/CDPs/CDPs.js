@@ -87,9 +87,13 @@ export default function CDPs({ bAnimation, setBAnimation }) {
     }
     fetchData();
     getEthPrice();
-    setInterval(async () => {
+    let intervalID=setInterval(async () => {
       await getEthPrice();
     }, 5000 * 60);
+
+    return () => {
+      clearInterval(intervalID);
+    }
   }, []);
 
   useEffect(() => {}, [cdps]);
