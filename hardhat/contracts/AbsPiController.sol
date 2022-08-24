@@ -29,6 +29,7 @@ contract AbsPiController is RedemptionRateController{
         int256 _feedbackOutputLowerBound,
         uint256 _integralPeriodSize,
         uint256 _perSecondCumulativeLeak
+
     ) 
     RedemptionRateController(
         _owner, 
@@ -56,10 +57,12 @@ contract AbsPiController is RedemptionRateController{
         if (block.timestamp - lastUpdateTime < integralPeriodSize) {
             revert AbsPiController__TooSoon();
         }
+
         int256 proportionalTerm = int256(_redemptionPrice) -
             int256(_marketPrice) *
             int256(10**19);
         updateDeviationHistory(proportionalTerm);
+
         lastUpdateTime = block.timestamp;
         int256 piOutput = getGainAdjustedPIOutput(
             proportionalTerm,
@@ -71,5 +74,6 @@ contract AbsPiController is RedemptionRateController{
         } else {
             return TWENTY_SEVEN_DECIMAL_NUMBER;
         }
+
     }    
 }

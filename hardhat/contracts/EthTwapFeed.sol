@@ -7,6 +7,8 @@ import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 error EthTwapFeed__TimeIntervalDidNotPass();
 error EthTwapFeed__NotMarketTwapFeed();
 error EthTwapFeed__NotOwner();
+error EthTwapFeed__NotAuthorized();
+error EthTwapFeed__NotActive();
 
 contract EthTwapFeed {
     uint256 public ethTwapPrice = 0;
@@ -27,6 +29,8 @@ contract EthTwapFeed {
     Snapshot[] private snapshotHistory;
     uint256 private historyIndx = 0;
 
+    bool private active=true;
+
     modifier IntervalPassed() {
         if (block.timestamp - lastUpdateTimestamp < updateTimeInterval)
             revert EthTwapFeed__TimeIntervalDidNotPass();
@@ -37,6 +41,19 @@ contract EthTwapFeed {
         if (msg.sender != owner) revert EthTwapFeed__NotOwner();
         _;
     }
+
+    modifier isActive() {
+        if (!active)
+            revert EthTwapFeed__NotActive();
+        _;
+    }
+
+    modifier isAuthorized() {
+        if(!authorizedAccounts[msg.sender]) revert EthTwapFeed__NotAuthorized();
+        _;
+    }
+
+    mapping(address => bool) public authorizedAccounts;
 
     address public immutable owner;
 
@@ -89,6 +106,8 @@ contract EthTwapFeed {
         public
         IntervalPassed
         isMarketTwapFeed
+        isAuthorized
+        isActive
         returns (uint256)
     {
         uint256 timePassed = block.timestamp - lastUpdateTimestamp;
@@ -148,5 +167,9 @@ contract EthTwapFeed {
         // price has 1e8 decimal points!
         (, int256 price, , , ) = ethPriceFeed.latestRoundData();
         return uint256(price); // cast to uint because it can be negative?
+    }
+
+    function shutdown()public isAuthorized{
+        active=false;
     }
 }

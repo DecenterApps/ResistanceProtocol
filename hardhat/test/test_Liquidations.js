@@ -4,7 +4,7 @@ const BigNumber = require('big-number');
 const { takeSnapshot, revertToSnapshot } = require("../utils/snapshot");
 const { executeActionFromMSW } = require("../utils/multiSigAction");
 
-const {openAndMintFromCDP, expectToFailWithError} = require("../utils/positionActions");
+const {openAndMintFromCDP, expectToFailWithError, openAndMintFromCDPatCR} = require("../utils/positionActions");
 
 describe("Liquidations", function () {
   this.timeout(80000);
@@ -43,9 +43,8 @@ describe("Liquidations", function () {
 
   it("... should liquidate CDP", async () => {
 
-
-    let cdpIndex = await openAndMintFromCDP(CDPManagerContractObj, senderAcc[1],13,10000);
-
+    let cdpIndex = await openAndMintFromCDPatCR(CDPManagerContractObj, senderAcc[1],13,140);
+    
     // should be set by the multi sig
     await executeActionFromMSW(
         multiSigWallet,

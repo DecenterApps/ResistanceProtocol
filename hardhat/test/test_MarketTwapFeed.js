@@ -9,9 +9,7 @@ describe("MarketTwapFeed", function () {
   let snapshot;
   let MarketTwapFeedShortInterval, MarketTwapFeedLongInterval, LendingPoolMock;
 
-  async function update(delayTime, newPrice) {
-    await delay(delayTime);
-
+  async function update(newPrice) {
     const setNewPricetx = await LendingPoolMock.setToken2(newPrice);
     await setNewPricetx.wait();
     
@@ -56,7 +54,8 @@ describe("MarketTwapFeed", function () {
       twapRefreshInterval,
       LendingPoolMock.address,
       EthTwapFeedShortInterval.address,
-      RateSetterAddress
+      RateSetterAddress,
+      msw.address
     );
     await MarketTwapFeedShortInterval.deployed();
 
@@ -67,7 +66,8 @@ describe("MarketTwapFeed", function () {
       twapRefreshInterval,
       LendingPoolMock.address,
       EthTwapFeedShortInterval.address,
-      RateSetterAddress
+      RateSetterAddress,
+      msw.address
     );
     await MarketTwapFeedLongInterval.deployed();
 
@@ -116,19 +116,19 @@ describe("MarketTwapFeed", function () {
     await expect(MarketTwapFeedLongInterval.update()).to.be.reverted;
   });
   it("... dampen aggressive spikes (wale attacks)", async () => {
-    await update(1000, "120000000");
-    await update(1000, "130000000");
-    await update(1000, "240000000");
-    await update(1000, "110000000");
-    await update(1000, "130000000");
+    await update("120000000");
+    await update("130000000");
+    await update("240000000");
+    await update("110000000");
+    await update("130000000");
 
     const twapUpper = (await MarketTwapFeedShortInterval.getTwap()).toString();
 
     expect(Number(twapUpper)).to.be.approximately(150000000, 20000000);
-    await update(1000, "120000000");
-    await update(1000, "40000000");
-    await update(1000, "110000000");
-    await update(1000, "120000000");
+    await update("120000000");
+    await update("40000000");
+    await update("110000000");
+    await update("120000000");
 
     const twapLower = (await MarketTwapFeedShortInterval.getTwap()).toString();
 

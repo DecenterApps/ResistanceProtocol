@@ -12,7 +12,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 
   let ethUsdPriceFeedAddress;
 
-  const ethPriceRefreshInterval = 3600; // 60 min
+  const ethPriceRefreshInterval = 5 //3600; // 60 min
   const ethTwapInterval = 24; // twap window 24h
 
   if (chainId == 31337) {

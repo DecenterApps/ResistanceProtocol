@@ -10,7 +10,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   const { deployer } = await getNamedAccounts();
   const chainId = network.config.chainId;
 
-  const PriceRefreshInterval = 3600; // 60 min
+  const PriceRefreshInterval = 5 //3600; // 60 min
   const TwapInterval = 24; // twap window 24h
 
   let lendingPoolAddress = (
@@ -23,6 +23,8 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   let RateSetterAddress = (await ethers.getContract("RateSetter", deployer))
     .address;
 
+  const multiSigWalletAddress = (await ethers.getContract("MultiSigWallet", deployer)).address;
+
   log("----------------------------------------------------");
   log("Deploying MarketTwapFeed and waiting for confirmations...");
   const MarketTwapFeed = await deploy("MarketTwapFeed", {
@@ -32,7 +34,8 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
       TwapInterval,
       lendingPoolAddress,
       EthTwapFeedAddress,
-      RateSetterAddress
+      RateSetterAddress,
+      multiSigWalletAddress
     ],
     log: true,
     // wait if on a live network so we can verify properly
@@ -50,7 +53,8 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
       TwapInterval,
       lendingPoolAddress,
       EthTwapFeedAddress,
-      RateSetterAddress
+      RateSetterAddress,
+      multiSigWalletAddress
     ]);
   }
 };

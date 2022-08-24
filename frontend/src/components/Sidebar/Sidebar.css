@@ -1,0 +1,8 @@
+.selected{
+    border-width: 3px;
+}
+.my-pro-sidebar{
+    max-width: 10vw !important;
+    width: 10vw !important;
+    min-width: 10vw !important;
+}

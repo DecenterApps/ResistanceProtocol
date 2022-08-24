@@ -22,8 +22,11 @@ module.exports = async ({ getNamedAccounts }) => {
     const AbsPIController = await ethers.getContract("AbsPiController", deployer);
     const CPIController = await ethers.getContract("CPIController", deployer);
     const FuzzyModule = await ethers.getContract("FuzzyModule", deployer);
+    const ShutdownModule = await ethers.getContract("ShutdownModule", deployer);
 
-    // add auth to cdpManager to mint and burn tokens from erc20
+    // noiContract
+
+
     await executeActionFromMSW(
         msw,
         0,
@@ -32,6 +35,17 @@ module.exports = async ({ getNamedAccounts }) => {
         ["address"],
         [cdpManagerContractObj.address]
     );
+
+    await executeActionFromMSW(
+        msw,
+        0,
+        noiContract.address,
+        "addAuthorization",
+        ["address"],
+        [TreasuryContractObj.address]
+    );
+
+    //Liquidator
 
     await executeActionFromMSW(
         msw,
@@ -72,6 +86,17 @@ module.exports = async ({ getNamedAccounts }) => {
     await executeActionFromMSW(
         msw,
         0,
+        LiquidatorContractObj.address,
+        "setShutdownModuleContractAddress",
+        ["address"],
+        [ShutdownModule.address]
+    );
+
+    //CDP Manager
+
+    await executeActionFromMSW(
+        msw,
+        0,
         cdpManagerContractObj.address,
         "setLiquidatorContractAddress",
         ["address"],
@@ -96,14 +121,6 @@ module.exports = async ({ getNamedAccounts }) => {
         [TreasuryContractObj.address]
     );
 
-    await executeActionFromMSW(
-        msw,
-        0,
-        TreasuryContractObj.address,
-        "setCDPManagerContractAddress",
-        ["address"],
-        [cdpManagerContractObj.address]
-    );
 
     await executeActionFromMSW(
         msw, 
@@ -117,6 +134,65 @@ module.exports = async ({ getNamedAccounts }) => {
     await executeActionFromMSW(
         msw,
         0,
+        cdpManagerContractObj.address,
+        "addAuthorization",
+        ["address"],
+        [ShutdownModule.address]
+    );
+
+    // Treasury
+    await executeActionFromMSW(
+        msw,
+        0,
+        TreasuryContractObj.address,
+        "addAuthorization",
+        ["address"],
+        [process.env.UPDATE_BOT_ACCOUNT]
+    );
+
+    await executeActionFromMSW(
+        msw,
+        0,
+        TreasuryContractObj.address,
+        "setCDPManagerContractAddress",
+        ["address"],
+        [cdpManagerContractObj.address]
+    );
+
+    await executeActionFromMSW(
+        msw,
+        0,
+        TreasuryContractObj.address,
+        "setShutdownModuleContractAddress",
+        ["address"],
+        [ShutdownModule.address]
+    );
+
+    await executeActionFromMSW(
+        msw,
+        0,
+        TreasuryContractObj.address,
+        "setNOIContractAddress",
+        ["address"],
+        [noiContract.address]
+    );
+
+    // Market TWAP Feed
+
+    await executeActionFromMSW(
+        msw,
+        0,
+        MarketTwapFeed.address,
+        "addAuthorization",
+        ["address"],
+        [ShutdownModule.address]
+    );
+
+    //ETH TWAP Feed
+    
+    await executeActionFromMSW(
+        msw,
+        0,
         EthTwapFeed.address,
         "setMarketTwapFeedContractAddress",
         ["address"],
@@ -126,8 +202,84 @@ module.exports = async ({ getNamedAccounts }) => {
     await executeActionFromMSW(
         msw, 
         0,
+        EthTwapFeed.address,
+        "addAuthorization",
+        ["address"],
+        [ShutdownModule.address]
+    );
+
+    //RateSetter
+
+    await executeActionFromMSW(
+        msw,
+        0,
+        RateSetterContractObj.address,
+        "addAuthorization",
+        ["address"],
+        [MarketTwapFeed.address]
+    );
+
+    await executeActionFromMSW(
+        msw,
+        0,
         RateSetterContractObj.address,
         "setMarketTwapFeedContractAddress",
+        ["address"],
+        [ShutdownModule.address]
+    );
+
+    // Shutdown Module
+
+    await executeActionFromMSW(
+        msw,
+        0,
+        ShutdownModule.address,
+        "setParametersAddress",
+        ["address"],
+        [ParametersContractObj.address]
+    );
+
+    await executeActionFromMSW(
+        msw,
+        0,
+        ShutdownModule.address,
+        "setTreasuryAddress",
+        ["address"],
+        [TreasuryContractObj.address]
+    );
+
+    await executeActionFromMSW(
+        msw,
+        0,
+        ShutdownModule.address,
+        "setCdpmanagerAddress",
+        ["address"],
+        [cdpManagerContractObj.address]
+    );
+
+    await executeActionFromMSW(
+        msw,
+        0,
+        ShutdownModule.address,
+        "setLiquidatorAddress",
+        ["address"],
+        [LiquidatorContractObj.address]
+    );
+
+    await executeActionFromMSW(
+        msw,
+        0,
+        ShutdownModule.address,
+        "setEthTWAPAddress",
+        ["address"],
+        [EthTwapFeed.address]
+    );
+
+    await executeActionFromMSW(
+        msw,
+        0,
+        ShutdownModule.address,
+        "setMarketTWAPAddress",
         ["address"],
         [MarketTwapFeed.address]
     );
@@ -158,6 +310,16 @@ module.exports = async ({ getNamedAccounts }) => {
         ["bytes32,address"],
         [formatBytes32String("rateSetterContractAddress"),RateSetterContractObj.address]
     );
+
+    await executeActionFromMSW(
+        msw,
+        0,
+        ShutdownModule.address,
+        "setRateSetterAddress",
+        ["address"],
+        [RateSetterContractObj.address]
+    );
+
 };
 
 module.exports.tags = ["all", "addauthorization"];
