@@ -20,7 +20,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
         // wait if on a live network so we can verify properly
         waitConfirmations: network.config.blockConfirmations || 1,
     });
-    log(`CDPManager deployed at ${ShutdownModule.address}`);
+    log(`ShutdownModule deployed at ${ShutdownModule.address}`);
 
     // verify contract on etherscan
     if (!developmentChains.includes(network.name) && process.env.ETHERSCAN_API_KEY) {

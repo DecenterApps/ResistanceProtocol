@@ -26,7 +26,6 @@ module.exports = async ({ getNamedAccounts }) => {
 
     // noiContract
 
-
     await executeActionFromMSW(
         msw,
         0,
@@ -130,16 +129,16 @@ module.exports = async ({ getNamedAccounts }) => {
         ["address"],
         [RateSetterContractObj.address]
     );
-
+   
     await executeActionFromMSW(
         msw,
         0,
         cdpManagerContractObj.address,
-        "addAuthorization",
+        "setShutdownModuleContractAddress",
         ["address"],
         [ShutdownModule.address]
     );
-
+    
     // Treasury
     await executeActionFromMSW(
         msw,
@@ -149,7 +148,7 @@ module.exports = async ({ getNamedAccounts }) => {
         ["address"],
         [process.env.UPDATE_BOT_ACCOUNT]
     );
-
+   
     await executeActionFromMSW(
         msw,
         0,
@@ -183,7 +182,7 @@ module.exports = async ({ getNamedAccounts }) => {
         msw,
         0,
         MarketTwapFeed.address,
-        "addAuthorization",
+        "setShutdownModuleContractAddress",
         ["address"],
         [ShutdownModule.address]
     );
@@ -203,29 +202,62 @@ module.exports = async ({ getNamedAccounts }) => {
         msw, 
         0,
         EthTwapFeed.address,
-        "addAuthorization",
+        "setShutdownModuleContractAddress",
         ["address"],
         [ShutdownModule.address]
     );
 
-    //RateSetter
+    // RateSetter
 
     await executeActionFromMSW(
         msw,
         0,
         RateSetterContractObj.address,
-        "addAuthorization",
-        ["address"],
-        [MarketTwapFeed.address]
+        "modifyAddressParameter",
+        ["bytes32","address"],
+        [formatBytes32String("MarketTwapFeed"),MarketTwapFeed.address]
     );
 
     await executeActionFromMSW(
         msw,
         0,
         RateSetterContractObj.address,
-        "setMarketTwapFeedContractAddress",
+        "modifyAddressParameter",
+        ["bytes32","address"],
+        [formatBytes32String("ShutdownModule"),ShutdownModule.address]
+    );
+
+    // Abs Pi Controller
+
+    await executeActionFromMSW(
+        msw,
+        0,
+        AbsPIController.address,
+        "setFuzzyModuleContractAddress",
         ["address"],
-        [ShutdownModule.address]
+        [FuzzyModule.address]
+    );
+
+    // CPI Controller
+
+    await executeActionFromMSW(
+        msw,
+        0,
+        CPIController.address,
+        "setFuzzyModuleContractAddress",
+        ["address"],
+        [FuzzyModule.address]
+    );
+
+    // Fuzzy Module
+
+    await executeActionFromMSW(
+        msw,
+        0,
+        FuzzyModule.address,
+        "modifyAddressParameter",
+        ["bytes32","address"],
+        [formatBytes32String("rateSetterContractAddress"),RateSetterContractObj.address]
     );
 
     // Shutdown Module

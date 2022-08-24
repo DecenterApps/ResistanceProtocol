@@ -7,7 +7,7 @@ import "./CDPManager.sol";
 import "./NOI.sol";
 
 error Liquidator__CDPNotEligibleForLiquidation();
-
+error Liquidator__NotOwner();
 error Liquidator__SendToTreasuryFailed();
 error Liquidator__SendToUserFailed();
 error Liquidator__NotActive();
@@ -36,7 +36,7 @@ contract Liquidator{
 
     modifier onlyOwner(){
         if (msg.sender != owner)
-            revert Parameters_NotAuthorized();
+            revert Liquidator__NotOwner();
         _;
     }
 

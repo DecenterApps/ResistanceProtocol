@@ -32,12 +32,17 @@ export const ABI= [
   },
   {
     "inputs": [],
-    "name": "RateSetter__NotAuthorized",
+    "name": "RateSetter__NotMarketTwapFeed",
     "type": "error"
   },
   {
     "inputs": [],
     "name": "RateSetter__NotOwner",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "RateSetter__NotShutdownModule",
     "type": "error"
   },
   {
@@ -49,6 +54,25 @@ export const ABI= [
     "inputs": [],
     "name": "RateSetter__UnknownParameter",
     "type": "error"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "_parameter",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "_value",
+        "type": "address"
+      }
+    ],
+    "name": "ModifyAddressParameter",
+    "type": "event"
   },
   {
     "anonymous": false,
@@ -147,38 +171,6 @@ export const ABI= [
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "account",
-        "type": "address"
-      }
-    ],
-    "name": "addAuthorization",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "name": "authorizedAccounts",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [],
     "name": "getCpiData",
     "outputs": [
@@ -257,6 +249,37 @@ export const ABI= [
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "marketTwapFeedContractAddress",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "_parameter",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "address",
+        "name": "_value",
+        "type": "address"
+      }
+    ],
+    "name": "modifyAddressParameter",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "bytes32",
@@ -303,19 +326,6 @@ export const ABI= [
       }
     ],
     "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "account",
-        "type": "address"
-      }
-    ],
-    "name": "removeAuthorization",
-    "outputs": [],
-    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -379,6 +389,19 @@ export const ABI= [
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "shutdownModuleContractAddress",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "uint256",
@@ -397,4 +420,4 @@ export const ABI= [
     "type": "function"
   }
 ]
-export const address= "0xCa1D199b6F53Af7387ac543Af8e8a34455BBe5E0"
+export const address= "0xFD2Cf3b56a73c75A7535fFe44EBABe7723c64719"

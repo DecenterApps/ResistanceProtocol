@@ -39,6 +39,7 @@ abstract contract RedemptionRateController {
     // --- Events ---
     event ModifyUintParameter(bytes32 parameter, uint256 data);
     event ModifyIntParameter(bytes32 parameter, int256 data);
+    event ModifyAddressParameter(bytes32 parameter, int256 data);
 
     // --- Modifiers ---
     modifier onlyOwner() virtual;
@@ -157,6 +158,14 @@ abstract contract RedemptionRateController {
     function getLastProportionalTerm() public view returns (int256) {
         if (oll() == 0) return 0;
         return deviationObservations[oll() - 1].proportional;
+    }
+
+    function lastAdjustedProportionalTerm() external view returns (int256) {
+        return ((deviationObservations[oll() - 1].proportional * int256(Kp)) / int256(EIGHTEEN_DECIMAL_NUMBER));
+    }
+
+    function lastAdjustedIntegralTerm() external view returns (int256) {
+        return ((deviationObservations[oll() - 1].integral * int256(Ki)) / int256(EIGHTEEN_DECIMAL_NUMBER));
     }
 
     ///@notice returns number of deviation observations

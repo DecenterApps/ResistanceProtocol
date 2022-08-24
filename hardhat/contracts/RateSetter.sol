@@ -15,12 +15,13 @@ error RateSetter__UnknownParameter();
 error RateSetter__UnknownContract();
 error RateSetter__NotOwner();
 error RateSetter__NotMarketTwapFeed();
-error RateSetter__NotAuthorized();
+error RateSetter__NotShutdownModule();
 error RateSetter__NotActive();
 
 contract RateSetter {
     address public immutable owner;
     address public marketTwapFeedContractAddress;  
+    address public shutdownModuleContractAddress;
     uint256 redemptionPrice;
     uint256 CPI;
     uint256 redemptionRate;
@@ -43,6 +44,7 @@ contract RateSetter {
 
     event ModifyParameters(bytes32 indexed _parameter, uint256 _data);
     event ModifyContract(bytes32 indexed _contract, address _newAddress);
+    event ModifyAddressParameter(bytes32 indexed _parameter, address _value);
     event NewPrices(uint256 _marketPrice, uint256 _redemptionPrice);
     event NewRedemptionRate(uint256 _value);
 
@@ -53,32 +55,21 @@ contract RateSetter {
         _;
     }
 
-
-    modifier isMarketTwapFeed() {
+    modifier onlyMarketTwapFeed() {
         if (msg.sender != marketTwapFeedContractAddress)
             revert RateSetter__NotMarketTwapFeed();
+        _;
+    }
+
+    modifier onlyShutdownModule() {
+        if (msg.sender != shutdownModuleContractAddress)
+            revert RateSetter__NotShutdownModule();
         _;
     }
 
     modifier isActive() {
         if (!active)
             revert RateSetter__NotActive();
-        _;
-    }
-
-    mapping(address => bool) public authorizedAccounts;
-
-    function addAuthorization(address account) external isOwner {
-        authorizedAccounts[account] = true;
-    }
-
-    function removeAuthorization(address account) external isOwner {
-        authorizedAccounts[account] = false;
-    }
-
-    modifier isAuthorized() {
-        if (authorizedAccounts[msg.sender] == false)
-            revert RateSetter__NotAuthorized();
         _;
     }
 
@@ -92,7 +83,7 @@ contract RateSetter {
 
     function modifyParameters(bytes32 _parameter, uint256 _data)
         external
-        isOwner
+        onlyOwner
         isActive
     {
         if (_parameter == "redemptionPriceUpdateTime")
@@ -109,7 +100,7 @@ contract RateSetter {
 
     function modifyContracts(bytes32 _contract, address _newAddress)
         external
-        isOwner
+        onlyOwner
         isActive
     {
         if (_contract == "CDPManager")
@@ -122,8 +113,11 @@ contract RateSetter {
         emit ModifyContract(_contract, _newAddress);
     }
 
-    function setMarketTwapFeedContractAddress(address _address) external onlyOwner { 
-        marketTwapFeedContractAddress = _address;
+    function modifyAddressParameter(bytes32 _parameter, address _value) external onlyOwner{
+        if(_parameter == "MarketTwapFeed") marketTwapFeedContractAddress = _value;
+        else if (_parameter == "ShutdownModule") shutdownModuleContractAddress = _value;
+        else revert RateSetter__UnknownParameter();
+        emit ModifyAddressParameter(_parameter,_value);
     }
 
     /*
@@ -156,8 +150,7 @@ contract RateSetter {
 
     function updatePrices(uint256 _ethTwapPrice, uint256 _noiMarketPrice)
         public
-        isAuthorized
-        isMarketTwapFeed
+        onlyMarketTwapFeed
         isActive
     {
         ethPrice = nextEthPrice;
@@ -226,8 +219,8 @@ contract RateSetter {
         return redemptionPrice;
     }
 
-    function shutdown()public isAuthorized{
-        active=false;
+    function shutdown() public onlyShutdownModule{
+        active = false;
     }
 
     function rpower(

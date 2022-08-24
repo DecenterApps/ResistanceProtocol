@@ -22,6 +22,11 @@ export const ABI= [
   },
   {
     "inputs": [],
+    "name": "Liquidator__NotOwner",
+    "type": "error"
+  },
+  {
+    "inputs": [],
     "name": "Liquidator__NotShutdownModule",
     "type": "error"
   },
@@ -33,11 +38,6 @@ export const ABI= [
   {
     "inputs": [],
     "name": "Liquidator__SendToUserFailed",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "Parameters_NotAuthorized",
     "type": "error"
   },
   {
@@ -206,4 +206,4 @@ export const ABI= [
     "type": "receive"
   }
 ]
-export const address= "0xCd7c00Ac6dc51e8dCc773971Ac9221cC582F3b1b"
+export const address= "0xCa1D199b6F53Af7387ac543Af8e8a34455BBe5E0"

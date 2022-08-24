@@ -7,7 +7,7 @@ import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 error EthTwapFeed__TimeIntervalDidNotPass();
 error EthTwapFeed__NotMarketTwapFeed();
 error EthTwapFeed__NotOwner();
-error EthTwapFeed__NotAuthorized();
+error EthTwapFeed__NotShutdownModule();
 error EthTwapFeed__NotActive();
 
 contract EthTwapFeed {
@@ -20,6 +20,7 @@ contract EthTwapFeed {
     uint256 private prevCumulativeValue = 0;
     uint256 private prevEthPrice;
     address public marketTwapFeedContractAddress;
+    address public shutdownModuleContractAddress;
 
     struct Snapshot {
         uint256 cumulativeValue;
@@ -48,12 +49,11 @@ contract EthTwapFeed {
         _;
     }
 
-    modifier isAuthorized() {
-        if(!authorizedAccounts[msg.sender]) revert EthTwapFeed__NotAuthorized();
+    modifier onlyShutdownModule() {
+        if (msg.sender != shutdownModuleContractAddress)
+            revert EthTwapFeed__NotShutdownModule();
         _;
     }
-
-    mapping(address => bool) public authorizedAccounts;
 
     address public immutable owner;
 
@@ -61,7 +61,14 @@ contract EthTwapFeed {
         marketTwapFeedContractAddress = _address;
     }
 
-    modifier isMarketTwapFeed() {
+    function setShutdownModuleContractAddress(address _address)
+        external
+        onlyOwner
+    {
+        shutdownModuleContractAddress = _address;        
+    }
+
+    modifier onlyMarketTwapFeed() {
         if(msg.sender != marketTwapFeedContractAddress)
             revert EthTwapFeed__NotMarketTwapFeed();
         _;
@@ -105,8 +112,7 @@ contract EthTwapFeed {
     function updateAndGetTwap()
         public
         IntervalPassed
-        isMarketTwapFeed
-        isAuthorized
+        onlyMarketTwapFeed
         isActive
         returns (uint256)
     {
@@ -169,7 +175,7 @@ contract EthTwapFeed {
         return uint256(price); // cast to uint because it can be negative?
     }
 
-    function shutdown()public isAuthorized{
-        active=false;
+    function shutdown() public onlyShutdownModule{
+        active = false;
     }
 }
