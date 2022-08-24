@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import "./MyInputModal.css";
 import {
   VStack,
@@ -13,14 +13,9 @@ import {
   InputGroup,
   InputLeftElement,
 } from "@chakra-ui/react";
-import { ethers } from "ethers";
-import { useWeb3React } from "@web3-react/core";
-import { ABI, address } from "../../contracts/CDPManager";
 
 export default function OpenCdpModal({ open, handleClose,doOnConfirm,title,symbol }) {
   const [col, setCol] = useState(0);
-  const { library, chainId, account, activate, deactivate, active } =
-    useWeb3React();
 
   const onConfirm = () => {
     doOnConfirm(col);

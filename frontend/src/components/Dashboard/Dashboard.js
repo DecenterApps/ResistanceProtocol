@@ -1,22 +1,12 @@
 import React, { useEffect, useState } from "react";
 import "./Dashboard.css";
 import {
-  Flex,
-  Spacer,
   Box,
-  Grid,
   HStack,
-  StatGroup,
-  Stat,
-  StatLabel,
-  StatNumber,
-  StatHelpText,
-  StatArrow,
   VStack,
   Image,
-  Center,
-  Icon,
   Tooltip,
+  Progress
 } from "@chakra-ui/react";
 import {
   Chart as ChartJS,
@@ -74,9 +64,8 @@ export const options = {
 export default function Dashboard({
   bAnimation,
   setBAnimation,
-  parentSetLoading,
 }) {
-  const { library, chainId, account, activate, deactivate, active } =
+  const { library} =
     useWeb3React();
   const [ethPrice, setEthPrice] = useState(0);
   const [totalEth, setTotalEth] = useState(0);
@@ -107,8 +96,7 @@ export default function Dashboard({
 
     return () => {
       FirebaseService.closeConnection();
-    }
-
+    };
   }, []);
 
   const updateInfo = async () => {
@@ -140,26 +128,26 @@ export default function Dashboard({
     } catch {}
 
     setLoading(false);
-    parentSetLoading(false);
   };
 
   useEffect(() => {
     setLoading(true);
-    parentSetLoading(true);
     updateInfo();
-    let intervalID=setInterval(async () => {
+    let intervalID = setInterval(async () => {
       await updateInfo();
     }, 5000 * 60);
 
     return () => {
       clearInterval(intervalID);
-    }
-
+    };
   }, [library]);
-  
 
   if (loading) {
-    return <></>;
+    return(
+    <>
+      <h1 className="load-h1">Loading...</h1>
+      <Progress size="xs" isIndeterminate className="progress" />
+    </>)
   } else {
     return (
       <div className="dashboard animated bounceIn">

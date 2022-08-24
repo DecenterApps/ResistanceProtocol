@@ -28,6 +28,7 @@ function listenForTransactionMine(transactionResponse, provider) {
 }
 
 const loadCDPsForUser = async (user, library, setCDPs) => {
+  if (!library) return;
   const ids = await contractCDPManager
     .connect(library.getSigner())
     .getCDPsForAddress(user);
@@ -48,7 +49,7 @@ const loadCDPsForUser = async (user, library, setCDPs) => {
         cdpId: new Decimal(c["cdpIndex"].toString()).toString(),
         cr: new Decimal(cr.toString()).toString(),
         left: new Decimal(left.toString()).toString(),
-        lr: new Decimal(lr.toString()).toString()
+        lr: new Decimal(lr.toString()).toString(),
       };
     })
   );

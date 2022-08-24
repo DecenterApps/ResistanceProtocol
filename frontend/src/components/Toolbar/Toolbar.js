@@ -1,17 +1,25 @@
-import React from "react";
+import React,{useState} from "react";
 import "./Toolbar.css";
 import { HStack, Button, Tooltip, Text, Image } from "@chakra-ui/react";
 import { VscHome, VscPulse } from "react-icons/vsc";
-import { BsGithub } from "react-icons/bs";
 import { useWeb3React } from "@web3-react/core";
 import { truncateAddress } from "../../utils/general";
+import {useNavigate } from "react-router-dom";
 
-export default function Toolbar({ onOpenModal, setShow, show, onDisconnect }) {
-  const { chainId, account, active, chain } = useWeb3React();
+export default function Toolbar({ onOpenModal}) {
+  const {  account,  deactivate,active} = useWeb3React();
+  const [show,setShow]=useState("Dashboard")
+
+  const navigation=useNavigate();
 
   const disconnect = () => {
     setShow("Dashboard");
-    onDisconnect();
+    refreshState();
+    deactivate();
+  };
+
+  const refreshState = () => {
+    window.localStorage.setItem("provider", undefined);
   };
 
   return (
@@ -36,6 +44,7 @@ export default function Toolbar({ onOpenModal, setShow, show, onDisconnect }) {
                   : "tlbr-btn raise"
               }
               onClick={() => {
+                navigation("dashboard")
                 setShow("Dashboard");
               }}
             >
@@ -48,6 +57,7 @@ export default function Toolbar({ onOpenModal, setShow, show, onDisconnect }) {
                   show === "CDPs" ? "selected-tlbr-btn raise" : "tlbr-btn raise"
                 }
                 onClick={() => {
+                  navigation("cdps")
                   setShow("CDPs");
                 }}
               >

@@ -1,7 +1,6 @@
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import "firebase/compat/database";
-import { getDatabase, ref, child, get } from "firebase/database";
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API,
@@ -48,59 +47,8 @@ const setUpMPTracking = async(setMarketPriceHistory)=>{
   });
 }
 
-const setUpCDPs = async (cdpsOrigin, setCDPs, address) => {
-  const cdpsRef = firebase.database().ref(`cdps/${address}`);
-
-  cdpsRef.on("value", (snapshot) => {
-    let cdps = snapshot.val() || {};
-    let newCdps = [];
-    Object.keys(cdps).forEach((key) => {
-      newCdps.push(cdps[key]);
-    });
-    setCDPs(newCdps);
-  });
-
-  cdpsRef.on("child_added", (snapshot) => {
-    if (cdpsOrigin)
-      if (
-        cdpsOrigin.filter((cdp) => cdp.cdpId === snapshot.val().cdpId)
-          .length === 0
-      ) {
-        setCDPs((state) => [...state, snapshot.val()]);
-      } else {
-        setCDPs((state) => [...state, snapshot.val()]);
-      }
-  });
-
-  cdpsRef.on("child_removed", (snapshot) => {
-    const removedCdp = snapshot.val();
-    setCDPs((state) => state.filter((c) => c.cdpId !== removedCdp.cdpId));
-  });
-};
-
-const loadCDPs = async (setCDPs, address) => {
-  const cdpsRef = firebase.database().ref(`cdps/${address}`);
-  await cdpsRef
-    .get()
-    .then((snapshot) => {
-      if (snapshot.exists()) {
-        let newCdps = [];
-        Object.keys(snapshot.val()).forEach((key) => {
-          newCdps.push(snapshot.val()[key]);
-        });
-        setCDPs(newCdps);
-        return newCdps;
-      } else {
-        console.log("No data available");
-      }
-    })
-    .catch((error) => {
-      console.error(error);
-    });
-};
-
 const closeConnection=()=>{
   firebase.database().goOffline()
 }
 
-export default { setUpCDPs, loadCDPs,setUpNOITracking,setUpMPTracking,setUpRPTracking,setUpRRTracking,closeConnection };
+export default {setUpNOITracking,setUpMPTracking,setUpRPTracking,setUpRRTracking,closeConnection };
