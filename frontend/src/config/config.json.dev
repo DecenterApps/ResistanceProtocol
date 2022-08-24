@@ -1,4 +1,14 @@
 {
-    "rpcUrl": "https://kovan.infura.io"
+    "rpcUrl": "https://kovan.infura.io",
+    "localURL": "http://127.0.0.1:8545/",
+    "firebaseConfig" : {
+        "authDomain": "resistanceprotocol.firebaseapp.com",
+        "databaseURL":
+          "https://resistanceprotocol-default-rtdb.europe-west1.firebasedatabase.app",
+        "projectId": "resistanceprotocol",
+        "storageBucket": "resistanceprotocol.appspot.com",
+        "messagingSenderId": "384010337601",
+        "appId": "1:384010337601:web:ab300045fe9139d28cb5c0"
+      },
+    "bridge":"https://bridge.walletconnect.org"
 }
-  

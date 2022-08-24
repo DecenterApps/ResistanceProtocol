@@ -28,6 +28,7 @@ import { ethers } from "ethers";
 import Decimal from "decimal.js";
 import FirebaseService from "../../services/FirebaseService";
 import InfoService from "../../services/InfoService";
+import config from '../../config/config.json'
 
 ChartJS.register(
   CategoryScale,
@@ -105,7 +106,7 @@ export default function Dashboard({
       signer = library.getSigner();
     } else {
       const provider = new ethers.providers.JsonRpcProvider(
-        "http://127.0.0.1:8545/"
+        config.localURL
       );
       signer = provider.getSigner();
     }

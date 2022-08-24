@@ -1,19 +1,10 @@
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import "firebase/compat/database";
+import config from '../config/config.json'
 
-const firebaseConfig = {
-  apiKey: process.env.REACT_APP_FIREBASE_API,
-  authDomain: "resistanceprotocol.firebaseapp.com",
-  databaseURL:
-    "https://resistanceprotocol-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "resistanceprotocol",
-  storageBucket: "resistanceprotocol.appspot.com",
-  messagingSenderId: "384010337601",
-  appId: "1:384010337601:web:ab300045fe9139d28cb5c0",
-};
 
-const app = firebase.initializeApp(firebaseConfig);
+const app = firebase.initializeApp({apiKey:  process.env.REACT_APP_FIREBASE_API,...config.firebaseConfig});
 
 const setUpNOITracking = async(setNOISupplyHistory)=>{
   const noiRef = firebase.database().ref(`noiSupply`);
