@@ -42,7 +42,7 @@ class CDP_Holder(ABC):
         added_eth, added_noi = pool.put_noi_get_eth(self.debt_noi, price_station, ext_data)
         return added_eth, added_noi
 
-    def liquidation(self):
+    def liquidation(self, pool: Pool,price_station, ext_data):
         self.opened_position = False
         self.debt_noi = 0
 
@@ -66,7 +66,7 @@ def update_holder(agents, price_station: PriceStation, pool: Pool, ext_data: Ext
     if holder.opened_position:
         current_cr = holder.cdp_position.calculate_cr(ext_data, price_station)
         if current_cr < LIQUIDATION_RATIO and leverager:
-            holder.liquidation()
+            holder.liquidation(pool,price_station, ext_data)
         else:
             if (relative_gap > holder.relative_gap and price_station.rp > price_station.mp and leverager) or \
                (relative_eth_difference > holder.prediction_threshold and predicted_eth_price < curr_eth_price):
@@ -76,7 +76,6 @@ def update_holder(agents, price_station: PriceStation, pool: Pool, ext_data: Ext
             elif current_cr < holder.repay_cr:
                 holder.repay(ext_data, price_station, pool)
     else:
-        
         if (relative_gap > holder.relative_gap and price_station.rp < price_station.mp and holder.eth > 0) or \
             (relative_eth_difference > holder.prediction_threshold and predicted_eth_price > curr_eth_price):
             holder.open_position(ext_data, price_station, pool)
@@ -86,7 +85,6 @@ def update_holder(agents, price_station: PriceStation, pool: Pool, ext_data: Ext
 def get_holder_values(CONST):
     p = np.random.random()
     if p < CONST.RISKY:
-        # return CONST._R_DIFF, CONST._R_CR
         return CONST.R_DIFF, CONST.R_CR
     p -= CONST.RISKY
     if p < CONST.MODERATE:

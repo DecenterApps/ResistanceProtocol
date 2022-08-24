@@ -68,7 +68,9 @@ def update_agents(params, substep, state_history, previous_state, policy_input):
     global agents, pool, price_station, timestamp_graph, full_graph, agent_utils, br
 
     if previous_state['timestep'] == 0:
+        print(params)
         if 'parameters' in params:
+            # print('LOL')        
             update_constants(params['parameters'])
             agents, pool, price_station, timestamp_graph, full_graph, agent_utils, br = init_state()
         pbar.clear()
@@ -81,6 +83,7 @@ def update_agents(params, substep, state_history, previous_state, policy_input):
     update_whale_longterm_price_setter(agents, price_station, pool, ext_data)
     
     total_sum = np.sum(nums)
+    # print(nums)
     for i in range(total_sum // 2):
         p = np.random.random()
         if i % 2 == 0:
@@ -147,3 +150,4 @@ simulation_result = pd.DataFrame(raw_system_events)
 simulation_result.set_index(['subset', 'run', 'timestep', 'substep'])
 
 plot_all_graphs()
+print(agent_utils.names)
