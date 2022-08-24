@@ -1,4 +1,3 @@
-import { useWeb3React } from "@web3-react/core";
 import { ethers } from "ethers";
 import { ABI, address } from "../contracts/CDPManager";
 import { ABI as ABI_NOI, address as address_NOI } from "../contracts/NOI";
@@ -28,6 +27,7 @@ function listenForTransactionMine(transactionResponse, provider) {
 }
 
 const loadCDPsForUser = async (user, library, setCDPs) => {
+  if (!library) return;
   const ids = await contractCDPManager
     .connect(library.getSigner())
     .getCDPsForAddress(user);
@@ -48,7 +48,7 @@ const loadCDPsForUser = async (user, library, setCDPs) => {
         cdpId: new Decimal(c["cdpIndex"].toString()).toString(),
         cr: new Decimal(cr.toString()).toString(),
         left: new Decimal(left.toString()).toString(),
-        lr: new Decimal(lr.toString()).toString()
+        lr: new Decimal(lr.toString()).toString(),
       };
     })
   );

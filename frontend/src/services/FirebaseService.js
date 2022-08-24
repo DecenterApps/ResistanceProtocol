@@ -1,20 +1,10 @@
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import "firebase/compat/database";
-import { getDatabase, ref, child, get } from "firebase/database";
+import config from '../config/config.json'
 
-const firebaseConfig = {
-  apiKey: process.env.REACT_APP_FIREBASE_API,
-  authDomain: "resistanceprotocol.firebaseapp.com",
-  databaseURL:
-    "https://resistanceprotocol-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "resistanceprotocol",
-  storageBucket: "resistanceprotocol.appspot.com",
-  messagingSenderId: "384010337601",
-  appId: "1:384010337601:web:ab300045fe9139d28cb5c0",
-};
 
-const app = firebase.initializeApp(firebaseConfig);
+const app = firebase.initializeApp({apiKey:  process.env.REACT_APP_FIREBASE_API,...config.firebaseConfig});
 
 const setUpNOITracking = async(setNOISupplyHistory)=>{
   const noiRef = firebase.database().ref(`noiSupply`);
@@ -48,55 +38,8 @@ const setUpMPTracking = async(setMarketPriceHistory)=>{
   });
 }
 
-const setUpCDPs = async (cdpsOrigin, setCDPs, address) => {
-  const cdpsRef = firebase.database().ref(`cdps/${address}`);
+const closeConnection=()=>{
+  firebase.database().goOffline()
+}
 
-  cdpsRef.on("value", (snapshot) => {
-    let cdps = snapshot.val() || {};
-    let newCdps = [];
-    Object.keys(cdps).forEach((key) => {
-      newCdps.push(cdps[key]);
-    });
-    setCDPs(newCdps);
-  });
-
-  cdpsRef.on("child_added", (snapshot) => {
-    if (cdpsOrigin)
-      if (
-        cdpsOrigin.filter((cdp) => cdp.cdpId === snapshot.val().cdpId)
-          .length === 0
-      ) {
-        setCDPs((state) => [...state, snapshot.val()]);
-      } else {
-        setCDPs((state) => [...state, snapshot.val()]);
-      }
-  });
-
-  cdpsRef.on("child_removed", (snapshot) => {
-    const removedCdp = snapshot.val();
-    setCDPs((state) => state.filter((c) => c.cdpId !== removedCdp.cdpId));
-  });
-};
-
-const loadCDPs = async (setCDPs, address) => {
-  const cdpsRef = firebase.database().ref(`cdps/${address}`);
-  await cdpsRef
-    .get()
-    .then((snapshot) => {
-      if (snapshot.exists()) {
-        let newCdps = [];
-        Object.keys(snapshot.val()).forEach((key) => {
-          newCdps.push(snapshot.val()[key]);
-        });
-        setCDPs(newCdps);
-        return newCdps;
-      } else {
-        console.log("No data available");
-      }
-    })
-    .catch((error) => {
-      console.error(error);
-    });
-};
-
-export default { setUpCDPs, loadCDPs,setUpNOITracking,setUpMPTracking,setUpRPTracking,setUpRRTracking };
+export default {setUpNOITracking,setUpMPTracking,setUpRPTracking,setUpRRTracking,closeConnection };

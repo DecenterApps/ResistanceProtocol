@@ -1,22 +1,12 @@
 import React, { useEffect, useState } from "react";
 import "./Dashboard.css";
 import {
-  Flex,
-  Spacer,
   Box,
-  Grid,
   HStack,
-  StatGroup,
-  Stat,
-  StatLabel,
-  StatNumber,
-  StatHelpText,
-  StatArrow,
   VStack,
   Image,
-  Center,
-  Icon,
   Tooltip,
+  Progress
 } from "@chakra-ui/react";
 import {
   Chart as ChartJS,
@@ -38,6 +28,7 @@ import { ethers } from "ethers";
 import Decimal from "decimal.js";
 import FirebaseService from "../../services/FirebaseService";
 import InfoService from "../../services/InfoService";
+import config from '../../config/config.json'
 
 ChartJS.register(
   CategoryScale,
@@ -74,9 +65,8 @@ export const options = {
 export default function Dashboard({
   bAnimation,
   setBAnimation,
-  parentSetLoading,
 }) {
-  const { library, chainId, account, activate, deactivate, active } =
+  const { library} =
     useWeb3React();
   const [ethPrice, setEthPrice] = useState(0);
   const [totalEth, setTotalEth] = useState(0);
@@ -104,6 +94,10 @@ export default function Dashboard({
     FirebaseService.setUpMPTracking(setMarketPriceHistory);
     FirebaseService.setUpRPTracking(setRedemptionPriceHistory);
     FirebaseService.setUpRRTracking(setRedemptionRateHistory);
+
+    return () => {
+      FirebaseService.closeConnection();
+    };
   }, []);
 
   const updateInfo = async () => {
@@ -112,7 +106,7 @@ export default function Dashboard({
       signer = library.getSigner();
     } else {
       const provider = new ethers.providers.JsonRpcProvider(
-        "http://127.0.0.1:8545/"
+        config.localURL
       );
       signer = provider.getSigner();
     }
@@ -135,20 +129,26 @@ export default function Dashboard({
     } catch {}
 
     setLoading(false);
-    parentSetLoading(false);
   };
 
   useEffect(() => {
     setLoading(true);
-    parentSetLoading(true);
     updateInfo();
-    setInterval(async () => {
+    let intervalID = setInterval(async () => {
       await updateInfo();
     }, 5000 * 60);
+
+    return () => {
+      clearInterval(intervalID);
+    };
   }, [library]);
 
   if (loading) {
-    return <></>;
+    return(
+    <>
+      <h1 className="load-h1">Loading...</h1>
+      <Progress size="xs" isIndeterminate className="progress" />
+    </>)
   } else {
     return (
       <div className="dashboard animated bounceIn">

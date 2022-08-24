@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import "./CDPs.css";
 import { Box, VStack, HStack, Image, Button, Tooltip } from "@chakra-ui/react";
 import { Chart as ChartJS, ArcElement, Tooltip as TP, Legend } from "chart.js";
@@ -15,12 +15,13 @@ import {
 } from "../../contracts/EthTwapFeed";
 import Decimal from "decimal.js";
 import CDPService from "../../services/CDPService";
+import { useNavigate } from "react-router-dom";
 
 ChartJS.register(ArcElement, TP, Legend);
 
 export default function CDPs({ bAnimation, setBAnimation }) {
-  const { library, chainId, account, activate, deactivate, active } =
-    useWeb3React();
+  const { library, account } = useWeb3React();
+  const navigation = useNavigate();
   const [cdps, setCdps] = useState([]);
   const [actionType, setActionType] = useState("");
   const [selectedCDP, setSelectedCDP] = useState();
@@ -39,10 +40,12 @@ export default function CDPs({ bAnimation, setBAnimation }) {
 
   const getEthPrice = async () => {
     const ethTwapFeedContract = new ethers.Contract(address_ETH, ABI_ETH);
-    const ethResponse = await ethTwapFeedContract
-      .connect(library.getSigner())
-      .getEthPrice();
-    setEthPrice(ethResponse.div(10 ** 8).toString());
+    if (library) {
+      const ethResponse = await ethTwapFeedContract
+        .connect(library.getSigner())
+        .getEthPrice();
+      setEthPrice(ethResponse.div(10 ** 8).toString());
+    }
   };
 
   const modalCallback = async (col, debt) => {
@@ -87,12 +90,20 @@ export default function CDPs({ bAnimation, setBAnimation }) {
     }
     fetchData();
     getEthPrice();
-    setInterval(async () => {
+    let intervalID = setInterval(async () => {
       await getEthPrice();
     }, 5000 * 60);
+
+    return () => {
+      clearInterval(intervalID);
+    };
   }, []);
 
-  useEffect(() => {}, [cdps]);
+  useEffect(() => {
+    if (!account) {
+      navigation("/dashboard");
+    }
+  }, [account]);
 
   return (
     <>
