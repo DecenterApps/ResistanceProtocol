@@ -3,7 +3,7 @@ import "./CDPs.css";
 import { Box, VStack, HStack, Image, Button, Tooltip } from "@chakra-ui/react";
 import { Chart as ChartJS, ArcElement, Tooltip as TP, Legend } from "chart.js";
 import { Pie } from "react-chartjs-2";
-import MyInputModal from "../MyInputModal/MyInputModal";
+import MyInputModal from "../SimpleInputModal/SimpleInputModal";
 import OpenCdpModal from "../OpenCdpModal/OpenCdpModal";
 import { FcInfo } from "react-icons/fc";
 import Footer from "../Footer/Footer";

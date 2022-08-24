@@ -9,7 +9,7 @@ import {
   Route,
   useNavigate,
 } from "react-router-dom";
-import MyModal from "../MyModal/MyModal";
+import WalletModal from "../WalletModal/WalletModal";
 import Toolbar from "../Toolbar/Toolbar";
 
 export default function MainContent() {
@@ -37,7 +37,7 @@ export default function MainContent() {
 
   return (
     <div className="app">
-      <MyModal open={openModal} handleClose={closeModal}></MyModal>
+      <WalletModal open={openModal} handleClose={closeModal}></WalletModal>
       {(window.location.href.includes("dashboard") || window.location.href.includes("cdps")) && <Toolbar onOpenModal={setOpenModal}></Toolbar>}
       {bAnimation && <canvas id="canvas" className="canvas"></canvas>}
       <div className="test-center">

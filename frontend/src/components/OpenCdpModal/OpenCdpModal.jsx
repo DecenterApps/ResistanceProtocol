@@ -1,4 +1,4 @@
-import React, { useState} from "react";
+import React, { useState,useEffect} from "react";
 import "./OpenCdpModal.css";
 import {
   VStack,
@@ -20,10 +20,14 @@ export default function OpenCdpModal({ open, handleClose,doOnConfirm }) {
 
   const onConfirm = () => {
     doOnConfirm(col,debt);
-    setCol(0)
-    setDebt(0)
     handleClose();
   };
+
+  useEffect(() => {
+    setCol(0)
+    setDebt(0)
+  }, [open])
+  
 
   return (
     <Modal isOpen={open} onClose={handleClose} isCentered>

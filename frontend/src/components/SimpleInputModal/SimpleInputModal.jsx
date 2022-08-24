@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import "./MyInputModal.css";
+import React, { useState, useEffect } from "react";
+import "./SimpleInputModal.css";
 import {
   VStack,
   Modal,
@@ -14,14 +14,18 @@ import {
   InputLeftElement,
 } from "@chakra-ui/react";
 
-export default function OpenCdpModal({ open, handleClose,doOnConfirm,title,symbol }) {
+export default function SimpleInputModal({ open, handleClose,doOnConfirm,title,symbol }) {
   const [col, setCol] = useState(0);
 
   const onConfirm = () => {
     doOnConfirm(col);
-    setCol(0)
     handleClose();
   };
+
+  useEffect(() => {
+    setCol(0)
+  }, [open])
+  
 
   return (
     <Modal isOpen={open} onClose={handleClose} isCentered>
