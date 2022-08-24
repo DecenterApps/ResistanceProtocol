@@ -1,3 +1,4 @@
+from decimal import Decimal
 from classes.ext_data import ExtData
 from classes.pool import Pool
 from web3 import Web3
@@ -5,9 +6,9 @@ from web3 import Web3
 import sys
 sys.path.append('../../')
 sys.path.append('../')
-from backend.ExchangePoolSimMock import *
-from backend.MarketTwapFeed import *
 from backend.RateSetter import *
+from backend.MarketTwapFeed import *
+from backend.ExchangePoolSimMock import *
 
 web3 = Web3(Web3.HTTPProvider())
 
@@ -30,16 +31,16 @@ class PriceStation:
         self.num_steps = 0
 
     def getMp(self):
-        return web3.fromWei(ExchangePool.functions.getNoiMarketPrice().call(), 'ether')
+        return Decimal(ExchangePool.functions.getNoiMarketPrice().call() / 1e8)
 
     def getRp(self):
-        return web3.fromWei(web3.fromWei(rateSetter.functions.getRedemptionPrice().call(), 'ether'), 'ether')
+        return Decimal(rateSetter.functions.getRedemptionPrice().call() / 1e27)
 
     def getRr(self):
-        return web3.fromWei(web3.fromWei(rateSetter.functions.getRedemptionPrice().call(), 'ether'), 'ether')
+        return Decimal(rateSetter.functions.getRedemptionPrice().call() / 1e27)
 
     def getMarketTwap(self):
-        return rateSetter.functions.getTwap().call()/1e10
+        return Decimal(marketTwapFeed.functions.getTwap().call() / 1e8)
 
     # returns the value of noi in usd with market price
     # input: amount of noi
@@ -56,7 +57,7 @@ class PriceStation:
     # input: amount of dollars
     # output: amount of noi that can be purchased with redemption_price
     def get_amount_of_noi_for_rp_value(self, dollar_amount):
-        return dollar_amount / self.getRp()
+        return dollar_amount / Decimal(self.getRp())
 
     # input: amount of dollars
     # output: amount of noi that can be purchased with market_price

@@ -18,6 +18,11 @@ module.exports = async ({ getNamedAccounts }) => {
     const MarketTwapFeed = await ethers.getContract("MarketTwapFeed", deployer);
     const AbsPIController = await ethers.getContract("AbsPiController", deployer);
     const ExchangePool = await ethers.getContract("ExchangePoolSimMock", deployer);
+    const EthPriceFeedMock = await ethers.getContract("EthPriceFeedMock", deployer);
+    const CPIDataFeedMock = await ethers.getContract("CPIDataFeedMock", deployer);
+
+    writeAbiAndAddress("EthPriceFeedMock",EthPriceFeedMock.address)
+    writeAbiAndAddress("CPIDataFeedMock",CPIDataFeedMock.address)
 
     writeAbiAndAddress("MultiSigWallet", msw.address)
     writeAbiAndAddress("NOI", noiContract.address)

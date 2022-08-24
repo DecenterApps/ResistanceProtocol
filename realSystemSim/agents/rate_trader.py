@@ -19,13 +19,13 @@ class Rate_Trader(Trader):
         return price_station.getRr() > self.rr_low and price_station.getRr() < self.rr_high
 
     def buy_noi_condition(self, price_station):
-        return price_station.getRr() > self.rr_high and price_station.getMp() < price_station.gerRp() and self.getEth() > 0.0001
+        return price_station.getRr() > self.rr_high and price_station.getMp() < price_station.getRp() and self.getEth() > 0.0001
 
     def buy_eth_condition(self, price_station):
-        return price_station.getRr() < self.rr_low and price_station.getMp() > price_station.gerRp() and self.getNoi() > 0.0001
+        return price_station.getRr() < self.rr_low and price_station.getMp() > price_station.getRp() and self.getNoi() > 0.0001
 
 
-def update_rate_trader(agents, price_station: PriceStation, pool: Pool):
+def update_rate_trader(agents, price_station: PriceStation, pool: Pool, ext_data):
     update_trader(agents, price_station, pool, 'rate_trader', RATE_TRADER)
 
 
@@ -36,7 +36,7 @@ def create_new_rate_trader(name, address, private_key):
 
 def create_rate_traders(agents):
     for i in range(RATE_TRADER.ACCOUNTS_START, RATE_TRADER.ACCOUNTS_END):
-        name = 'rate_trader' + str(i)
+        name = 'rate_trader' + str(i-RATE_TRADER.ACCOUNTS_START)
         account = accounts[i]
         agents[name] = create_new_rate_trader(
             name, account['account'], account['private_key'])

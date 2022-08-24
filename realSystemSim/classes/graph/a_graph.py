@@ -1,3 +1,4 @@
+from decimal import Decimal
 import matplotlib.pyplot as plt
 from classes.ext_data import ExtData
 from constants import REDEMPTION_RATES

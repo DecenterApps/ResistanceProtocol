@@ -4,8 +4,11 @@ pragma solidity >=0.8.0 <0.9.0;
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 import "./NOI.sol";
+import "hardhat/console.sol";
 
 error ExchangePoolSimMock__CantSendEth();
+error ExchangePoolSimMock__EthAmountExceedsLimit();
+error ExchangePoolSimMock__NoiAmountExceedsLimit();
 
 contract ExchangePoolSimMock {
     NOI private immutable noiContract;
@@ -26,6 +29,9 @@ contract ExchangePoolSimMock {
 
         uint256 amount = (msg.value * noiBalance) / ethBalance;
 
+        if (amount >= noiBalance)
+            revert ExchangePoolSimMock__NoiAmountExceedsLimit();
+
         noiContract.transferFrom(address(this), msg.sender, amount);
     }
 
@@ -34,6 +40,9 @@ contract ExchangePoolSimMock {
         uint256 noiBalance = noiContract.balanceOf(address(this));
 
         uint256 ethAmount = (amount * ethBalance) / noiBalance;
+
+        if (ethAmount >= ethBalance)
+            revert ExchangePoolSimMock__EthAmountExceedsLimit();
 
         noiContract.transferFrom(msg.sender, address(this), amount);
 
@@ -55,7 +64,7 @@ contract ExchangePoolSimMock {
 
     function getNoiMarketPrice() public view returns (uint256) {
         uint256 ethAmount = howMuchEthForNoi(1e18);
-        return ethAmount * getEthPrice()/1e18;
+        return (ethAmount * getEthPrice()) / 1e18;
     }
 
     function getEthPrice() public view returns (uint256) {

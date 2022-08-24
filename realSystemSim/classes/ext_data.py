@@ -1,3 +1,6 @@
+from decimal import Decimal
+
+
 class ExtData:
     def __init__(self):
         self.eth_dollar = []
@@ -14,11 +17,15 @@ class ExtData:
     
     #for amount of eth, returns eth value in usd
     def get_eth_value_for_amount(self, eth_amount):
-        return eth_amount * self.get_eth_value()
+        return eth_amount * Decimal(self.get_eth_value())
 
     #for dollar value returns amount of eth
     def get_eth_amount_for_value(self, dollar_value):
         return dollar_value / self.get_eth_value()
+
+    def get_predicted_eth_price(self, timestamp):
+        # return self.eth_prediction[min(timestamp, len(self.eth_prediction))]
+        return 0
 
     def set_parameters(self, timestamp):
         self.timestamp = timestamp

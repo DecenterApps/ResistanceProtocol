@@ -12,11 +12,11 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     "ExchangePoolSimMock",
     deployer
   );
-
-
   const signers = await ethers.getSigners();
-  // deplete traders
-  for (let i = 3; i < 14; i += 1) {
+
+
+  // deplete accounts
+  for (let i = 3; i < 100; i += 1) {
     const sendEth = await signers[i].sendTransaction({
       to: deployer,
       value: ethers.utils.parseEther("9950"),
@@ -26,7 +26,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 
   //get noi from opening cdp
   const txOpenCDP = await CDPManager.openCDP(deployer, {
-    value: ethers.utils.parseEther("1000"),
+    value: ethers.utils.parseEther("10000"),
   });
   await txOpenCDP.wait();
 
@@ -34,20 +34,28 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 
   const mintTx = await CDPManager.mintFromCDP(
     getCDPIndex.toString(),
-    ethers.utils.parseEther("100000")
+    ethers.utils.parseEther("3000000")
   );
   await mintTx.wait();
 
+  // send noi to traders
+  for (let i = 3; i < 13; i += 1) {
+    const sendNoi = await NOI.transfer(signers[i].address, ethers.utils.parseEther("25000"));
+    await sendNoi.wait();
+    // const amount = await NOI.balanceOf(signers[i].address);
+    // console.log(amount.toString())
+  }
+
   const approveTx = await NOI.approve(
     ExhangePoolSimMock.address,
-    ethers.utils.parseEther("100000")
+    ethers.utils.parseEther("2500000")
   );
   await approveTx.wait();
 
   const tx = await ExhangePoolSimMock.addFunds(
-    ethers.utils.parseEther("100000"),
+    ethers.utils.parseEther("2500000"),
     {
-      value: ethers.utils.parseUnits("200", "ether"),
+      value: ethers.utils.parseUnits("5000", "ether"),
     }
   );
   await tx.wait();

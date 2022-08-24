@@ -24,7 +24,7 @@ class Price_Trader(Trader):
         return price_station.getMp() > price_station.getRp() and self.getNoi() > 0.00001
 
 
-def update_price_trader(agents, price_station: PriceStation, pool: Pool):
+def update_price_trader(agents, price_station: PriceStation, pool: Pool, ext_data):
     update_trader(agents, price_station, pool, 'price_trader', PRICE_TRADER)
 
 
@@ -34,7 +34,7 @@ def create_new_price_trader(name, address, private_key):
 
 def create_price_traders(agents):
     for i in range(PRICE_TRADER.ACCOUNTS_START, PRICE_TRADER.ACCOUNTS_END):
-        name = 'price_trader' + str(i)
+        name = 'price_trader' + str(i - PRICE_TRADER.ACCOUNTS_START)
         account = accounts[i]
         agents[name] = create_new_price_trader(
             name, account['account'], account['private_key'])

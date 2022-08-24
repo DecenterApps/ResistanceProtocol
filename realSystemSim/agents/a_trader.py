@@ -1,3 +1,7 @@
+from decimal import *
+from classes.price_station import PriceStation
+from classes.pool import Pool
+from backend.NOI import *
 from email.headerregistry import Address
 from web3 import Web3
 from abc import ABC, abstractmethod
@@ -5,15 +9,12 @@ import random
 import sys
 sys.path.append('../../')
 sys.path.append('../')
-from backend.NOI import *
 sys.path.append("..")
-from classes.pool import Pool
-from classes.price_station import PriceStation
-from decimal import *
 
 web3 = Web3(Web3.HTTPProvider())
 
 NoiContract = web3.eth.contract(address=ADDRESS_NOI, abi=ABI_NOI)
+
 
 class Trader(ABC):
     def __init__(self, name, address, private_key):
@@ -45,19 +46,20 @@ def update_trader(agents, price_station: PriceStation, pool: Pool, literal_name,
     num = CONST.ACCOUNTS_END - CONST.ACCOUNTS_START
     if num == 0:
         return
-    i = random.randint(CONST.ACCOUNTS_START, num - 1)
+    i = random.randint(0, num-1)
 
     name = literal_name + str(i)
     trader: Trader = agents[name]
-    
+
     if trader.terminate_condition(price_station):
         return
-    
+
     if trader.buy_noi_condition(price_station):
         # buy noi, sell eth
-        pool.put_eth_get_noi(Decimal(trader.getEth())*Decimal(trader.perc_amount), trader)
-    
+        pool.put_eth_get_noi(Decimal(trader.getEth(
+        ))*Decimal(trader.perc_amount), trader.name, trader.address, trader.private_key)
+
     elif trader.buy_eth_condition(price_station):
         # buy eth, sell noi
-        pool.put_noi_get_eth(trader.getNoi()*trader.perc_amount, trader)
-
+        pool.put_noi_get_eth(Decimal(trader.getNoi(
+        ))*Decimal(trader.perc_amount), trader.name, trader.address, trader.private_key)

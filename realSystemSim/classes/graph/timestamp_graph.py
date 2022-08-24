@@ -1,4 +1,6 @@
-import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use('agg')
+from matplotlib import pyplot as plt
 from agents.price_trader import *
 from classes.graph.a_graph import Graph
 from agents.agent_utils import *
@@ -15,10 +17,10 @@ class Timestamp_Graph(Graph):
         for i in range(len(agent_utils.names)):
             self.agent_balances[agent_utils.names[i]] = agent_utils.agents_dict[agent_utils.names[i]]['graph']
 
-    def add_to_graph(self, previous_state, price_station, pool):
+    def add_to_graph(self, price_station, pool, agents):
         Graph.add_to_graph(self, price_station, pool)
 
-        self.agent_utils.calculate_all_amounts(previous_state)
+        self.agent_utils.calculate_all_amounts(agents)
     
     def plot(self, ext_data: ExtData):
         Graph.plotGraph1(self, 'images/timestamp_graph.png', ext_data, 'timestamp_graph')

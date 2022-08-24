@@ -42,7 +42,8 @@ contract ExchangePool {
             uint32 _blockTimestampLast
         )
     {
-        (_reserve0, _reserve1, _blockTimestampLast) = IPool(poolAddr).getReserves();
+        (_reserve0, _reserve1, _blockTimestampLast) = IPool(poolAddr)
+            .getReserves();
     }
 
     /*
@@ -53,10 +54,7 @@ contract ExchangePool {
     This function is a wrapped and simplified version of the Uniswap Router "addLiquidity" function. If necessary, a third parameter, uint percentError, may be 
     added, to calculate the minimum amount of assets to be provided before transaction reverts:  _amountNoi * ((100 - _percentError) * scale / 100) / scale
     */
-    function provideLiquidity(
-        uint256 _amountNoi,
-        uint256 _amountDai
-    )
+    function provideLiquidity(uint256 _amountNoi, uint256 _amountDai)
         external
         returns (
             uint256 amountA,
@@ -66,47 +64,44 @@ contract ExchangePool {
     {
         IERC20(noiAddr).transferFrom(msg.sender, address(this), _amountNoi);
         IERC20(daiAddr).transferFrom(msg.sender, address(this), _amountDai);
-  
+
         IERC20(noiAddr).approve(poolRouterAddr, _amountNoi);
         IERC20(daiAddr).approve(poolRouterAddr, _amountDai);
 
-        (amountA,amountB, liquidity) = 
-            IRouter02(poolRouterAddr).addLiquidity(
-                noiAddr,
-                daiAddr,
-                _amountNoi,
-                _amountDai,
-                0, //_amountNoi * ((100 - _percentError) * scale / 100) / scale,
-                0, //_amountDai * ((100 - _percentError) * scale / 100) / scale,
-                address(msg.sender),
-                MAX_UINT
-            );
- 
+        (amountA, amountB, liquidity) = IRouter02(poolRouterAddr).addLiquidity(
+            noiAddr,
+            daiAddr,
+            _amountNoi,
+            _amountDai,
+            0, //_amountNoi * ((100 - _percentError) * scale / 100) / scale,
+            0, //_amountDai * ((100 - _percentError) * scale / 100) / scale,
+            address(msg.sender),
+            MAX_UINT
+        );
+
         emit LiquidityProvided(msg.sender, liquidity);
     }
-
 
     /*
     As with the "provideLiquidity" function, additional parameters may be added to set the minimum amount of assets to be returned before the
     transaction reverts (uint minNoi, uint minDai)
     */
-    function removeLiquidity(
-        uint256 _liquidity 
-    ) external returns (uint256 amountNoi, uint256 amountDai) {
-
+    function removeLiquidity(uint256 _liquidity)
+        external
+        returns (uint256 amountNoi, uint256 amountDai)
+    {
         IPool(poolAddr).transferFrom(msg.sender, address(this), _liquidity);
         IPool(poolAddr).approve(poolRouterAddr, _liquidity);
 
-        (amountNoi, amountDai) = 
-            IRouter02(poolRouterAddr).removeLiquidity(
-                noiAddr,
-                daiAddr,
-                _liquidity,
-                0, //minNoi,
-                0, //minDai,
-                address(msg.sender),
-                MAX_UINT
-            );
+        (amountNoi, amountDai) = IRouter02(poolRouterAddr).removeLiquidity(
+            noiAddr,
+            daiAddr,
+            _liquidity,
+            0, //minNoi,
+            0, //minDai,
+            address(msg.sender),
+            MAX_UINT
+        );
     }
 
     function exchangeNoiForDai(uint256 _amount)
@@ -140,7 +135,7 @@ contract ExchangePool {
         address[] memory tokenAddresses = new address[](2);
         tokenAddresses[0] = daiAddr;
         tokenAddresses[1] = noiAddr;
-        
+
         IERC20(daiAddr).transferFrom(msg.sender, address(this), _amount);
         IERC20(daiAddr).approve(poolRouterAddr, _amount);
 
