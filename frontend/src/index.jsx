@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./components/App/App";
 import { Web3ReactProvider } from "@web3-react/core";
-import {providers,ethers} from 'ethers'
+import {providers} from 'ethers'
 import { ChakraProvider } from "@chakra-ui/react";
 
 import Decimal from "decimal.js";

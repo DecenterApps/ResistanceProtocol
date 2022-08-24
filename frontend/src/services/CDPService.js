@@ -1,4 +1,3 @@
-import { useWeb3React } from "@web3-react/core";
 import { ethers } from "ethers";
 import { ABI, address } from "../contracts/CDPManager";
 import { ABI as ABI_NOI, address as address_NOI } from "../contracts/NOI";
