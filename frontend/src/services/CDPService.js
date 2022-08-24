@@ -39,12 +39,15 @@ const loadCDPsForUser = async (user, library, setCDPs) => {
       let left = await contractCDPManager
         .connect(library.getSigner())
         .maxMintAmount(c["cdpIndex"]);
+      let sf = await contractCDPManager
+        .connect(library.getSigner())
+        .getOnlySF(c["cdpIndex"]);
       const lr = await contractPARAMETERS.connect(library.getSigner()).getLR();
       return {
         col: new Decimal(c["lockedCollateral"].toString()),
         owner: c["owner"],
         debt: new Decimal(c["generatedDebt"].toString()),
-        sf: new Decimal(c["accumulatedFee"].toString()),
+        sf: new Decimal(sf.toString()).toString(),
         cdpId: new Decimal(c["cdpIndex"].toString()).toString(),
         cr: new Decimal(cr.toString()).toString(),
         left: new Decimal(left.toString()).toString(),

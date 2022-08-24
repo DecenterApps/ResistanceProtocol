@@ -302,8 +302,8 @@ export default function CDPs({ bAnimation, setBAnimation }) {
                     {cdps.map((c) => (
                       <Box
                         className={
-                          c.cr - c.lr < 10
-                            ? c.cr < c.lr
+                          c.cr - c.lr <= 10
+                            ? c.cr <= c.lr
                               ? "per-cdp danger"
                               : "per-cdp warning"
                             : "per-cdp"
@@ -361,8 +361,8 @@ export default function CDPs({ bAnimation, setBAnimation }) {
                             </VStack>
                             <VStack
                               className={
-                                c.cr - c.lr < 10 &&
-                                (c.cr < c.lr ? "danger-text" : "warning-text")
+                                c.cr - c.lr <= 10 &&
+                                (c.cr <= c.lr ? "danger-text" : "warning-text")
                               }
                             >
                               <div>CR</div>
