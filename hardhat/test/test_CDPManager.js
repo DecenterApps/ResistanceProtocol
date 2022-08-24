@@ -110,10 +110,10 @@ describe("CDPManager", function () {
             const cdpIndex = await openAndMintFromCDP(CDPManagerContractObj,senderAccounts[1],12,5000);
 
             const maxMint = await CDPManagerContractObj.maxMintAmount(cdpIndex);
-
-            await expect(CDPManagerContractObj.connect(senderAccounts[1]).mintFromCDP(cdpIndex,maxMint.toString())).to.be.reverted;
             const sfpfs = await getSFperSecond(CDPManagerContractObj, cdpIndex);
-            CDPManagerContractObj.connect(senderAccounts[1]).mintFromCDP(cdpIndex,(maxMint-2*sfpfs).toString());
+            
+            await expect(CDPManagerContractObj.connect(senderAccounts[1]).mintFromCDP(cdpIndex,maxMint.toString())).to.be.reverted;
+            await CDPManagerContractObj.connect(senderAccounts[1]).mintFromCDP(cdpIndex,BigNumber(maxMint.toString()).subtract(2*sfpfs).toString());
         });
     });
 

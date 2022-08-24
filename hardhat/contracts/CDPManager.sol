@@ -346,7 +346,8 @@ contract CDPManager {
     /// @param _cdpIndex index of cdp
     function maxMintAmount(uint256 _cdpIndex) public view returns(uint256){
 
-        uint256 maxTotalDebt = cdpList[_cdpIndex].lockedCollateral * ethRp / EIGHTEEN_DECIMAL_NUMBER;
+        uint256 LR = Parameters(parametersContractAddress).getLR();
+        uint256 maxTotalDebt = (cdpList[_cdpIndex].lockedCollateral * ethRp / EIGHTEEN_DECIMAL_NUMBER)*100/LR;
         return maxTotalDebt - getDebtWithSF(_cdpIndex);
     }
 
