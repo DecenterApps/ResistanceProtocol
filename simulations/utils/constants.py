@@ -89,10 +89,6 @@ class LEVERAGER:
     PREDICTION_THRESHOLD_MID = 0.15
     PREDICTION_THRESHOLD_LOW = 0.09
 
-    # _R_DIFF = 0.1
-    # _R_CR = 0.1
-
-
 class SAFE_OWNER:
     NUM = 100
 
@@ -106,9 +102,6 @@ class SAFE_OWNER:
     R_DIFF = 0.1
     M_DIFF = 0.25
     S_DIFF = 0.5
-
-    # _R_DIFF = 0.1
-    # _R_CR = 0.1
 
     #initial cr of safe owner
     R_CR = 1.7
@@ -142,7 +135,7 @@ class SAFE_OWNER:
 class WHALE_INSTANT_PRICE_SETTER:
     NUM = 0
 
-    ETH_AMOUNT = 50
+    ETH_AMOUNT = 0
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
 
     # relative difference between redemption price and market price when whale is activated
@@ -153,7 +146,7 @@ class WHALE_INSTANT_PRICE_SETTER:
 class WHALE_INSTANT_RATE_SETTER:
     NUM = 0
 
-    ETH_AMOUNT = 30
+    ETH_AMOUNT = 0
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
 
     # relative difference between redemption price and market price when whale is activated
@@ -164,7 +157,7 @@ class WHALE_INSTANT_RATE_SETTER:
 class NOI_TRUSTER:
     NUM = 0
 
-    ETH_AMOUNT = 5
+    ETH_AMOUNT = 10
     NOI_AMOUNT = 0
 
     #percentage of trusters resource when buying noi
@@ -187,7 +180,7 @@ class RANDOM_TRADER:
 class WHALE_LONGTERM_PRICE_SETTER:
     NUM = 0
 
-    ETH_AMOUNT = 20
+    ETH_AMOUNT = 0
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
 
     # targetted difference between redemption price and market price
@@ -225,7 +218,7 @@ INF = 10000000000
 
 TWAP_TIMESTAMPS = 100
 
-SIMULATION_TIMESTAMPS = 3000
+SIMULATION_TIMESTAMPS = 2000
 
 names = ['rate_trader', 'price_trader', 'leverager', 'safe_owner', 'whale_instant_price_setter',
          'whale_instant_rate_setter', 'noi_truster', 'random_trader', 'whale_longterm_price_setter']
@@ -237,19 +230,16 @@ nums = [RATE_TRADER.NUM, PRICE_TRADER.NUM, LEVERAGER.NUM, SAFE_OWNER.NUM, WHALE_
         WHALE_INSTANT_RATE_SETTER.NUM, NOI_TRUSTER.NUM, RANDOM_TRADER.NUM, WHALE_LONGTERM_PRICE_SETTER.NUM]
 
 def update_constants(params):
-    print(params)
     global nums
-    # LEVERAGER._R_DIFF = params['r_diff'] if 'r_diff' in params else LEVERAGER._R_DIFF
-    # SAFE_OWNER._R_DIFF = params['r_diff'] if 'r_diff' in params else SAFE_OWNER._R_DIFF
-    # LEVERAGER._R_CR = params['r_cr'] if 'r_cr' in params else LEVERAGER._R_CR
-    # SAFE_OWNER._R_CR = params['r_cr'] if 'r_cr' in params else SAFE_OWNER._R_CR
+    # print(params)
+    WHALE_INSTANT_PRICE_SETTER.ETH_AMOUNT = params['instant_price'] if 'instant_price' in params else WHALE_INSTANT_PRICE_SETTER.ETH_AMOUNT
+    WHALE_INSTANT_RATE_SETTER.ETH_AMOUNT = params['instant_rate'] if 'instant_rate' in params else WHALE_INSTANT_RATE_SETTER.ETH_AMOUNT
+    WHALE_LONGTERM_PRICE_SETTER.ETH_AMOUNT = params['longterm_price'] if 'longterm_price' in params else WHALE_LONGTERM_PRICE_SETTER.ETH_AMOUNT
+    # print(WHALE_INSTANT_PRICE_SETTER.ETH_AMOUNT, WHALE_INSTANT_RATE_SETTER.ETH_AMOUNT, WHALE_LONGTERM_PRICE_SETTER.ETH_AMOUNT)
     for i in range(len(names)):
         update_field(agent_const_classes[i], names[i], params)
         nums[i] = agent_const_classes[i].NUM
+    # print(nums)
 
 def update_field(CONST, name, params):
     CONST.NUM = params[name] if name in params else CONST.NUM
-    # if CONST != LEVERAGER and CONST != SAFE_OWNER:
-    #     return
-    LEVERAGER.RISKY = 1
-    SAFE_OWNER.RISKY = 1
