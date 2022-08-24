@@ -99,4 +99,8 @@ const loadCDPs = async (setCDPs, address) => {
     });
 };
 
-export default { setUpCDPs, loadCDPs,setUpNOITracking,setUpMPTracking,setUpRPTracking,setUpRRTracking };
+const closeConnection=()=>{
+  firebase.database().goOffline()
+}
+
+export default { setUpCDPs, loadCDPs,setUpNOITracking,setUpMPTracking,setUpRPTracking,setUpRRTracking,closeConnection };

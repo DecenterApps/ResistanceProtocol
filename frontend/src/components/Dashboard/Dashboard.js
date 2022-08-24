@@ -104,6 +104,11 @@ export default function Dashboard({
     FirebaseService.setUpMPTracking(setMarketPriceHistory);
     FirebaseService.setUpRPTracking(setRedemptionPriceHistory);
     FirebaseService.setUpRRTracking(setRedemptionRateHistory);
+
+    return () => {
+      FirebaseService.closeConnection();
+    }
+
   }, []);
 
   const updateInfo = async () => {

@@ -30,8 +30,6 @@ export default function Homepage() {
 
   useEffect(() => {
     if (library) {
-      //const contract1 = new library.eth.Contract();
-      //setContract(contract1);
     }
   }, [library]);
   return (
