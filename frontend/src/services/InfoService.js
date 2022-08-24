@@ -1,63 +1,28 @@
 import { ethers } from "ethers";
 import Decimal from "decimal.js";
 import {
-  ABI as ABI_CDPMANAGER,
-  address as address_CDPMANAGER,
+  contract as contractCDPManager
 } from "../contracts/CDPManager";
 import {
-  ABI as ABI_ETHFEED,
-  address as address_ETHFEED,
+  contract as ethTwapFeedContract
 } from "../contracts/EthTwapFeed";
-import { ABI as ABI_NOI, address as address_NOI } from "../contracts/NOI";
+import { contract as contractNOI } from "../contracts/NOI";
 import {
-  ABI as ABI_PARAMETERS,
-  address as address_PARAMETERS,
+  contract as contractPARAMETERS
 } from "../contracts/Parameters";
 import {
-  ABI as ABI_RATESETTER,
-  address as address_RATESETTER,
+  contract as contractRATESETTER
 } from "../contracts/RateSetter";
 import {
-  ABI as ABI_MARKET,
-  address as address_MARKET,
+  contract as contractMARKET
 } from "../contracts/MarketTwapFeed";
 import {
-  address as address_CONTROLLER,
-  ABI as ABI_CONTROLLER,
-} from "../contracts/AbsPiController";
-import {
-  ABI as ABI_TREASURY,
-  address as address_TREASURY,
+  contract as contractTREASURY,
+  address as address_TREASURY
 } from "../contracts/Treasury";
 import {
-  ABI as ABI_SHUTDOWN,
-  address as address_SHUTDOWN,
+  contract as contractSHUTDOWN
 } from "../contracts/ShutdownModule";
-
-const contractCDPManager = new ethers.Contract(
-  address_CDPMANAGER,
-  ABI_CDPMANAGER
-);
-
-const ethTwapFeedContract = new ethers.Contract(address_ETHFEED, ABI_ETHFEED);
-
-const contractPARAMETERS = new ethers.Contract(
-  address_PARAMETERS,
-  ABI_PARAMETERS
-);
-
-const contractRATESETTER = new ethers.Contract(
-  address_RATESETTER,
-  ABI_RATESETTER
-);
-
-const contractMARKET = new ethers.Contract(address_MARKET, ABI_MARKET);
-
-const contractNOI = new ethers.Contract(address_NOI, ABI_NOI);
-
-const contractTREASURY = new ethers.Contract(address_TREASURY, ABI_TREASURY);
-
-const contractSHUTDOWN = new ethers.Contract(address_SHUTDOWN,ABI_SHUTDOWN);
 
 const getEthPrice = async (signer) => {
   const ethResponse = await ethTwapFeedContract.connect(signer).getTwap();

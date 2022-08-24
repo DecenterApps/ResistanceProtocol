@@ -9,13 +9,10 @@ import { FcInfo } from "react-icons/fc";
 import Footer from "../Footer/Footer";
 import { useWeb3React } from "@web3-react/core";
 import { ethers } from "ethers";
-import {
-  ABI as ABI_ETH,
-  address as address_ETH,
-} from "../../contracts/EthTwapFeed";
 import Decimal from "decimal.js";
 import CDPService from "../../services/CDPService";
 import { useNavigate } from "react-router-dom";
+import InfoService from '../../services/InfoService'
 
 ChartJS.register(ArcElement, TP, Legend);
 
@@ -39,12 +36,8 @@ export default function CDPs({ bAnimation, setBAnimation }) {
   };
 
   const getEthPrice = async () => {
-    const ethTwapFeedContract = new ethers.Contract(address_ETH, ABI_ETH);
     if (library) {
-      const ethResponse = await ethTwapFeedContract
-        .connect(library.getSigner())
-        .getEthPrice();
-      setEthPrice(ethResponse.div(10 ** 8).toString());
+      setEthPrice(await InfoService.getEthPrice(library.getSigner()));
     }
   };
 

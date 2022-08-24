@@ -1,4 +1,5 @@
-export const ABI= [
+import { ethers } from "ethers"; 
+const ABI= [
   {
     "inputs": [
       {
@@ -221,3 +222,4 @@ export const ABI= [
   }
 ]
 export const address= "0x8ac87219a0F5639BC01b470F87BA2b26356CB2B9"
+ export const contract=new ethers.Contract(address, ABI)
