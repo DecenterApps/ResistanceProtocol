@@ -17,9 +17,13 @@ module.exports = async ({ getNamedAccounts }) => {
     const EthTWAPFeedContractObj = await ethers.getContract("EthTwapFeed", deployer);
     const MarketTwapFeed = await ethers.getContract("MarketTwapFeed", deployer);
     const AbsPIController = await ethers.getContract("AbsPiController", deployer);
+
     const ExchangePool = await ethers.getContract("ExchangePoolSimMock", deployer);
     const EthPriceFeedMock = await ethers.getContract("EthPriceFeedMock", deployer);
     const CPIDataFeedMock = await ethers.getContract("CPIDataFeedMock", deployer);
+
+    const ShutdownModule = await ethers.getContract("ShutdownModule", deployer);
+
 
     writeAbiAndAddress("EthPriceFeedMock",EthPriceFeedMock.address)
     writeAbiAndAddress("CPIDataFeedMock",CPIDataFeedMock.address)
@@ -34,7 +38,10 @@ module.exports = async ({ getNamedAccounts }) => {
     writeAbiAndAddress("EthTwapFeed", EthTWAPFeedContractObj.address)
     writeAbiAndAddress("MarketTwapFeed", MarketTwapFeed.address)
     writeAbiAndAddress("AbsPiController",AbsPIController.address)
+
     writeAbiAndAddress("ExchangePoolSimMock",ExchangePool.address)
+
+    writeAbiAndAddress("ShutdownModule",ShutdownModule.address)
 };
 
 module.exports.tags = ["all", "writeforfront"];

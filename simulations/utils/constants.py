@@ -13,9 +13,9 @@ def update_one_eth(one_eth: int) -> None:
     POOL.NOI_AMOUNT = POOL.ETH_AMOUNT * ONE_ETH
 
 class PRICE_TRADER:
-    NUM = 50
+    NUM = 100
 
-    ETH_AMOUNT = 10
+    ETH_AMOUNT = 5
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
 
     # percentage of traders resource when trading
@@ -29,9 +29,9 @@ class PRICE_TRADER:
     BOUND_LOW = 1 - BOUND_HIGH - BOUND_MID
 
 class RATE_TRADER:
-    NUM = 50
+    NUM = 100
 
-    ETH_AMOUNT = 10
+    ETH_AMOUNT = 5
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
 
     # percentage of traders resource when trading
@@ -47,7 +47,7 @@ class RATE_TRADER:
     RR_LOW = 1 - RR_HIGH - RR_MID
 
 class LEVERAGER:
-    NUM = 0
+    NUM = 100
 
     ETH_AMOUNT = 10
 
@@ -66,8 +66,8 @@ class LEVERAGER:
     S_CR = 2.5
 
     # percent of leveragers(risky leveragers put more percent of their money in collateral)
-    R_COLLATERAL = 1
-    M_COLLATERAL = 0.7
+    R_COLLATERAL = 0.2
+    M_COLLATERAL = 0.5
     S_COLLATERAL = 0.5
 
     # gap between market price and redemption price when leverager opens/closes a position
@@ -89,9 +89,8 @@ class LEVERAGER:
     PREDICTION_THRESHOLD_MID = 0.15
     PREDICTION_THRESHOLD_LOW = 0.09
 
-
 class SAFE_OWNER:
-    NUM = 0
+    NUM = 100
 
     ETH_AMOUNT = 10
 
@@ -110,8 +109,8 @@ class SAFE_OWNER:
     S_CR = 3
 
     #percent of safe owners(risky safe owners put more percent of their money in collateral)
-    R_COLLATERAL = 1
-    M_COLLATERAL = 0.7
+    R_COLLATERAL = 0.2
+    M_COLLATERAL = 0.5
     S_COLLATERAL = 0.5
 
     #gap between market price and redemption price when safe owner opens a position
@@ -136,7 +135,7 @@ class SAFE_OWNER:
 class WHALE_INSTANT_PRICE_SETTER:
     NUM = 0
 
-    ETH_AMOUNT = 50
+    ETH_AMOUNT = 0
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
 
     # relative difference between redemption price and market price when whale is activated
@@ -147,7 +146,7 @@ class WHALE_INSTANT_PRICE_SETTER:
 class WHALE_INSTANT_RATE_SETTER:
     NUM = 0
 
-    ETH_AMOUNT = 30
+    ETH_AMOUNT = 0
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
 
     # relative difference between redemption price and market price when whale is activated
@@ -158,7 +157,7 @@ class WHALE_INSTANT_RATE_SETTER:
 class NOI_TRUSTER:
     NUM = 0
 
-    ETH_AMOUNT = 5
+    ETH_AMOUNT = 10
     NOI_AMOUNT = 0
 
     #percentage of trusters resource when buying noi
@@ -181,7 +180,7 @@ class RANDOM_TRADER:
 class WHALE_LONGTERM_PRICE_SETTER:
     NUM = 0
 
-    ETH_AMOUNT = 20
+    ETH_AMOUNT = 0
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
 
     # targetted difference between redemption price and market price
@@ -219,7 +218,7 @@ INF = 10000000000
 
 TWAP_TIMESTAMPS = 100
 
-SIMULATION_TIMESTAMPS = 1500
+SIMULATION_TIMESTAMPS = 2000
 
 names = ['rate_trader', 'price_trader', 'leverager', 'safe_owner', 'whale_instant_price_setter',
          'whale_instant_rate_setter', 'noi_truster', 'random_trader', 'whale_longterm_price_setter']
@@ -232,9 +231,15 @@ nums = [RATE_TRADER.NUM, PRICE_TRADER.NUM, LEVERAGER.NUM, SAFE_OWNER.NUM, WHALE_
 
 def update_constants(params):
     global nums
+    # print(params)
+    WHALE_INSTANT_PRICE_SETTER.ETH_AMOUNT = params['instant_price'] if 'instant_price' in params else WHALE_INSTANT_PRICE_SETTER.ETH_AMOUNT
+    WHALE_INSTANT_RATE_SETTER.ETH_AMOUNT = params['instant_rate'] if 'instant_rate' in params else WHALE_INSTANT_RATE_SETTER.ETH_AMOUNT
+    WHALE_LONGTERM_PRICE_SETTER.ETH_AMOUNT = params['longterm_price'] if 'longterm_price' in params else WHALE_LONGTERM_PRICE_SETTER.ETH_AMOUNT
+    # print(WHALE_INSTANT_PRICE_SETTER.ETH_AMOUNT, WHALE_INSTANT_RATE_SETTER.ETH_AMOUNT, WHALE_LONGTERM_PRICE_SETTER.ETH_AMOUNT)
     for i in range(len(names)):
         update_field(agent_const_classes[i], names[i], params)
         nums[i] = agent_const_classes[i].NUM
+    # print(nums)
 
 def update_field(CONST, name, params):
     CONST.NUM = params[name] if name in params else CONST.NUM

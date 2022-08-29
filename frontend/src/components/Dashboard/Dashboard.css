@@ -1,3 +1,5 @@
+@import url(https://fonts.googleapis.com/css?family=Nosifer|Codystar:300,400|Poiret+One|Limelight|Shojumaru|Titan+One|UnifrakturMaguntia|Press+Start+2P|Creepster|Playball|Griffy|Lobster|Bevan|Racing+Sans+One|Fontdiner+Swanky|Wire+One|Lato:100,300,400|Graduate);
+
 .dashboard {
   top: 5%;
   left: 10%;
@@ -52,7 +54,7 @@
 
 .div-indiv-line2 {
   width: 10vw;
-  height: 35vh;
+  height: 15vh;
   background: rgb(5, 25, 46);
   border-radius: 3%;
   display: flex;
@@ -145,4 +147,32 @@
   top: 10px;
   right: 10px;
   cursor: pointer;
+}
+
+.load-h1 {
+  width: 100%;
+  position: absolute;
+  margin: 0;
+  top: 35vh;
+  left: 15vw;
+  text-align: center;
+  font-size: 5rem !important;
+  transform: translateY(-50%);
+  font-weight: normal;
+  color: #d7dde2;
+  font-family: lato;
+  font-weight: 100;
+  text-shadow: 0 2px 0 #000, 0 0 20px #fff;
+}
+
+.progress {
+  width: 30%;
+  position: absolute;
+  margin: 0;
+  top: 41vh;
+  left: 36vw;
+  text-align: center;
+  font-size: 5rem !important;
+  transform: translateY(-50%);
+  font-weight: normal;
 }

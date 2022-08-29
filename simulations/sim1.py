@@ -14,8 +14,8 @@ from utils.exchange import *
 from agents.agent_utils import *
 from utils.constants import *
 from tqdm import tqdm
+from parameters import parameters
 import csv
-
 
 INIT_REDEMPTION_PRICE = 2
 
@@ -68,7 +68,9 @@ def update_agents(params, substep, state_history, previous_state, policy_input):
     global agents, pool, price_station, timestamp_graph, full_graph, agent_utils, br
 
     if previous_state['timestep'] == 0:
+        print(params)
         if 'parameters' in params:
+            # print('LOL')        
             update_constants(params['parameters'])
             agents, pool, price_station, timestamp_graph, full_graph, agent_utils, br = init_state()
         pbar.clear()
@@ -81,6 +83,7 @@ def update_agents(params, substep, state_history, previous_state, policy_input):
     update_whale_longterm_price_setter(agents, price_station, pool, ext_data)
     
     total_sum = np.sum(nums)
+    # print(nums)
     for i in range(total_sum // 2):
         p = np.random.random()
         if i % 2 == 0:
@@ -98,14 +101,12 @@ def update_agents(params, substep, state_history, previous_state, policy_input):
 
     if previous_state['timestep'] == SIMULATION_TIMESTAMPS - 1:
         plot_graphs(full_graph, timestamp_graph, br)
-        print('poceo spor')
         with open('dataset/graphs.csv', 'a') as f:
             writer = csv.writer(f)
             one, two, three = timestamp_graph.save_main_axis(ext_data)
             writer.writerow([one, two, three])
             one, two, three = full_graph.save_main_axis(ext_data)
             writer.writerow([one, two, three])
-        print('kraj spor')
     
     pbar.update(1)
 
@@ -126,44 +127,8 @@ sim_config_dict = {
     'T': range(SIMULATION_TIMESTAMPS),
     'N': 1,
     'M': {
-        'parameters': [
-            {
-                'leverager': 5,
-                'safe_owner': 5
-            },
-            {
-                'leverager': 0,
-                'safe_owner': 0
-            },
-            {
-                'leverager': 10,
-                'safe_owner': 10
-            },
-            {
-                'leverager': 15,
-                'safe_owner': 15
-            },
-            {
-                'leverager': 20,
-                'safe_owner': 20
-            },
-            {
-                'leverager': 25,
-                'safe_owner': 25
-            },
-            {
-                'leverager': 30,
-                'safe_owner': 30
-            },
-            {
-                'leverager': 40,
-                'safe_owner': 40
-            },
-            {
-                'leverager': 50,
-                'safe_owner': 50
-            },
-        ]
+        'parameters':
+            parameters
     }
 }
 
@@ -185,3 +150,4 @@ simulation_result = pd.DataFrame(raw_system_events)
 simulation_result.set_index(['subset', 'run', 'timestep', 'substep'])
 
 plot_all_graphs()
+print(agent_utils.names)

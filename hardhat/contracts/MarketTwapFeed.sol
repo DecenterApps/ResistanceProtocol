@@ -8,6 +8,9 @@ import "./RateSetter.sol";
 import "./EthTwapFeed.sol";
 
 error MarketTwapFeed__TimeIntervalDidNotPass();
+error MarketTwapFeed__NotOwner();
+error MarketTwapFeed__NotActive();
+error MarketTwapFeed__NotAuthorized();
 
 abstract contract LendingPoolLike {
     function getReserves()
@@ -36,6 +39,8 @@ contract MarketTwapFeed {
     uint256 private prevCumulativeValue = 0;
     uint256 private prevPrice;
 
+    bool private active=true;
+
     struct Snapshot {
         uint256 cumulativeValue;
         uint256 timestamp;
@@ -57,6 +62,34 @@ contract MarketTwapFeed {
         _;
     }
 
+    modifier isOwner() {
+        if (msg.sender != owner) revert MarketTwapFeed__NotOwner();
+        _;
+    }
+
+    modifier isActive() {
+        if (!active)
+            revert MarketTwapFeed__NotActive();
+        _;
+    }
+
+    modifier isAuthorized() {
+        if (authorizedAccounts[msg.sender] == false)
+            revert MarketTwapFeed__NotAuthorized();
+        _;
+    }
+
+    mapping(address => bool) public authorizedAccounts;
+    address public immutable owner;
+
+    function addAuthorization(address account) external isOwner {
+        authorizedAccounts[account] = true;
+    }
+
+    function removeAuthorization(address account) external isOwner {
+        authorizedAccounts[account] = false;
+    }
+
     /*
      * @param _updateTimeInterval sets the minimum time interval for update
      * @param _twapWindowSize sets the number of updates needed for twap to change
@@ -68,8 +101,11 @@ contract MarketTwapFeed {
         address _lendingPool,
         address _ethTwapFeed,
         address _rateSetter,
-        address _coinPriceFeed
+        address _coinPriceFeed,
+        address _owner
     ) {
+        owner=_owner;
+        authorizedAccounts[_owner]=true;
         lastUpdateTimestamp = block.timestamp;
 
         coinPriceFeed = AggregatorV3Interface(_coinPriceFeed);
@@ -108,7 +144,7 @@ contract MarketTwapFeed {
     /*
      * @notice update the cumulative price if minimum interval passed
      */
-    function update() public IntervalPassed {
+    function update() public IntervalPassed isActive {
         uint256 timePassed = block.timestamp - lastUpdateTimestamp;
 
         uint256 nextCumulativeValue = prevCumulativeValue +
@@ -172,5 +208,9 @@ contract MarketTwapFeed {
     function getCoinPrice() public view returns (uint256) {
         (, int256 price, , , ) = coinPriceFeed.latestRoundData();
         return uint256(price);
+    }
+
+    function shutdown()public isAuthorized{
+        active=false;
     }
 }

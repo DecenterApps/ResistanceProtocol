@@ -15,6 +15,7 @@ error RateSetter__UnknownParameter();
 error RateSetter__UnknownContract();
 error RateSetter__NotOwner();
 error RateSetter__NotAuthorized();
+error RateSetter__NotActive();
 
 contract RateSetter {
     address public immutable owner;
@@ -22,6 +23,7 @@ contract RateSetter {
     uint256 CPI;
     uint256 redemptionRate;
     uint256 ethPrice;
+    uint256 nextEthPrice;
 
     uint256 public constant RAY = 10**27;
     uint256 public constant SECONDS_IN_A_YEAR = 31556926;
@@ -32,6 +34,8 @@ contract RateSetter {
     AbsPiController private AbsPiController_CONTRACT;
 
     CPITrackerOracle private cpiDataFeed;
+
+    bool active=true;
 
     // EVENTS
 
@@ -44,6 +48,12 @@ contract RateSetter {
 
     modifier isOwner() {
         if (owner != msg.sender) revert RateSetter__NotOwner();
+        _;
+    }
+
+    modifier isActive() {
+        if (!active)
+            revert RateSetter__NotActive();
         _;
     }
 
@@ -73,6 +83,7 @@ contract RateSetter {
     function modifyParameters(bytes32 _parameter, uint256 _data)
         external
         isOwner
+        isActive
     {
         if (_parameter == "redemptionPriceUpdateTime")
             redemptionPriceUpdateTime = _data;
@@ -88,6 +99,7 @@ contract RateSetter {
     function modifyContracts(bytes32 _contract, address _newAddress)
         external
         isOwner
+        isActive
     {
         if (_contract == "CDPManager")
             CDPManager_CONTRACT = CDPManager(_newAddress);
@@ -130,10 +142,12 @@ contract RateSetter {
     function updatePrices(uint256 _ethTwapPrice, uint256 _noiMarketPrice)
         public
         isAuthorized
+        isActive
     {
-        ethPrice = _ethTwapPrice;
 
-        // reward caller
+        ethPrice = nextEthPrice;
+        nextEthPrice = _ethTwapPrice;
+        // reward caller 
         uint256 tlv = AbsPiController_CONTRACT.tlv();
         uint256 iapcr = rpower(AbsPiController_CONTRACT.pscl(), tlv, RAY);
         uint256 validated = AbsPiController_CONTRACT.computeRate(
@@ -163,8 +177,6 @@ contract RateSetter {
                 redemptionPrice
         );
     }
-
-    function updateRatesInternal() public {}
 
     function getCpiData() public view returns (uint256) {
         uint256 data = cpiDataFeed.currPegPrice();
@@ -197,6 +209,10 @@ contract RateSetter {
 
     function getRedemptionPrice() public view returns (uint256) {
         return redemptionPrice;
+    }
+
+    function shutdown()public isAuthorized{
+        active=false;
     }
 
     function rpower(

@@ -1,26 +1,24 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import "./CDPs.css";
 import { Box, VStack, HStack, Image, Button, Tooltip } from "@chakra-ui/react";
 import { Chart as ChartJS, ArcElement, Tooltip as TP, Legend } from "chart.js";
 import { Pie } from "react-chartjs-2";
-import MyInputModal from "../MyInputModal/MyInputModal";
+import MyInputModal from "../SimpleInputModal/SimpleInputModal";
 import OpenCdpModal from "../OpenCdpModal/OpenCdpModal";
 import { FcInfo } from "react-icons/fc";
 import Footer from "../Footer/Footer";
 import { useWeb3React } from "@web3-react/core";
 import { ethers } from "ethers";
-import {
-  ABI as ABI_ETH,
-  address as address_ETH,
-} from "../../contracts/EthTwapFeed";
 import Decimal from "decimal.js";
 import CDPService from "../../services/CDPService";
+import { useNavigate } from "react-router-dom";
+import InfoService from '../../services/InfoService'
 
 ChartJS.register(ArcElement, TP, Legend);
 
 export default function CDPs({ bAnimation, setBAnimation }) {
-  const { library, chainId, account, activate, deactivate, active } =
-    useWeb3React();
+  const { library, account } = useWeb3React();
+  const navigation = useNavigate();
   const [cdps, setCdps] = useState([]);
   const [actionType, setActionType] = useState("");
   const [selectedCDP, setSelectedCDP] = useState();
@@ -38,11 +36,9 @@ export default function CDPs({ bAnimation, setBAnimation }) {
   };
 
   const getEthPrice = async () => {
-    const ethTwapFeedContract = new ethers.Contract(address_ETH, ABI_ETH);
-    const ethResponse = await ethTwapFeedContract
-      .connect(library.getSigner())
-      .getEthPrice();
-    setEthPrice(ethResponse.div(10 ** 8).toString());
+    if (library) {
+      setEthPrice(await InfoService.getEthPrice(library.getSigner()));
+    }
   };
 
   const modalCallback = async (col, debt) => {
@@ -87,12 +83,20 @@ export default function CDPs({ bAnimation, setBAnimation }) {
     }
     fetchData();
     getEthPrice();
-    setInterval(async () => {
+    let intervalID = setInterval(async () => {
       await getEthPrice();
     }, 5000 * 60);
+
+    return () => {
+      clearInterval(intervalID);
+    };
   }, []);
 
-  useEffect(() => {}, [cdps]);
+  useEffect(() => {
+    if (!account) {
+      navigation("/dashboard");
+    }
+  }, [account]);
 
   return (
     <>
@@ -176,8 +180,10 @@ export default function CDPs({ bAnimation, setBAnimation }) {
                     borderRadius="3px"
                   />
                   <div>Total Debt</div>
-                  <div className="bold-text">
-                    {cdps &&
+
+                  <Tooltip
+                    label={
+                      cdps &&
                       new Decimal(
                         cdps
                           .reduce(
@@ -190,9 +196,29 @@ export default function CDPs({ bAnimation, setBAnimation }) {
                           .toString()
                       )
                         .div(10 ** 18)
-                        .toPrecision(10)
-                        .toString()}
-                  </div>
+                        .toString()
+                    }
+                    placement="auto"
+                  >
+                    <div className="bold-text">
+                      {cdps &&
+                        new Decimal(
+                          cdps
+                            .reduce(
+                              (previousValue, currentValue) =>
+                                new Decimal(previousValue).add(
+                                  currentValue["debt"]
+                                ),
+                              0
+                            )
+                            .toString()
+                        )
+                          .div(10 ** 18)
+                          .toDP(5)
+                          .toString()}{" "}
+                      NOI
+                    </div>
+                  </Tooltip>
                 </VStack>
               </Box>
               <Box className="div-line1">
@@ -212,8 +238,9 @@ export default function CDPs({ bAnimation, setBAnimation }) {
                     borderRadius="3px"
                   />
                   <div>Stability fee</div>
-                  <div className="bold-text">
-                    {cdps &&
+                  <Tooltip
+                    label={
+                      cdps &&
                       new Decimal(
                         cdps
                           .reduce(
@@ -224,10 +251,30 @@ export default function CDPs({ bAnimation, setBAnimation }) {
                             0
                           )
                           .toString()
-                      ).div(10 ** 18)
-                      .toPrecision(10)
-                      .toString()}
-                  </div>
+                      )
+                        .div(10 ** 18)
+                        .toString()
+                    }
+                    placement="auto"
+                  >
+                    <div className="bold-text">
+                      {cdps &&
+                        new Decimal(
+                          cdps
+                            .reduce(
+                              (previousValue, currentValue) =>
+                                new Decimal(previousValue).add(
+                                  currentValue["sf"]
+                                ),
+                              0
+                            )
+                            .toString()
+                        )
+                          .div(10 ** 18)
+                          .toDP(4)
+                          .toString()}
+                    </div>
+                  </Tooltip>
                 </VStack>
               </Box>
             </HStack>
@@ -246,7 +293,16 @@ export default function CDPs({ bAnimation, setBAnimation }) {
                 <Box className="cdp-line2-holder">
                   <VStack spacing="2vh">
                     {cdps.map((c) => (
-                      <Box className="per-cdp" key={c.cdpId}>
+                      <Box
+                        className={
+                          c.cr - c.lr <= 10
+                            ? c.cr <= c.lr
+                              ? "per-cdp danger"
+                              : "per-cdp warning"
+                            : "per-cdp"
+                        }
+                        key={c.cdpId}
+                      >
                         <HStack>
                           <HStack spacing="1vw" className="per-cdp-left">
                             <VStack>
@@ -264,25 +320,50 @@ export default function CDPs({ bAnimation, setBAnimation }) {
                             </VStack>
                             <VStack>
                               <div>Debt</div>
-                              <div>
-                                {
-                                  new Decimal(c.debt.toString()).div(10**18).toPrecision(10).toString()
-                                }{" "}
-                              </div>
+                              <Tooltip
+                                label={new Decimal(c.debt.toString())
+                                  .div(10 ** 18)
+                                  .toString()}
+                                placement="auto"
+                              >
+                                <div>
+                                  {new Decimal(c.debt.toString())
+                                    .div(10 ** 18)
+                                    .toDP(5)
+                                    .toString()}{" "}
+                                </div>
+                              </Tooltip>
                             </VStack>
                             <VStack>
                               <div>Stabillity fee</div>
-                              <div>
-                                {c.sf !== undefined
-                                  ? 
-                                      new Decimal(c.sf.toString()).div(10**18).toPrecision(10).toString()
-                                    
-                                  : "Calculating..."}
-                              </div>
+                              <Tooltip
+                                placement="auto"
+                                label={new Decimal(c.sf.toString())
+                                  .div(10 ** 18)
+                                  .toString()}
+                              >
+                                <div>
+                                  {c.sf !== undefined
+                                    ? new Decimal(c.sf.toString())
+                                        .div(10 ** 18)
+                                        .toDP(4)
+                                        .toString()
+                                    : "Calculating..."}
+                                </div>
+                              </Tooltip>
                             </VStack>
-                            <VStack>
+                            <VStack
+                              className={
+                                c.cr - c.lr <= 10 &&
+                                (c.cr <= c.lr ? "danger-text" : "warning-text")
+                              }
+                            >
                               <div>CR</div>
                               <div>{c.cr}%</div>
+                            </VStack>
+                            <VStack>
+                              <div>LR</div>
+                              <div>{c.lr}%</div>
                             </VStack>
                           </HStack>
                           <HStack className="per-cdp-center">

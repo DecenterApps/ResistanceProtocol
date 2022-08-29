@@ -15,11 +15,11 @@
   top: 0;
   left: 0;
   margin: 0;
-	padding: 0;
-	width: 100vw;
-	height: 100vh;
-	overflow: hidden;
-	display: flex;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
 }
 
 .container1 {
@@ -166,11 +166,23 @@
   margin-top: 2px;
 }
 
-h1 {
+.res-h1 {
   width: 100%;
   position: absolute;
   margin: 0;
-  top: 50%;
+  top: 38vh;
+  text-align: center;
+  font-size: 5rem !important;
+  transform: translateY(-50%);
+  font-weight: normal;
+}
+
+.progress {
+  width: 30%;
+  position: absolute;
+  margin: 0;
+  top: 44vh;
+  left: 15vw;
   text-align: center;
   font-size: 5rem !important;
   transform: translateY(-50%);
@@ -187,8 +199,8 @@ h1 {
 .btn {
   position: absolute;
   margin: 0;
-  top: 58%;
-  left: 30%;
+  top: 43vh;
+  left: 17vw;
   text-align: center;
   font-size: 2rem !important;
   transform: translateY(-50%);

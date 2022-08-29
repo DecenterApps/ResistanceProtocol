@@ -25,6 +25,7 @@ def calculate_rp_and_rr(market_twap, redemption_price, accumulated_leak_stable, 
 def update_rp(redemption_price:float, redemption_rate: float) -> float:
     # Update redemption price
     # print(redemptionRate)
+    # print(redemption_price)
     redemption_price = (redemption_rate ** PID_CONTROLLER.TIME_STEP) * redemption_price
     if redemption_price == 0:
         redemption_price = 1

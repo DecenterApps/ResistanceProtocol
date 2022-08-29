@@ -47,7 +47,6 @@ describe('RateSetter', function () {
         const cdpIndex = getCDPIndex.toString();
 
         let mintAmount= await CDPManagerContractObj.connect(senderAccounts[1]).maxMintAmount(cdpIndex);
-        //console.log(mintAmount.toString())
 
         const txmintFromCDPManager = await CDPManagerContractObj.connect(senderAccounts[1]).mintFromCDP(cdpIndex, "10000000000000000000000");
         await txmintFromCDPManager.wait();
@@ -65,28 +64,18 @@ describe('RateSetter', function () {
         const cdpIndex = getCDPIndex.toString();
 
         let redemptionPrice= await RateSetterContractObj.connect(senderAccounts[1]).getRedemptionPrice()
-        //console.log(redemptionPrice.toString())
         let marketPrice= await marketTwapFeedObj.connect(senderAccounts[1]).getMarketPrice()
-        //console.log(marketPrice.toString())
 
         let mintAmount= await CDPManagerContractObj.connect(senderAccounts[1]).maxMintAmount(cdpIndex);
-        //console.log(mintAmount.toString())
         let ethRP= await CDPManagerContractObj.connect(senderAccounts[1]).ethRp();
-        //console.log("===============")
-        //console.log(ethRP.toString())
 
         const txChangeRate = await marketTwapFeedObj.connect(senderAccounts[0]).update();
 
         ethRP= await CDPManagerContractObj.connect(senderAccounts[1]).ethRp();
-        //console.log("===============")
-        //console.log(ethRP.toString())
 
         mintAmount= await CDPManagerContractObj.connect(senderAccounts[1]).maxMintAmount(cdpIndex);
         redemptionPrice= await RateSetterContractObj.connect(senderAccounts[1]).getRedemptionPrice()
-        //console.log(redemptionPrice.toString())
         marketPrice= await marketTwapFeedObj.connect(senderAccounts[1]).getMarketPrice()
-        //console.log(marketPrice.toString())
-        //console.log(mintAmount.toString())
 
         await expect(CDPManagerContractObj.connect(senderAccounts[1]).mintFromCDP(cdpIndex, "10000000000000000000000")).to.be.reverted;
                                                                                             
@@ -97,12 +86,8 @@ describe('RateSetter', function () {
         const txChangeRate = await marketTwapFeedObj.connect(senderAccounts[0]).update();
 
         let redemptionRate= await RateSetterContractObj.connect(senderAccounts[1]).getYearlyRedemptionRate()
-        console.log(redemptionRate.toString())
         let proportionalTerm= await RateSetterContractObj.connect(senderAccounts[1]).getYearlyProportionalTerm()
-        console.log(proportionalTerm.toString())
         let integralTerm= await RateSetterContractObj.connect(senderAccounts[1]).getYearlyIntegralTerm()
-        console.log(integralTerm.toString())
-        console.log((integralTerm+proportionalTerm).toString())
                                                                                             
     });
 

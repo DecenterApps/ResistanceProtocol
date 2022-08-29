@@ -8,7 +8,7 @@ const injected = new InjectedConnector({
 
 const walletconnect = new WalletConnectConnector({
   rpcUrl: config.rpcUrl,
-  bridge: "https://bridge.walletconnect.org",
+  bridge: config.bridge,
   qrcode: true
 });
 

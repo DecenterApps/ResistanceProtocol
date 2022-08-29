@@ -1,4 +1,5 @@
-export const ABI= [
+import { ethers } from "ethers"; 
+const ABI= [
   {
     "inputs": [
       {
@@ -24,6 +25,11 @@ export const ABI= [
     ],
     "stateMutability": "nonpayable",
     "type": "constructor"
+  },
+  {
+    "inputs": [],
+    "name": "RateSetter__NotActive",
+    "type": "error"
   },
   {
     "inputs": [],
@@ -367,6 +373,13 @@ export const ABI= [
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "shutdown",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "uint256",
@@ -383,13 +396,7 @@ export const ABI= [
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "updateRatesInternal",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
   }
 ]
-export const address= "0x8ac87219a0F5639BC01b470F87BA2b26356CB2B9"
+export const address= "0xCa1D199b6F53Af7387ac543Af8e8a34455BBe5E0"
+ export const contract=new ethers.Contract(address, ABI)

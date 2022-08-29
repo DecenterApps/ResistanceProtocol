@@ -1,5 +1,3 @@
-from classes.regression import Regression
-
 class ExtData:
     def __init__(self):
         self.eth_dollar = []

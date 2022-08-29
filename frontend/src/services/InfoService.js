@@ -1,62 +1,28 @@
 import { ethers } from "ethers";
 import Decimal from "decimal.js";
 import {
-  ABI as ABI_CDPMANAGER,
-  address as address_CDPMANAGER,
+  contract as contractCDPManager
 } from "../contracts/CDPManager";
 import {
-  ABI as ABI_ETHFEED,
-  address as address_ETHFEED,
+  contract as ethTwapFeedContract
 } from "../contracts/EthTwapFeed";
-import { ABI as ABI_NOI, address as address_NOI } from "../contracts/NOI";
+import { contract as contractNOI } from "../contracts/NOI";
 import {
-  ABI as ABI_PARAMETERS,
-  address as address_PARAMETERS,
+  contract as contractPARAMETERS
 } from "../contracts/Parameters";
 import {
-  ABI as ABI_RATESETTER,
-  address as address_RATESETTER,
+  contract as contractRATESETTER
 } from "../contracts/RateSetter";
 import {
-  ABI as ABI_MARKET,
-  address as address_MARKET,
+  contract as contractMARKET
 } from "../contracts/MarketTwapFeed";
 import {
-  address as address_CONTROLLER,
-  ABI as ABI_CONTROLLER,
-} from "../contracts/AbsPiController";
-import {
-  ABI as ABI_TREASURY,
-  address as address_TREASURY,
+  contract as contractTREASURY,
+  address as address_TREASURY
 } from "../contracts/Treasury";
-
-const contractCDPManager = new ethers.Contract(
-  address_CDPMANAGER,
-  ABI_CDPMANAGER
-);
-
-const ethTwapFeedContract = new ethers.Contract(address_ETHFEED, ABI_ETHFEED);
-
-const contractPARAMETERS = new ethers.Contract(
-  address_PARAMETERS,
-  ABI_PARAMETERS
-);
-
-const contractRATESETTER = new ethers.Contract(
-  address_RATESETTER,
-  ABI_RATESETTER
-);
-
-const contractMARKET = new ethers.Contract(address_MARKET, ABI_MARKET);
-
-const contractNOI = new ethers.Contract(address_NOI, ABI_NOI);
-
-const contractTREASURY= new ethers.Contract(address_TREASURY,ABI_TREASURY);
-
-const contractCONTROLLER = new ethers.Contract(
-  address_CONTROLLER,
-  ABI_CONTROLLER
-);
+import {
+  contract as contractSHUTDOWN
+} from "../contracts/ShutdownModule";
 
 const getEthPrice = async (signer) => {
   const ethResponse = await ethTwapFeedContract.connect(signer).getTwap();
@@ -130,14 +96,32 @@ const getCdpCount = async (signer) => {
 };
 
 const getNoiSurplus = async (signer) => {
-  const surplusResponse=await contractTREASURY.connect(signer).unmintedNoiBalance();
+  const surplusResponse = await contractTREASURY
+    .connect(signer)
+    .unmintedNoiBalance();
   return surplusResponse;
-}
+};
 
-const getTreasuryNoi = async (signer) =>{
-  const treasuryResponse=await contractNOI.connect(signer).balanceOf(address_TREASURY);
+const getTreasuryNoi = async (signer) => {
+  const treasuryResponse = await contractNOI
+    .connect(signer)
+    .balanceOf(address_TREASURY);
   return treasuryResponse;
-}
+};
+
+const getGlobalCR = async (signer) => {
+  const globalCR = await contractSHUTDOWN
+    .connect(signer)
+    .calculateGlobalCR();
+  return globalCR;
+};
+
+const getCRLimit = async (signer) => {
+  const crLimit = await contractPARAMETERS
+    .connect(signer)
+    .getGlobalCRLimit();
+  return crLimit;
+};
 
 export default {
   getCdpCount,
@@ -153,4 +137,6 @@ export default {
   getEthPrice,
   getNoiSurplus,
   getTreasuryNoi,
+  getGlobalCR,
+  getCRLimit
 };

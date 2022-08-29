@@ -14,9 +14,9 @@ import {
 import { Image } from "@chakra-ui/react";
 import { useWeb3React } from "@web3-react/core";
 import { connectors } from "../../utils/connectors";
-import './MyModal.css'
+import './WalletModal.css'
 
-export default function MyModal({ open, handleClose }) {
+export default function WalletModal({ open, handleClose }) {
   const { activate } = useWeb3React();
 
   const setProvider = (type) => {

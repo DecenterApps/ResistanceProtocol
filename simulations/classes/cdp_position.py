@@ -17,7 +17,7 @@ class CDP_Position:
             return INF
         return eth_total_val / noi_total_val
     
-    def dfs_boost_position(self, ext_data: ExtData, price_station: PriceStation, pool: Pool):
+    def dfs_boost_position(self, ext_data: ExtData, price_station: PriceStation, pool: Pool) -> bool:
         eth_total_val = ext_data.get_eth_value_for_amount(self.collateral_eth)
         noi_total_val = price_station.get_rp_value_for_amount(self.debt_noi)
         if noi_total_val != 0 and eth_total_val / noi_total_val < self.boost_cr:
@@ -28,17 +28,25 @@ class CDP_Position:
         doll = ext_data.get_eth_value()
         b = a*(self.debt_noi + pool.noi) - doll*(self.collateral_eth + pool.eth)
         c = pool.noi*(a*self.debt_noi - doll*self.collateral_eth)
+        if b**2 - 4*a*c < 0:
+            return False
         noi_amount = (-b + np.sqrt(b**2 - 4*a*c)) / (2*a)
+
+        if noi_amount < 0:
+            return False
+
         eth_amount, noi_amount = pool.put_noi_get_eth(noi_amount, price_station, ext_data)
         self.collateral_eth += eth_amount
         self.debt_noi += noi_amount
+        if self.collateral_eth < 0 or self.debt_noi < 0:
+            assert False, "ASSERT, minus"
 
         if np.abs(self.calculate_cr(ext_data, price_station) - self.stable_cr) > 0.01:
             assert False, "ASSERT 02, not correct boost "
 
         return
     
-    def dfs_repay_position(self, ext_data: ExtData, price_station: PriceStation, pool: Pool):
+    def dfs_repay_position(self, ext_data: ExtData, price_station: PriceStation, pool: Pool) -> bool:
         eth_total_val = ext_data.get_eth_value_for_amount(self.collateral_eth)
         noi_total_val = price_station.get_rp_value_for_amount(self.debt_noi)
 
@@ -50,17 +58,21 @@ class CDP_Position:
         a = doll
         b = self.stable_cr * price_station.rp * (self.debt_noi - pool.noi) + doll * (pool.eth - self.collateral_eth)
         c = pool.eth * (self.stable_cr * price_station.rp * self.debt_noi - doll * self.collateral_eth)
+        if b**2 - 4*a*c < 0:
+            return False
         eth_amount = (-b - np.sqrt(b**2 - 4*a*c)) / (2*a)
+        if eth_amount > self.collateral_eth or eth_amount < 0 or pool.how_much_noi_for_eth(eth_amount) > self.debt_noi:
+            return False
         eth_amount, noi_amount = pool.put_eth_get_noi(eth_amount, price_station, ext_data)
 
         self.collateral_eth -= eth_amount
         self.debt_noi -= noi_amount
         if self.collateral_eth < 0 or self.debt_noi < 0:
-            assert False, "values are negative"
+            assert False, "ASSERT, minus"
         if np.abs(self.calculate_cr(ext_data, price_station) - self.stable_cr) > 0.01:
             assert False, "ASSERT 03, not correct repay"
         
-        return
+        return True
 
     def boost_position(self, ext_data: ExtData, price_station: PriceStation, pool: Pool):
         cr = self.calculate_cr(ext_data, price_station)
@@ -105,6 +117,3 @@ class CDP_Position:
             assert False, ("ASSERT 01, POSITION NOT CLOSED", noi_am - diff_noi)
         left_collateral = self.collateral_eth - eth_amount
         return left_collateral
-    
-    #TODO jel treba ovo
-    # def liquidation(self, ext_data: ExtData, price_station: PriceStation, pool: Pool):

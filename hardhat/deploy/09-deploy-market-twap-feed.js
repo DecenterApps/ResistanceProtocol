@@ -27,6 +27,8 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   let RateSetterAddress = (await ethers.getContract("RateSetter", deployer))
     .address;
 
+  const multiSigWalletAddress = (await ethers.getContract("MultiSigWallet", deployer)).address;
+
   log("----------------------------------------------------");
   log("Deploying MarketTwapFeed and waiting for confirmations...");
   const MarketTwapFeed = await deploy("MarketTwapFeed", {
@@ -38,6 +40,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
       EthTwapFeedAddress,
       RateSetterAddress,
       CoinContractAddress,
+      multiSigWalletAddress
     ],
     log: true,
     // wait if on a live network so we can verify properly
@@ -57,6 +60,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
       EthTwapFeedAddress,
       RateSetterAddress,
       CoinContractAddress,
+      multiSigWalletAddress
     ]);
   }
 };

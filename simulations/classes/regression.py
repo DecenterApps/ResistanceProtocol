@@ -7,7 +7,6 @@ sys.path.append('../../')
 
 from utils.constants import PREDICTION
 from sklearn import svm
-from sklearn.preprocessing import StandardScaler
 import csv
 from utils.util_functions import get_data_from_csv
 

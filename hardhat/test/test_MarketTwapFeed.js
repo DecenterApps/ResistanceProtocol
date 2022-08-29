@@ -54,7 +54,8 @@ describe("MarketTwapFeed", function () {
       twapRefreshInterval,
       LendingPoolMock.address,
       EthTwapFeedShortInterval.address,
-      RateSetterAddress
+      RateSetterAddress,
+      msw.address
     );
     await MarketTwapFeedShortInterval.deployed();
 
@@ -65,7 +66,8 @@ describe("MarketTwapFeed", function () {
       twapRefreshInterval,
       LendingPoolMock.address,
       EthTwapFeedShortInterval.address,
-      RateSetterAddress
+      RateSetterAddress,
+      msw.address
     );
     await MarketTwapFeedLongInterval.deployed();
 

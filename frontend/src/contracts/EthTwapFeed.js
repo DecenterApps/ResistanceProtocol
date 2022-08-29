@@ -1,4 +1,5 @@
-export const ABI= [
+import { ethers } from "ethers"; 
+const ABI= [
   {
     "inputs": [
       {
@@ -24,6 +25,11 @@ export const ABI= [
     ],
     "stateMutability": "nonpayable",
     "type": "constructor"
+  },
+  {
+    "inputs": [],
+    "name": "EthTwapFeed__NotActive",
+    "type": "error"
   },
   {
     "inputs": [],
@@ -170,6 +176,13 @@ export const ABI= [
   },
   {
     "inputs": [],
+    "name": "shutdown",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "twapWindowSize",
     "outputs": [
       {
@@ -208,4 +221,5 @@ export const ABI= [
     "type": "function"
   }
 ]
-export const address= "0x4593ed9CbE6003e687e5e77368534bb04b162503"
+export const address= "0x8ac87219a0F5639BC01b470F87BA2b26356CB2B9"
+ export const contract=new ethers.Contract(address, ABI)

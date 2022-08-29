@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "./OpenCdpModal.css";
+import "./SimpleInputModal.css";
 import {
   VStack,
   Modal,
@@ -13,28 +13,25 @@ import {
   InputGroup,
   InputLeftElement,
 } from "@chakra-ui/react";
-import { ethers } from "ethers";
-import { useWeb3React } from "@web3-react/core";
-import { ABI, address } from "../../contracts/CDPManager";
 
-export default function OpenCdpModal({ open, handleClose,doOnConfirm }) {
+export default function SimpleInputModal({ open, handleClose,doOnConfirm,title,symbol }) {
   const [col, setCol] = useState(0);
-  const [debt, setDebt] = useState(0);
-  const { library, chainId, account, activate, deactivate, active } =
-    useWeb3React();
 
   const onConfirm = () => {
-    doOnConfirm(col,debt);
-    setCol(0)
-    setDebt(0)
+    doOnConfirm(col);
     handleClose();
   };
+
+  useEffect(() => {
+    setCol(0)
+  }, [open])
+  
 
   return (
     <Modal isOpen={open} onClose={handleClose} isCentered>
       <ModalOverlay />
       <ModalContent className="modal" w="300px">
-        <ModalHeader>Add Collateral</ModalHeader>
+        <ModalHeader>{title}</ModalHeader>
         <ModalCloseButton
           _focus={{
             boxShadow: "none",
@@ -47,7 +44,7 @@ export default function OpenCdpModal({ open, handleClose,doOnConfirm }) {
                 pointerEvents="none"
                 color="gray.300"
                 fontSize="1.2em"
-                children="ETH"
+                children={symbol}
               />
               <Input
                 placeholder="Enter amount"
@@ -55,22 +52,6 @@ export default function OpenCdpModal({ open, handleClose,doOnConfirm }) {
                 value={col}
                 onChange={(e) => {
                   setCol(e.target.value);
-                }}
-              />
-            </InputGroup>
-            <InputGroup>
-              <InputLeftElement
-                pointerEvents="none"
-                color="gray.300"
-                fontSize="1.2em"
-                children="NOI"
-              />
-              <Input
-                placeholder="Enter amount"
-                type="number"
-                value={debt}
-                onChange={(e) => {
-                  setDebt(e.target.value);
                 }}
               />
             </InputGroup>
