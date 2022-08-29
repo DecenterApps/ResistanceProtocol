@@ -398,5 +398,5 @@ const ABI= [
     "type": "function"
   }
 ]
-export const address= "0xCa1D199b6F53Af7387ac543Af8e8a34455BBe5E0"
+export const address= "0x70E5370b8981Abc6e14C91F4AcE823954EFC8eA3"
  export const contract=new ethers.Contract(address, ABI)

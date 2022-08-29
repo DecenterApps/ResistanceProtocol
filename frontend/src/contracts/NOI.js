@@ -6,11 +6,6 @@ const ABI= [
         "internalType": "address",
         "name": "_owner",
         "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_chainId",
-        "type": "uint256"
       }
     ],
     "stateMutability": "nonpayable",
@@ -236,19 +231,6 @@ const ABI= [
   },
   {
     "inputs": [],
-    "name": "chainId",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
     "name": "decimals",
     "outputs": [
       {
@@ -395,20 +377,7 @@ const ABI= [
     ],
     "stateMutability": "nonpayable",
     "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "version",
-    "outputs": [
-      {
-        "internalType": "string",
-        "name": "",
-        "type": "string"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
   }
 ]
-export const address= "0x7580708993de7CA120E957A62f26A5dDD4b3D8aC"
+export const address= "0xB22C255250d74B0ADD1bfB936676D2a299BF48Bd"
  export const contract=new ethers.Contract(address, ABI)

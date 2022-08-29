@@ -29,6 +29,11 @@ const ABI= [
       },
       {
         "internalType": "address",
+        "name": "_coinPriceFeed",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
         "name": "_owner",
         "type": "address"
       }
@@ -121,7 +126,7 @@ const ABI= [
   },
   {
     "inputs": [],
-    "name": "daiPriceFeed",
+    "name": "coinPriceFeed",
     "outputs": [
       {
         "internalType": "contract AggregatorV3Interface",
@@ -134,7 +139,7 @@ const ABI= [
   },
   {
     "inputs": [],
-    "name": "getDaiPrice",
+    "name": "getCoinPrice",
     "outputs": [
       {
         "internalType": "uint256",
@@ -251,5 +256,5 @@ const ABI= [
     "type": "function"
   }
 ]
-export const address= "0xdF46e54aAadC1d55198A4a8b4674D7a4c927097A"
+export const address= "0x4000F8820522AC96C4221b299876e3e53bCc8525"
  export const contract=new ethers.Contract(address, ABI)
