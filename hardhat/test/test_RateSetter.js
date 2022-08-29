@@ -69,6 +69,9 @@ describe('RateSetter', function () {
         let mintAmount= await CDPManagerContractObj.connect(senderAccounts[1]).maxMintAmount(cdpIndex);
         let ethRP= await CDPManagerContractObj.connect(senderAccounts[1]).ethRp();
 
+        await network.provider.send("evm_increaseTime", [3660]);
+        await network.provider.send("evm_mine");
+
         const txChangeRate = await marketTwapFeedObj.connect(senderAccounts[0]).update();
 
         ethRP= await CDPManagerContractObj.connect(senderAccounts[1]).ethRp();
@@ -83,6 +86,9 @@ describe('RateSetter', function () {
 
     it('... get rates', async () => {     
         
+        await network.provider.send("evm_increaseTime", [3660]);
+        await network.provider.send("evm_mine");
+
         const txChangeRate = await marketTwapFeedObj.connect(senderAccounts[0]).update();
 
         let redemptionRate= await RateSetterContractObj.connect(senderAccounts[1]).getYearlyRedemptionRate()
