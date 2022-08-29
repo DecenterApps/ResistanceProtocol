@@ -14,6 +14,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   );
   const signers = await ethers.getSigners();
 
+  return  
 
   // deplete accounts
   for (let i = 3; i < 100; i += 1) {
