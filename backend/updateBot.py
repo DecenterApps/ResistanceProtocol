@@ -36,6 +36,8 @@ treasuryContract = web3.eth.contract(
 
 
 def updateLoop():
+    web3.provider.make_request("evm_increaseTime", [3660])
+    
     print(f'Attempting to send tx...')
     try:
         update_tx = marketTwapFeedContract.functions.update().buildTransaction(
