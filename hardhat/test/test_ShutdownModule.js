@@ -161,7 +161,7 @@ describe("ShutdownModule", function () {
       amount
     );
 
-    await network.provider.send("evm_increaseTime", [10]);
+    await network.provider.send("evm_increaseTime", [3660]);
     await network.provider.send("evm_mine");
 
     const txRedeem = await ShutdownModuleObj.connect(
@@ -293,7 +293,7 @@ describe("ShutdownModule", function () {
     shutdown = await ShutdownModuleObj.connect(senderAccounts[0]).shutdown();
     assert.equal("true", shutdown.toString());
 
-    await network.provider.send("evm_increaseTime", [1000]);
+    await network.provider.send("evm_increaseTime", [3660]);
     await network.provider.send("evm_mine");
 
     let receipt= await expect(
@@ -336,7 +336,7 @@ describe("ShutdownModule", function () {
 
     const txProcess= await ShutdownModuleObj.connect(senderAccounts[0]).processCDP("2");
 
-    await network.provider.send("evm_increaseTime", [1000]);
+    await network.provider.send("evm_increaseTime", [3660]);
     await network.provider.send("evm_mine");
 
     let receipt= await expect(
@@ -379,7 +379,7 @@ describe("ShutdownModule", function () {
 
     const txProcess= await ShutdownModuleObj.connect(senderAccounts[0]).processCDP("2");
 
-    await network.provider.send("evm_increaseTime", [1000]);
+    await network.provider.send("evm_increaseTime", [3660]);
     await network.provider.send("evm_mine");
 
     let receipt= await expect(
@@ -435,7 +435,7 @@ describe("ShutdownModule", function () {
       ShutdownModuleObj.connect(senderAccounts[0]).reedemNOI(amount)
     ).to.be.revertedWith("ShutdownModule__NotPhaseTwo()");
 
-    await network.provider.send("evm_increaseTime", [20]);
+    await network.provider.send("evm_increaseTime", [3660]);
     await network.provider.send("evm_mine");
 
     receipt= await expect(
@@ -475,6 +475,9 @@ describe("ShutdownModule", function () {
         senderAccounts[0]
       ).liquidateCDP("2")
     ).to.be.revertedWith("Liquidator__NotActive()");
+
+    await network.provider.send("evm_increaseTime", [3660]);
+    await network.provider.send("evm_mine");
 
     receipt= await expect(
       MarketTwapObj.connect(
