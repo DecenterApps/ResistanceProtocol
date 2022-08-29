@@ -33,7 +33,7 @@ describe("MarketTwapFeed", function () {
     const twapRefreshInterval = 4;
 
     LendingPoolMock = await ethers.getContract("LendingPoolMock", deployer);
-    LendingPoolMock.setToken1("100000000");
+    LendingPoolMock.setToken1("100000000000");
 
     EthPriceFeedMock = await ethers.getContract("EthPriceFeedMock", deployer);
 
@@ -55,6 +55,7 @@ describe("MarketTwapFeed", function () {
       LendingPoolMock.address,
       EthTwapFeedShortInterval.address,
       RateSetterAddress,
+      EthPriceFeedMock.address,
       msw.address
     );
     await MarketTwapFeedShortInterval.deployed();
@@ -67,6 +68,7 @@ describe("MarketTwapFeed", function () {
       LendingPoolMock.address,
       EthTwapFeedShortInterval.address,
       RateSetterAddress,
+      EthPriceFeedMock.address,
       msw.address
     );
     await MarketTwapFeedLongInterval.deployed();
