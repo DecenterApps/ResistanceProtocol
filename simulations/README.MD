@@ -22,7 +22,14 @@ To create artificial data about cpi values and eth/usd market price, run script 
 This will create 2 files in /dataset/artificial folder. Also, you will have 2 plots in images/external_data/artificial folder to view the data.
 You can also call the scripts generate_eth_value.py and generate_cpi_value.py independently.
 
-Whichever option you choose, you will have the dataset/simulation_data folder with values that are going to be used in a simulation. Plots are in the images/simulation_data/ folder. Every time you run scripts for generating data for the simulation, new data will overwrite theese folders, so when you execute the simulation, it will use the most recent data.
+Whichever option you choose, you will have the dataset/simulation_data folder with values that are going to be used in a simulation. Plots are in the images/simulation_data/ folder. Every time you run scripts for generating data for the simulation, new data will overwrite these folders, so when you execute the simulation, it will use the most recent data.
+
+#### Generate ETH script
+There are some quite useful parameters that the generate_eth_value.py script accepts. Run the command  **python utils/artificial_data/generate_eth_value.py -h** to see the details. You can choose the direction where ETH price is heading, number of samples you want to create(by default, the number of samples that is going to be created is in the constants.py file), and how stable ETH price is.
+
+_-o Parameter: ETH_Trend_Growth, range(-10,10)  
+-n Parameter: Number of samples  
+ -s Parameter: Stability of the eth price, 1 - low, 10 - high_
 
 | ETH/USD  |
 | :---: |
