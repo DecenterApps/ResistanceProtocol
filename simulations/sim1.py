@@ -70,7 +70,7 @@ def update_agents(params, substep, state_history, previous_state, policy_input):
     if previous_state['timestep'] == 0:
         print(params)
         if 'parameters' in params:
-            # print('LOL')        
+            # print('LOL')
             update_constants(params['parameters'])
             agents, pool, price_station, timestamp_graph, full_graph, agent_utils, br = init_state()
         pbar.clear()
