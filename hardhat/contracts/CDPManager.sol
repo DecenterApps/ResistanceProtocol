@@ -9,8 +9,9 @@ import "./Treasury.sol";
 error CDPManager__OnlyOwnerAuthorization();
 error CDPManager__UnauthorizedLiquidator();
 error CDPManager__NotAuthorized();
+error CDPManager__NotShutdownModule();
 error CDPManager__InvalidCDPIndex();
-error CDPManager__ContractNotAuthorized();
+error CDPManager__NotRateSetter();
 error CDPManager__NotOwner();
 error CDPManager__HasDebt();
 error CDPManager__LiquidationRatioReached();
@@ -55,13 +56,11 @@ contract CDPManager {
     address liquidatorContractAddress;
     address parametersContractAddress;
     address treasuryContractAddress;
+    address rateSetterContractAddress;
+    address shutdownModuleContractAddress;
 
     address public immutable owner;
-
-    bool private active=true;
-
-    // --- Auth ---
-    mapping(address => bool) public authorizedAccounts;
+    bool private active = true;
 
     uint256 internal constant TWENTY_SEVEN_DECIMAL_NUMBER = 10**27;
     uint256 internal constant EIGHTEEN_DECIMAL_NUMBER = 10**18;
@@ -90,20 +89,14 @@ contract CDPManager {
         address indexed _to,
         uint256 indexed _cdpIndex
     );
-    event MintCDP(
-        address indexed _from,
-        uint256 indexed _cdpIndex,
-        uint256 _amount
-    );
-    event RepayCDP(
-        address indexed _from,
-        uint256 indexed _cdpIndex,
-        uint256 _amount
-    );
-    event AddAuthorization(address _account);
-    event RemoveAuthorization(address _account);
+
+    event MintCDP(address indexed _from, uint256 indexed _cdpIndex, uint256 _amount);
+    event RepayCDP(address indexed _from, uint256 indexed _cdpIndex, uint256 _amount);
+
     event ModifyParameters(bytes32 indexed _parameter, uint256 _data);
     event ModifyContract(bytes32 indexed _contract, address _newAddress);
+    event SetRateSetterContractAddress(address _address);
+
     event CDPProcessed(uint256 _cdpId,uint256 _debtSettled, uint256 _collateralConsumed);
     event CollateralReclaimed(uint256 _cdpId, uint256 _amount);
 
@@ -118,9 +111,15 @@ contract CDPManager {
         _;
     }
 
-    modifier isAuthorized() {
-        if (authorizedAccounts[msg.sender] == false)
-            revert CDPManager__ContractNotAuthorized();
+    modifier onlyRateSetter() {
+        if (msg.sender != rateSetterContractAddress)
+            revert CDPManager__NotRateSetter();
+        _;
+    }
+
+    modifier onlyShutdownModule() {
+        if (msg.sender != shutdownModuleContractAddress)
+            revert CDPManager__NotShutdownModule();
         _;
     }
 
@@ -143,7 +142,6 @@ contract CDPManager {
 
     constructor(address _owner, address _noiCoin) {
         owner = _owner;
-        authorizedAccounts[msg.sender] = true;
         totalSupply = 0;
         cdpi = 0;
         openCDPcount = 0;
@@ -152,14 +150,10 @@ contract CDPManager {
         NOI_COIN = NOI(_noiCoin);
     }
 
-    function addAuthorization(address account) external onlyOwner isActive {
-        authorizedAccounts[account] = true;
-        emit AddAuthorization(account);
-    }
+    function setRateSetterContractAddress(address _address) external onlyOwner {
+        rateSetterContractAddress = _address;
+        emit SetRateSetterContractAddress(_address);
 
-    function removeAuthorization(address account) external onlyOwner isActive{
-        authorizedAccounts[account] = false;
-        emit RemoveAuthorization(account);
     }
 
     /// @notice Modify general uint256 params
@@ -206,6 +200,13 @@ contract CDPManager {
         onlyOwner
     {
         treasuryContractAddress = _treasuryContractAddress;
+    }
+
+    function setShutdownModuleContractAddress (address _addr)
+        external
+        onlyOwner 
+    {
+        shutdownModuleContractAddress = _addr;
     }
 
 
@@ -559,9 +560,11 @@ contract CDPManager {
         emit CDPClose(cdpList[_cdpIndex].owner, _cdpIndex);
     }
 
-    function setEthRp(uint256 _ethRp) public isAuthorized isActive{
+
+    function setEthRp(uint256 _ethRp) public onlyRateSetter isActive{
         ethRp = _ethRp;
     }
+
 
     /// @notice view the state of one CDP
     /// @param _cdpIndex index of cdp
@@ -594,15 +597,15 @@ contract CDPManager {
     }
 
     /// @notice disable the contract
-    function shutdown() public isActive{
-        active=false;
+    function shutdown() public isActive onlyShutdownModule{
+        active = false;
     }
 
 
     /// @notice process one CDP, settle debt and move some collateral to the treasury
     /// @param _cdpId id of CDP
     /// @param _collateralDelta amount of collateral which should be moved to the treasury
-    function processCDP(uint256 _cdpId, uint256 _collateralDelta) public isAuthorized CDPExists(_cdpId){
+    function processCDP(uint256 _cdpId, uint256 _collateralDelta) public onlyShutdownModule CDPExists(_cdpId){
         Treasury(payable(treasuryContractAddress)).receiveRedeemableNoi(cdpList[_cdpId].generatedDebt);
         (bool sent, ) = payable(treasuryContractAddress).call{
             value: _collateralDelta
@@ -621,7 +624,7 @@ contract CDPManager {
 
     /// @notice reclaim the remaining collateral in a processed CDP
     /// @param _cdpId id of CDP
-    function freeCollateral(uint256 _cdpId) public isAuthorized CDPExists(_cdpId){ 
+    function freeCollateral(uint256 _cdpId) public onlyShutdownModule CDPExists(_cdpId){ 
         if (getDebtWithSF(_cdpId) != 0) {
             revert CDPManager__HasDebt();
         }
