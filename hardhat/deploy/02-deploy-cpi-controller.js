@@ -7,11 +7,12 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     const { deploy, log } = deployments;
     const { deployer } = await getNamedAccounts();
     log("----------------------------------------------------");
-    log("Deploying AbsPiControllerContract and waiting for confirmations...");
+    log("Deploying CPIControllerContract and waiting for confirmations...");
 
     const multiSigWalletAddress = (await ethers.getContract("MultiSigWallet", deployer)).address;
     let precent99 = new BigNumber(10).pow(25).mult(99).toString();
-    const AbsPiControllerContract = await deploy("AbsPiController", {
+
+    const CPIControllerContract = await deploy("CPIController", {
         from: deployer,
         args: [multiSigWalletAddress, precent99, "75000000000","24000","0","0","0","999999711200000000000000000"],
         log: true,
@@ -19,11 +20,11 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
         waitConfirmations: network.config.blockConfirmations || 1,
     });
 
-    log(`AbsPiControllerContract deployed at ${AbsPiControllerContract.address}`);
+    log(`CPIControllerContract deployed at ${CPIControllerContract.address}`);
 
     // verify contract on etherscan
     if (!developmentChains.includes(network.name) && process.env.ETHERSCAN_API_KEY) {
-        await verify(AbsPiControllerContract.address, [multiSigWalletAddress, "750000000000","240000","0","0","0","999999711200000000000000000"]);
+        await verify(CPIControllerContract.address, [multiSigWalletAddress, "75000000000","24000","0","0","0","999999711200000000000000000"]);
     }
 };
 

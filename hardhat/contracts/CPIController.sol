@@ -3,34 +3,33 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import "./RedemptionRateController.sol";
 
-error AbsPiController__NotFuzzyModule();
-error AbsPiController__NotOwner();
-error AbsPiController__TooSoon();
+error CPIController__TooSoon();
+error CPIController__NotOwner();
+error CPIController__NotFuzzyModule();
 
-contract AbsPiController is RedemptionRateController{
+contract CPIController is RedemptionRateController{
 
-    modifier onlyOwner() override {
-        if (owner != msg.sender) revert AbsPiController__NotOwner();
+    // --- Modifiers ---
+    modifier onlyOwner() override{
+        if (owner != msg.sender) revert CPIController__NotOwner();
         _;
     }
 
-    modifier onlyFuzzyModule() override {
-        if(msg.sender != fuzzyModuleContractAddress) 
-            revert AbsPiController__NotFuzzyModule();
-        _;
+    modifier onlyFuzzyModule() override{
+        if (msg.sender != fuzzyModuleContractAddress)
+            revert CPIController__NotFuzzyModule();
+        _;   
     }
 
-    constructor(
-        address _owner,
+    constructor(address _owner,
         uint256 _alpha,
-        int256 _Kp,
-        int256 _Ki,
+        int256  _Kp,
+        int256  _Ki,
         uint256 _feedbackOutputUpperBound,
-        int256 _feedbackOutputLowerBound,
+        int256  _feedbackOutputLowerBound,
         uint256 _integralPeriodSize,
         uint256 _perSecondCumulativeLeak
-
-    ) 
+    )
     RedemptionRateController(
         _owner, 
         _alpha,
@@ -42,30 +41,29 @@ contract AbsPiController is RedemptionRateController{
         _perSecondCumulativeLeak
     ){}
 
-    // --- COMPUTATION ---
+    // --- Computation ---
 
     ///@notice calculates new redemption rate based on market and redemption values using PI controller logic
-    ///@param _marketPrice last recorded market price of NOI
-    ///@param _redemptionPrice last recorded redemption price of NOI
+    ///@param _marketValue last recorded market value of post-inflation NOI
+    ///@param _redemptionValue last recorded redemption value of post-inflation NOI
     function computeRate(
-        uint256 _marketPrice,
-        uint256 _redemptionPrice,
+        uint256 _marketValue,
+        uint256 _redemptionValue,
         uint256 _alpha
     ) override external 
-        onlyFuzzyModule 
-        returns (uint256) 
+        onlyFuzzyModule
+        returns (uint256)
     {
         if (block.timestamp - lastUpdateTime < integralPeriodSize) {
-            revert AbsPiController__TooSoon();
+            revert CPIController__TooSoon();
         }
 
         alpha = _alpha;
         
-        int256 proportionalTerm = int256(_redemptionPrice) -
-            int256(_marketPrice) *
+        int256 proportionalTerm = int256(_redemptionValue) -
+            int256(_marketValue) *
             int256(10**19);
         updateDeviationHistory(proportionalTerm);
-
         lastUpdateTime = block.timestamp;
         int256 piOutput = getGainAdjustedPIOutput(
             proportionalTerm,
@@ -73,10 +71,10 @@ contract AbsPiController is RedemptionRateController{
         );
         if (piOutput != 0) {
             uint256 newRedemptionRate = getBoundedRedemptionRate(piOutput);
-            currentRedemptionRate = newRedemptionRate;
+            currentRedemptionRate = TWENTY_SEVEN_DECIMAL_NUMBER * 2 - newRedemptionRate;
         } else {
             currentRedemptionRate = TWENTY_SEVEN_DECIMAL_NUMBER;
         }
         return currentRedemptionRate;
-    }    
+    }
 }

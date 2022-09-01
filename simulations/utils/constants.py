@@ -13,7 +13,7 @@ def update_one_eth(one_eth: int) -> None:
     POOL.NOI_AMOUNT = POOL.ETH_AMOUNT * ONE_ETH
 
 class PRICE_TRADER:
-    NUM = 100
+    NUM = 15
 
     ETH_AMOUNT = 5
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
@@ -29,7 +29,7 @@ class PRICE_TRADER:
     BOUND_LOW = 1 - BOUND_HIGH - BOUND_MID
 
 class RATE_TRADER:
-    NUM = 100
+    NUM = 15
 
     ETH_AMOUNT = 5
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
@@ -47,7 +47,7 @@ class RATE_TRADER:
     RR_LOW = 1 - RR_HIGH - RR_MID
 
 class LEVERAGER:
-    NUM = 100
+    NUM = 30
 
     ETH_AMOUNT = 10
 
@@ -90,7 +90,7 @@ class LEVERAGER:
     PREDICTION_THRESHOLD_LOW = 0.09
 
 class SAFE_OWNER:
-    NUM = 100
+    NUM = 30
 
     ETH_AMOUNT = 10
 
@@ -194,7 +194,7 @@ class WHALE_LONGTERM_PRICE_SETTER:
     LONG_PERIOD = 1 - SHORT_PERIOD - MID_PERIOD
 
 class POOL:
-    ETH_AMOUNT = 1000
+    ETH_AMOUNT = 300
     NOI_AMOUNT = ETH_AMOUNT * ONE_ETH
 
 class REDEMPTION_RATES:

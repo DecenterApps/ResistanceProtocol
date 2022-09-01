@@ -6,8 +6,8 @@ import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 error EthTwapFeed__TimeIntervalDidNotPass();
 error EthTwapFeed__NotMarketTwapFeed();
-error EthTwapFeed__NotAuthorized();
 error EthTwapFeed__NotOwner();
+error EthTwapFeed__NotShutdownModule();
 error EthTwapFeed__NotActive();
 
 contract EthTwapFeed {
@@ -19,6 +19,8 @@ contract EthTwapFeed {
     uint256 private lastUpdateTimestamp;
     uint256 private prevCumulativeValue = 0;
     uint256 private prevEthPrice;
+    address public marketTwapFeedContractAddress;
+    address public shutdownModuleContractAddress;
 
     struct Snapshot {
         uint256 cumulativeValue;
@@ -36,7 +38,7 @@ contract EthTwapFeed {
         _;
     }
 
-    modifier isOwner() {
+    modifier onlyOwner() {
         if (msg.sender != owner) revert EthTwapFeed__NotOwner();
         _;
     }
@@ -47,20 +49,28 @@ contract EthTwapFeed {
         _;
     }
 
-    mapping(address => bool) public authorizedAccounts;
+    modifier onlyShutdownModule() {
+        if (msg.sender != shutdownModuleContractAddress)
+            revert EthTwapFeed__NotShutdownModule();
+        _;
+    }
+
     address public immutable owner;
 
-    function addAuthorization(address account) external isOwner {
-        authorizedAccounts[account] = true;
+    function setMarketTwapFeedContractAddress(address _address) external onlyOwner {
+        marketTwapFeedContractAddress = _address;
     }
 
-    function removeAuthorization(address account) external isOwner {
-        authorizedAccounts[account] = false;
+    function setShutdownModuleContractAddress(address _address)
+        external
+        onlyOwner
+    {
+        shutdownModuleContractAddress = _address;        
     }
 
-    modifier isAuthorized() {
-        if (authorizedAccounts[msg.sender] == false)
-            revert EthTwapFeed__NotAuthorized();
+    modifier onlyMarketTwapFeed() {
+        if(msg.sender != marketTwapFeedContractAddress)
+            revert EthTwapFeed__NotMarketTwapFeed();
         _;
     }
 
@@ -114,7 +124,7 @@ contract EthTwapFeed {
     function updateAndGetTwap()
         public
         IntervalPassed
-        isAuthorized
+        onlyMarketTwapFeed
         isActive
         returns (uint256)
     {
@@ -166,7 +176,7 @@ contract EthTwapFeed {
         return uint256(price); // cast to uint because it can be negative?
     }
 
-    function shutdown()public isAuthorized{
-        active=false;
+    function shutdown() public onlyShutdownModule{
+        active = false;
     }
 }

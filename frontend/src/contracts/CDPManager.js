@@ -18,11 +18,6 @@ const ABI= [
   },
   {
     "inputs": [],
-    "name": "CDPManager__ContractNotAuthorized",
-    "type": "error"
-  },
-  {
-    "inputs": [],
     "name": "CDPManager__HasDebt",
     "type": "error"
   },
@@ -44,6 +39,16 @@ const ABI= [
   {
     "inputs": [],
     "name": "CDPManager__NotAuthorized",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "CDPManager__NotRateSetter",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "CDPManager__NotShutdownModule",
     "type": "error"
   },
   {
@@ -70,19 +75,6 @@ const ABI= [
     "inputs": [],
     "name": "CDPManager__ZeroTokenMint",
     "type": "error"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "_account",
-        "type": "address"
-      }
-    ],
-    "name": "AddAuthorization",
-    "type": "event"
   },
   {
     "anonymous": false,
@@ -264,19 +256,6 @@ const ABI= [
     "anonymous": false,
     "inputs": [
       {
-        "indexed": false,
-        "internalType": "address",
-        "name": "_account",
-        "type": "address"
-      }
-    ],
-    "name": "RemoveAuthorization",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
         "indexed": true,
         "internalType": "address",
         "name": "_from",
@@ -296,6 +275,19 @@ const ABI= [
       }
     ],
     "name": "RepayCDP",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "_address",
+        "type": "address"
+      }
+    ],
+    "name": "SetRateSetterContractAddress",
     "type": "event"
   },
   {
@@ -347,38 +339,6 @@ const ABI= [
     ],
     "name": "WithdrawCollateral",
     "type": "event"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "account",
-        "type": "address"
-      }
-    ],
-    "name": "addAuthorization",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "name": "authorizedAccounts",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
   },
   {
     "inputs": [
@@ -899,19 +859,6 @@ const ABI= [
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "account",
-        "type": "address"
-      }
-    ],
-    "name": "removeAuthorization",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
         "internalType": "uint256",
         "name": "_cdpIndex",
         "type": "uint256"
@@ -975,6 +922,32 @@ const ABI= [
       }
     ],
     "name": "setParametersContractAddress",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_address",
+        "type": "address"
+      }
+    ],
+    "name": "setRateSetterContractAddress",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_addr",
+        "type": "address"
+      }
+    ],
+    "name": "setShutdownModuleContractAddress",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

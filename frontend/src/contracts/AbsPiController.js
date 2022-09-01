@@ -8,6 +8,11 @@ const ABI= [
         "type": "address"
       },
       {
+        "internalType": "uint256",
+        "name": "_alpha",
+        "type": "uint256"
+      },
+      {
         "internalType": "int256",
         "name": "_Kp",
         "type": "int256"
@@ -43,7 +48,7 @@ const ABI= [
   },
   {
     "inputs": [],
-    "name": "AbsPiController__ContractNotEnabled",
+    "name": "AbsPiController__NotFuzzyModule",
     "type": "error"
   },
   {
@@ -61,12 +66,18 @@ const ABI= [
     "inputs": [
       {
         "indexed": false,
-        "internalType": "address",
-        "name": "_account",
-        "type": "address"
+        "internalType": "bytes32",
+        "name": "parameter",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "int256",
+        "name": "data",
+        "type": "int256"
       }
     ],
-    "name": "AddAuthorization",
+    "name": "ModifyAddressParameter",
     "type": "event"
   },
   {
@@ -108,51 +119,6 @@ const ABI= [
     "type": "event"
   },
   {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "_account",
-        "type": "address"
-      }
-    ],
-    "name": "RemoveAuthorization",
-    "type": "event"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "account",
-        "type": "address"
-      }
-    ],
-    "name": "addAuthorization",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "name": "authorizedAccounts",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [
       {
         "internalType": "uint256",
@@ -162,11 +128,6 @@ const ABI= [
       {
         "internalType": "uint256",
         "name": "_redemptionPrice",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_accumulatedLeak",
         "type": "uint256"
       }
     ],
@@ -183,12 +144,12 @@ const ABI= [
   },
   {
     "inputs": [],
-    "name": "contractEnabled",
+    "name": "fuzzyModuleContractAddress",
     "outputs": [
       {
-        "internalType": "bool",
+        "internalType": "address",
         "name": "",
-        "type": "bool"
+        "type": "address"
       }
     ],
     "stateMutability": "view",
@@ -268,19 +229,6 @@ const ABI= [
   },
   {
     "inputs": [],
-    "name": "getLastIntegralTerm",
-    "outputs": [
-      {
-        "internalType": "int256",
-        "name": "",
-        "type": "int256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
     "name": "getLastProportionalTerm",
     "outputs": [
       {
@@ -298,11 +246,6 @@ const ABI= [
         "internalType": "int256",
         "name": "_proportionalTerm",
         "type": "int256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_accumulatedLeak",
-        "type": "uint256"
       }
     ],
     "name": "getNextPriceDeviationCumulative",
@@ -346,12 +289,12 @@ const ABI= [
     "inputs": [
       {
         "internalType": "bytes32",
-        "name": "parameter",
+        "name": "_parameter",
         "type": "bytes32"
       },
       {
         "internalType": "int256",
-        "name": "data",
+        "name": "_value",
         "type": "int256"
       }
     ],
@@ -364,12 +307,12 @@ const ABI= [
     "inputs": [
       {
         "internalType": "bytes32",
-        "name": "parameter",
+        "name": "_parameter",
         "type": "bytes32"
       },
       {
         "internalType": "uint256",
-        "name": "data",
+        "name": "_value",
         "type": "uint256"
       }
     ],
@@ -406,7 +349,7 @@ const ABI= [
   },
   {
     "inputs": [],
-    "name": "pscl",
+    "name": "perSecondCumulativeLeak",
     "outputs": [
       {
         "internalType": "uint256",
@@ -421,24 +364,11 @@ const ABI= [
     "inputs": [
       {
         "internalType": "address",
-        "name": "account",
+        "name": "_address",
         "type": "address"
       }
     ],
-    "name": "removeAuthorization",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bool",
-        "name": "_enabled",
-        "type": "bool"
-      }
-    ],
-    "name": "setEnabled",
+    "name": "setFuzzyModuleContractAddress",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

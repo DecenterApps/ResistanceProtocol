@@ -12,7 +12,7 @@ describe("MarketTwapFeed", function () {
   async function update(newPrice) {
     const setNewPricetx = await LendingPoolMock.setToken2(newPrice);
     await setNewPricetx.wait();
-
+    
     const updateTx = await MarketTwapFeedShortInterval.update();
     await updateTx.wait();
   }
@@ -78,7 +78,7 @@ describe("MarketTwapFeed", function () {
       msw,
       0,
       EthTwapFeedShortInterval.address,
-      "addAuthorization",
+      "setMarketTwapFeedContractAddress",
       ["address"],
       [MarketTwapFeedShortInterval.address]
     );
@@ -86,7 +86,7 @@ describe("MarketTwapFeed", function () {
       msw,
       0,
       EthTwapFeedShortInterval.address,
-      "addAuthorization",
+      "setMarketTwapFeedContractAddress",
       ["address"],
       [MarketTwapFeedLongInterval.address]
     );
@@ -96,7 +96,7 @@ describe("MarketTwapFeed", function () {
       msw,
       0,
       RateSetterAddress,
-      "addAuthorization",
+      "setMarketTwapFeedContractAddress",
       ["address"],
       [MarketTwapFeedLongInterval.address]
     );
@@ -104,7 +104,7 @@ describe("MarketTwapFeed", function () {
       msw,
       0,
       RateSetterAddress,
-      "addAuthorization",
+      "setMarketTwapFeedContractAddress",
       ["address"],
       [MarketTwapFeedShortInterval.address]
     );

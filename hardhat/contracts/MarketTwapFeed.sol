@@ -10,7 +10,7 @@ import "./EthTwapFeed.sol";
 error MarketTwapFeed__TimeIntervalDidNotPass();
 error MarketTwapFeed__NotOwner();
 error MarketTwapFeed__NotActive();
-error MarketTwapFeed__NotAuthorized();
+error MarketTwapFeed__NotShutdownModule();
 
 abstract contract LendingPoolLike {
     function getReserves()
@@ -62,7 +62,7 @@ contract MarketTwapFeed {
         _;
     }
 
-    modifier isOwner() {
+    modifier onlyOwner() {
         if (msg.sender != owner) revert MarketTwapFeed__NotOwner();
         _;
     }
@@ -73,22 +73,14 @@ contract MarketTwapFeed {
         _;
     }
 
-    modifier isAuthorized() {
-        if (authorizedAccounts[msg.sender] == false)
-            revert MarketTwapFeed__NotAuthorized();
+    modifier onlyShutdownModule() {
+        if (msg.sender != shutdownModuleContractAddress)
+            revert MarketTwapFeed__NotShutdownModule();
         _;
     }
 
-    mapping(address => bool) public authorizedAccounts;
+    address shutdownModuleContractAddress;
     address public immutable owner;
-
-    function addAuthorization(address account) external isOwner {
-        authorizedAccounts[account] = true;
-    }
-
-    function removeAuthorization(address account) external isOwner {
-        authorizedAccounts[account] = false;
-    }
 
     /*
      * @param _updateTimeInterval sets the minimum time interval for update
@@ -105,7 +97,6 @@ contract MarketTwapFeed {
         address _owner
     ) {
         owner=_owner;
-        authorizedAccounts[_owner]=true;
         lastUpdateTimestamp = block.timestamp;
 
         coinPriceFeed = AggregatorV3Interface(_coinPriceFeed);
@@ -191,6 +182,10 @@ contract MarketTwapFeed {
         return marketTwapPrice;
     }
 
+    function setShutdownModuleContractAddress(address _addr) external onlyOwner{
+        shutdownModuleContractAddress = _addr;
+    }
+
     /*
      * @notice calculate the market price
      */
@@ -210,7 +205,7 @@ contract MarketTwapFeed {
         return uint256(price);
     }
 
-    function shutdown()public isAuthorized{
-        active=false;
+    function shutdown() public onlyShutdownModule{
+        active = false;
     }
 }

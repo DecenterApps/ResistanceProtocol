@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import csv
+import math
 
 from regression import *
 import sys, getopt
@@ -12,15 +13,16 @@ from constants import SIMULATION_TIMESTAMPS
 
 TWAP_LEN = 10
 SAMPLES = SIMULATION_TIMESTAMPS + 1
+STABILITY_INDEX = 50
 time = None
 
-def ETH_Dollar_value(trend, samples):
+def ETH_Dollar_value(trend, samples, stability_q):
 
-    parameter = 25
+    parameter = stability_q/2
     if len(sys.argv) > 1:
         parameter -= trend / 10
     
-    delta = np.random.random(samples)*50-parameter
+    delta = np.random.random(samples)*stability_q-parameter
     init = 1000
     out = np.zeros(samples)
     twap = np.zeros(samples)
@@ -49,30 +51,33 @@ def get_prediction(twap_eth_dollar, training_ind, test_ind):
     return outcome
 
 def get_input_arguments():
-    options = "ho:n:"
-    long_options = ["Help", "ETH_Trend_Growth=", "Number_of_Samples="]
+    options = "ho:n:s:"
+    long_options = ["Help", "ETH_Trend_Growth=", "Number_of_Samples=", "Stability="]
     trend = 0
     samples = SAMPLES
+    stability_q = 50
     try:
         arguments, values = getopt.getopt(sys.argv[1:], options, long_options)
         for current_arg, current_val in arguments:
             if current_arg in ("-h", "--Help"):
-                print ("-o Parameter: ETH_Trend_Growth, range(-10,10) \n-n Parameter: Number of samples")
+                print ("-o Parameter: ETH_Trend_Growth, range(-10,10) \n-n Parameter: Number of samples \n -s Parameter: Stability of the eth price, 1 - low, 10 - high")
             if current_arg in ("-o", "--ETH_Trend_Growth"):
                 trend = int(current_val)
             elif current_arg in ("-n", "--Number_of_Samples"):
                 samples = int(current_val)
+            elif current_arg in ("-s", "--Stability"):
+                stability_q = math.floor(STABILITY_INDEX / float(current_val))
 
     except getopt.error as err:
         print (str(err))
     
-    return trend, samples
+    return trend, samples, stability_q
 
 if __name__ == "__main__":
-    trend, samples = get_input_arguments()
+    trend, samples, stability_q = get_input_arguments()
     time = np.arange(samples)
 
-    eth_dollar, twap_eth_dollar = ETH_Dollar_value(trend, samples)
+    eth_dollar, twap_eth_dollar = ETH_Dollar_value(trend, samples, stability_q)
     prediction = get_prediction(twap_eth_dollar, 1500, samples)
     with open('../../dataset/artificial/eth_dollar.csv', 'w') as csvfile:
         writer = csv.writer(csvfile)
