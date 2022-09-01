@@ -34,6 +34,9 @@ contract RateSetter {
     AbsPiController private AbsPiController_CONTRACT;
 
     CPITrackerOracle private cpiDataFeed;
+    uint256 private lastCpiValue;
+    uint256 private baseCpiValue;
+    uint256 private lastCpiUpdate;
 
     bool active=true;
 
@@ -134,6 +137,11 @@ contract RateSetter {
         cpiDataFeed = CPITrackerOracle(_cpiDataFeed);
 
         redemptionPriceUpdateTime = block.timestamp;
+
+        lastCpiUpdate = block.timestamp;
+        uint256 cpi = cpiDataFeed.currPegPrice();
+        lastCpiValue = cpi;
+        baseCpiValue = cpi;
     }
 
     /*
@@ -176,11 +184,21 @@ contract RateSetter {
             (_ethTwapPrice * (10**19) * EIGHTEEN_DECIMAL_NUMBER) /
                 redemptionPrice
         );
+
+
     }
 
-    function getCpiData() public view returns (uint256) {
-        uint256 data = cpiDataFeed.currPegPrice();
-        return data;
+    function getCpiData() public returns (uint256 cpi) {
+
+        uint256 currentCPI = cpiDataFeed.currPegPrice();
+
+        if(currentCPI != lastCpiValue) {
+            baseCpiValue = lastCpiUpdate;
+            lastCpiValue = currentCPI;
+            lastCpiUpdate = block.timestamp;
+        }
+        
+        cpi = baseCpiValue + (currentCPI - baseCpiValue) * (block.timestamp - lastCpiUpdate) / (28 days);
     }
 
     function getYearlyRedemptionRate() public view returns (uint256) {
