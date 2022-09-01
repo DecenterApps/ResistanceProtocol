@@ -27,6 +27,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 
     const cdpManager = await ethers.getContract("CDPManager", deployer);
     const absPiController = await ethers.getContract("AbsPiController", deployer);
+    const cpiController = await ethers.getContract("CPIController", deployer);
 
     const rateSetter = await deploy("RateSetter", {
         from: deployer,
@@ -34,6 +35,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
             multiSigWalletAddress,
             cdpManager.address,
             absPiController.address,
+            cpiController.address,
             cpiDataFeedAddress,
         ],
         log: true,
@@ -48,6 +50,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
             multiSigWalletAddress,
             cdpManager.address,
             absPiController.address,
+            cpiController.address,
             cpiDataFeedAddress,
         ]);
     }

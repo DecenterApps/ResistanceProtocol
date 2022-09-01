@@ -48,7 +48,8 @@ contract CPIController is RedemptionRateController{
     ///@param _redemptionValue last recorded redemption value of post-inflation NOI
     function computeRate(
         uint256 _marketValue,
-        uint256 _redemptionValue
+        uint256 _redemptionValue,
+        uint256 _alpha
     ) override external 
         onlyFuzzyModule
         returns (uint256)
@@ -56,6 +57,9 @@ contract CPIController is RedemptionRateController{
         if (block.timestamp - lastUpdateTime < integralPeriodSize) {
             revert CPIController__TooSoon();
         }
+
+        alpha = _alpha;
+        
         int256 proportionalTerm = int256(_redemptionValue) -
             int256(_marketValue) *
             int256(10**19);
@@ -67,9 +71,10 @@ contract CPIController is RedemptionRateController{
         );
         if (piOutput != 0) {
             uint256 newRedemptionRate = getBoundedRedemptionRate(piOutput);
-            return TWENTY_SEVEN_DECIMAL_NUMBER * 2 - newRedemptionRate;
+            currentRedemptionRate = TWENTY_SEVEN_DECIMAL_NUMBER * 2 - newRedemptionRate;
         } else {
-            return TWENTY_SEVEN_DECIMAL_NUMBER;
+            currentRedemptionRate = TWENTY_SEVEN_DECIMAL_NUMBER;
         }
+        return currentRedemptionRate;
     }
 }

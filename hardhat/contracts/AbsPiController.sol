@@ -49,7 +49,8 @@ contract AbsPiController is RedemptionRateController{
     ///@param _redemptionPrice last recorded redemption price of NOI
     function computeRate(
         uint256 _marketPrice,
-        uint256 _redemptionPrice
+        uint256 _redemptionPrice,
+        uint256 _alpha
     ) override external 
         onlyFuzzyModule 
         returns (uint256) 
@@ -58,6 +59,8 @@ contract AbsPiController is RedemptionRateController{
             revert AbsPiController__TooSoon();
         }
 
+        alpha = _alpha;
+        
         int256 proportionalTerm = int256(_redemptionPrice) -
             int256(_marketPrice) *
             int256(10**19);
@@ -70,10 +73,10 @@ contract AbsPiController is RedemptionRateController{
         );
         if (piOutput != 0) {
             uint256 newRedemptionRate = getBoundedRedemptionRate(piOutput);
-            return newRedemptionRate;
+            currentRedemptionRate = newRedemptionRate;
         } else {
-            return TWENTY_SEVEN_DECIMAL_NUMBER;
+            currentRedemptionRate = TWENTY_SEVEN_DECIMAL_NUMBER;
         }
-
+        return currentRedemptionRate;
     }    
 }

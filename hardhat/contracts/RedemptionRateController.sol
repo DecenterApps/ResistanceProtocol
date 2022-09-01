@@ -18,6 +18,7 @@ abstract contract RedemptionRateController {
     uint256 internal integralPeriodSize;        // [seconds], minimum time between two calculations
     uint256 internal lastUpdateTime;            // [timestamp]
 
+    uint256 public   currentRedemptionRate;     // [TWENTY_SEVEN_DECIMAL_NUMBER]
     uint256 internal defaultRedemptionRate;     // [TWENTY_SEVEN_DECIMAL_NUMBER]
     uint256 internal feedbackOutputUpperBound;  // [TWENTY_SEVEN_DECIMAL_NUMBER]
     int256  internal feedbackOutputLowerBound;  // [TWENTY_SEVEN_DECIMAL_NUMBER]
@@ -59,6 +60,7 @@ abstract contract RedemptionRateController {
         owner = _owner;
         alpha = _alpha;
         defaultRedemptionRate = TWENTY_SEVEN_DECIMAL_NUMBER;
+        currentRedemptionRate = defaultRedemptionRate;
         Kp = _Kp;
         Ki = _Ki;
         feedbackOutputUpperBound = _feedbackOutputUpperBound;
@@ -122,7 +124,8 @@ abstract contract RedemptionRateController {
     ///@param _redemptionValue last recorded redemption value of post-inflation NOI
     function computeRate(
         uint256 _marketValue,
-        uint256 _redemptionValue
+        uint256 _redemptionValue,
+        uint256 _alpha
     )virtual external returns (uint256);
 
     ///@notice calculates new integral term and records current deviation

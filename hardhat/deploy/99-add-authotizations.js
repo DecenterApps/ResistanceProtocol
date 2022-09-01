@@ -227,6 +227,15 @@ module.exports = async ({ getNamedAccounts }) => {
         [formatBytes32String("ShutdownModule"),ShutdownModule.address]
     );
 
+    await executeActionFromMSW(
+        msw,
+        0,
+        RateSetterContractObj.address,
+        "modifyContracts",
+        ["bytes32","address"],
+        [formatBytes32String("FuzzyModule"),FuzzyModule.address]
+    );
+
     // Abs Pi Controller
 
     await executeActionFromMSW(

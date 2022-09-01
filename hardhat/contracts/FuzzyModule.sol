@@ -12,9 +12,6 @@ contract FuzzyModule {
     address public rateSetterContractAddress;
     address public immutable owner;
 
-    uint256 public alphaStable;
-    uint256 public alphaCPI;
-
     uint256 constant EIGHTEEN_DIGIT_NUMBER = 10**18;
     uint256 constant TWENTY_SEVEN_DIGIT_NUMBER = 10**27;
     uint256 constant ONE = TWENTY_SEVEN_DIGIT_NUMBER;
@@ -47,12 +44,14 @@ contract FuzzyModule {
     function computeRate(
         uint256 _marketPrice,
         uint256 _redemptionPrice,
-        uint256 _marketValue
+        uint256 _marketValue,
+        uint256 _alphaAbs,
+        uint256 _alphaCPI
     ) external onlyRateSetter returns (uint256) {
         uint256 rrStable = IRedemptionRateController(absPiControllerContractAddress)
-            .computeRate(_marketPrice, _redemptionPrice, alphaStable);
+            .computeRate(_marketPrice, _redemptionPrice, _alphaAbs);
         uint256 rrCPI = IRedemptionRateController(CPIControllerContractAddress)
-            .computeRate(_marketValue, _redemptionPrice, alphaCPI);
+            .computeRate(_marketValue, _redemptionPrice, _alphaCPI);
 
         uint256 percErrorStable = 
             absolute(int256(_marketPrice * EIGHTEEN_DIGIT_NUMBER) - int256(_redemptionPrice)) * ONE / _redemptionPrice;

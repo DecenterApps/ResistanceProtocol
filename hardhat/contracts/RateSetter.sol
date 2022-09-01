@@ -6,6 +6,8 @@ import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 import "./CDPManager.sol";
 import "./AbsPiController.sol";
+import "./FuzzyModule.sol";
+import "./CPIController.sol";
 
 abstract contract CPITrackerOracle {
     function currPegPrice() external view virtual returns (uint256);
@@ -33,12 +35,16 @@ contract RateSetter {
     uint256 redemptionPriceUpdateTime;
     uint256 internal constant EIGHTEEN_DECIMAL_NUMBER = 10**18;
 
-    CDPManager private CDPManager_CONTRACT;
-    AbsPiController private AbsPiController_CONTRACT;
+    CDPManager          private CDPManager_CONTRACT;
 
-    CPITrackerOracle private cpiDataFeed;
+    AbsPiController     private AbsPiController_CONTRACT;
+    CPIController       private CPIController_CONTRACT;
+    FuzzyModule         private FuzzyModule_CONTRACT;
 
-    bool active=true;
+
+    CPITrackerOracle    private cpiDataFeed;
+
+    bool active = true;
 
     // EVENTS
 
@@ -107,6 +113,10 @@ contract RateSetter {
             CDPManager_CONTRACT = CDPManager(_newAddress);
         else if (_contract == "AbsPiController")
             AbsPiController_CONTRACT = AbsPiController(_newAddress);
+        else if (_contract == "CPIController")
+            CPIController_CONTRACT = CPIController(_newAddress);
+        else if (_contract == "FuzzyModule")
+            FuzzyModule_CONTRACT = FuzzyModule(_newAddress);
         else if (_contract == "CPITrackerOracle")
             cpiDataFeed = CPITrackerOracle(_newAddress);
         else revert RateSetter__UnknownContract();
@@ -131,15 +141,18 @@ contract RateSetter {
         address _owner,
         address _cdpManager,
         address _AbsPiController,
+        address _CPIController,
         address _cpiDataFeed
     ) {
         owner = _owner;
         CDPManager_CONTRACT = CDPManager(_cdpManager);
         AbsPiController_CONTRACT = AbsPiController(_AbsPiController);
+        CPIController_CONTRACT = CPIController(_CPIController);
         redemptionPrice = RAY;
         redemptionRate = RAY;
 
         cpiDataFeed = CPITrackerOracle(_cpiDataFeed);
+        CPI = cpiDataFeed.currPegPrice();
 
         redemptionPriceUpdateTime = block.timestamp;
     }
@@ -153,15 +166,23 @@ contract RateSetter {
         onlyMarketTwapFeed
         isActive
     {
+        CPI = cpiDataFeed.currPegPrice();
         ethPrice = nextEthPrice;
         nextEthPrice = _ethTwapPrice;
         // reward caller 
-        uint256 tlv = AbsPiController_CONTRACT.tlv();
-        uint256 iapcr = rpower(AbsPiController_CONTRACT.perSecondCumulativeLeak(), tlv, RAY);
-        uint256 validated = AbsPiController_CONTRACT.computeRate(
+
+        uint256 tlvAbs = AbsPiController_CONTRACT.tlv();
+        uint256 iapcrAbs = rpower(AbsPiController_CONTRACT.perSecondCumulativeLeak(), tlvAbs, RAY);
+
+        uint256 tlvCPI = CPIController_CONTRACT.tlv();
+        uint256 iapcrCPI = rpower(CPIController_CONTRACT.perSecondCumulativeLeak(), tlvCPI, RAY);
+
+        uint256 validated = FuzzyModule_CONTRACT.computeRate(
             _noiMarketPrice,
-            redemptionPrice//,
-            //iapcr
+            redemptionPrice,
+            CPI,
+            iapcrAbs,
+            iapcrCPI
         );
 
         redemptionRate = validated;
@@ -178,7 +199,7 @@ contract RateSetter {
         emit NewPrices(_noiMarketPrice, redemptionPrice);
 
         redemptionPriceUpdateTime = block.timestamp;
-
+           
         // set Eth/Redemption Rate
         CDPManager_CONTRACT.setEthRp(
             (_ethTwapPrice * (10**19) * EIGHTEEN_DECIMAL_NUMBER) /
@@ -191,24 +212,48 @@ contract RateSetter {
         return data;
     }
 
-    function getYearlyRedemptionRate() public view returns (uint256) {
-        //return redemptionRate;
-        return rpower(redemptionRate, SECONDS_IN_A_YEAR, RAY);
+    function getYearlyRedemptionRates() public view returns (uint256[] memory) {
+        uint256[] memory redemptionRates = new uint256[](2);
+
+        uint256 AbsPi_RR = AbsPiController_CONTRACT.currentRedemptionRate();
+        uint256 CPI_RR = CPIController_CONTRACT.currentRedemptionRate();
+
+        redemptionRates[0] = rpower(AbsPi_RR, SECONDS_IN_A_YEAR, RAY);
+        redemptionRates[1] = rpower(CPI_RR, SECONDS_IN_A_YEAR, RAY);
+
+        return redemptionRates;
     }
 
-    function getYearlyProportionalTerm() public view returns (uint256) {
-        uint256 pTerm = uint256(
+    function getYearlyProportionalTerms() public view returns (uint256[] memory) {
+        uint256[] memory proportionalTerms = new uint256[](2);
+
+        uint256 pTermAbs = uint256(
             AbsPiController_CONTRACT.lastAdjustedProportionalTerm()
         );
+        uint256 pTermCPI = uint256(
+            CPIController_CONTRACT.lastAdjustedProportionalTerm()
+        );
         
-        return rpower(pTerm+RAY, SECONDS_IN_A_YEAR, RAY);
+        proportionalTerms[0] = rpower(pTermAbs + RAY, SECONDS_IN_A_YEAR, RAY);
+        proportionalTerms[1] = rpower(pTermCPI + RAY, SECONDS_IN_A_YEAR, RAY);
+
+        return proportionalTerms;
     }
 
-    function getYearlyIntegralTerm() public view returns (uint256) {
-        uint256 iTerm = uint256(
+    function getYearlyIntegralTerms() public view returns (uint256[] memory) {
+        uint256[] memory integralTerms = new uint256[](2);
+
+        uint256 iTermAbs = uint256(
             AbsPiController_CONTRACT.lastAdjustedIntegralTerm()
         );
-        return rpower(iTerm+RAY, SECONDS_IN_A_YEAR, RAY);
+        uint256 iTermCPI = uint256(
+            CPIController_CONTRACT.lastAdjustedIntegralTerm()
+        );
+        
+        integralTerms[0] = rpower(iTermAbs + RAY, SECONDS_IN_A_YEAR, RAY);
+        integralTerms[1] = rpower(iTermCPI + RAY, SECONDS_IN_A_YEAR, RAY);
+
+        return integralTerms;
     }
 
     function getRedemptionRate() public view returns (uint256) {
