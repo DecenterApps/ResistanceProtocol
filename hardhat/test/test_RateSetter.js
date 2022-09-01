@@ -55,7 +55,7 @@ describe('RateSetter', function () {
         assert.equal("10000000000000000000000", receipt.toString());
     });
 
-    it('... mint tokens with changing the rate', async () => {        
+    it('... lower redemption price', async () => {        
         const txOpenCDP = await CDPManagerContractObj.connect(senderAccounts[1]).openCDP(senderAccounts[1].address, {value: ethers.utils.parseEther("12")});
         await txOpenCDP.wait();
 
@@ -63,7 +63,7 @@ describe('RateSetter', function () {
 
         const cdpIndex = getCDPIndex.toString();
 
-        let redemptionPrice= await RateSetterContractObj.connect(senderAccounts[1]).getRedemptionPrice()
+        let redemptionPriceBefore= await RateSetterContractObj.connect(senderAccounts[1]).getRedemptionPrice()
         let marketPrice= await marketTwapFeedObj.connect(senderAccounts[1]).getMarketPrice()
 
         let mintAmount= await CDPManagerContractObj.connect(senderAccounts[1]).maxMintAmount(cdpIndex);
@@ -77,10 +77,10 @@ describe('RateSetter', function () {
         ethRP= await CDPManagerContractObj.connect(senderAccounts[1]).ethRp();
 
         mintAmount= await CDPManagerContractObj.connect(senderAccounts[1]).maxMintAmount(cdpIndex);
-        redemptionPrice= await RateSetterContractObj.connect(senderAccounts[1]).getRedemptionPrice()
+        let redemptionPriceAfter= await RateSetterContractObj.connect(senderAccounts[1]).getRedemptionPrice()
         marketPrice= await marketTwapFeedObj.connect(senderAccounts[1]).getMarketPrice()
 
-        await expect(CDPManagerContractObj.connect(senderAccounts[1]).mintFromCDP(cdpIndex, "10000000000000000000000")).to.be.reverted;
+        await expect(redemptionPriceBefore).to.be.gt(redemptionPriceAfter);
                                                                                             
     });
 
@@ -91,9 +91,9 @@ describe('RateSetter', function () {
 
         const txChangeRate = await marketTwapFeedObj.connect(senderAccounts[0]).update();
 
-        let redemptionRate= await RateSetterContractObj.connect(senderAccounts[1]).getYearlyRedemptionRate()
-        let proportionalTerm= await RateSetterContractObj.connect(senderAccounts[1]).getYearlyProportionalTerm()
-        let integralTerm= await RateSetterContractObj.connect(senderAccounts[1]).getYearlyIntegralTerm()
+        let redemptionRate= await RateSetterContractObj.connect(senderAccounts[1]).getYearlyRedemptionRates();
+        let proportionalTerm= await RateSetterContractObj.connect(senderAccounts[1]).getYearlyProportionalTerms();
+        let integralTerm= await RateSetterContractObj.connect(senderAccounts[1]).getYearlyIntegralTerms();
                                                                                             
     });
 

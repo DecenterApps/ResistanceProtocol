@@ -2,6 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import "./interfaces/IRedemptionRateController.sol";
+import "hardhat/console.sol";
 
 error FuzzyModule__NotOwner();
 error FuzzyModule__NotRateSetter();
@@ -50,8 +51,10 @@ contract FuzzyModule {
     ) external onlyRateSetter returns (uint256) {
         uint256 rrStable = IRedemptionRateController(absPiControllerContractAddress)
             .computeRate(_marketPrice, _redemptionPrice, _alphaAbs);
+        console.log(rrStable);
         uint256 rrCPI = IRedemptionRateController(CPIControllerContractAddress)
             .computeRate(_marketValue, _redemptionPrice, _alphaCPI);
+        console.log(rrCPI);
 
         uint256 percErrorStable = 
             absolute(int256(_marketPrice * EIGHTEEN_DIGIT_NUMBER) - int256(_redemptionPrice)) * ONE / _redemptionPrice;
@@ -66,6 +69,7 @@ contract FuzzyModule {
             weightStable = weightStable + (ONE - weightStable) * percErrorStable / (percErrorStable + percErrorCPI);
         }
         uint256 weightCPI = ONE - weightStable;
+        console.log((weightStable * rrStable + weightCPI * rrCPI) / TWENTY_SEVEN_DIGIT_NUMBER);
         return (weightStable * rrStable + weightCPI * rrCPI) / TWENTY_SEVEN_DIGIT_NUMBER;
     }
 

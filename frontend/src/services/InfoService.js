@@ -1,28 +1,18 @@
 import { ethers } from "ethers";
 import Decimal from "decimal.js";
-import {
-  contract as contractCDPManager
-} from "../contracts/CDPManager";
-import {
-  contract as ethTwapFeedContract
-} from "../contracts/EthTwapFeed";
+import { contract as contractCDPManager } from "../contracts/CDPManager";
+import { contract as ethTwapFeedContract } from "../contracts/EthTwapFeed";
 import { contract as contractNOI } from "../contracts/NOI";
-import {
-  contract as contractPARAMETERS
-} from "../contracts/Parameters";
-import {
-  contract as contractRATESETTER
-} from "../contracts/RateSetter";
-import {
-  contract as contractMARKET
-} from "../contracts/MarketTwapFeed";
+import { contract as contractPARAMETERS } from "../contracts/Parameters";
+import { contract as contractRATESETTER } from "../contracts/RateSetter";
+import { contract as contractMARKET } from "../contracts/MarketTwapFeed";
 import {
   contract as contractTREASURY,
-  address as address_TREASURY
+  address as address_TREASURY,
 } from "../contracts/Treasury";
-import {
-  contract as contractSHUTDOWN
-} from "../contracts/ShutdownModule";
+import { contract as contractSHUTDOWN } from "../contracts/ShutdownModule";
+
+const SECONDS_IN_A_YEAR = 31556926;
 
 const getEthPrice = async (signer) => {
   const ethResponse = await ethTwapFeedContract.connect(signer).getTwap();
@@ -47,14 +37,19 @@ const getLR = async (signer) => {
 const getRedemptionRate = async (signer) => {
   const rrResponse = await contractRATESETTER
     .connect(signer)
-    .getYearlyRedemptionRate();
-  return rrResponse;
+    .getYearlyRedemptionRates();
+  console.log(rrResponse[0].toString())
+  console.log(rrResponse[1].toString())
+  const rr = await contractRATESETTER.connect(signer).getRedemptionRate();
+  console.log(rr.toString())
+  return [...rrResponse, rr];
 };
 
 const getRedemptionPrice = async (signer) => {
   const rpResponse = await contractRATESETTER
     .connect(signer)
     .getRedemptionPrice();
+
   return rpResponse;
 };
 
@@ -71,23 +66,36 @@ const getNOISupply = async (signer) => {
 const getProportionalTerm = async (signer) => {
   const pResponse = await contractRATESETTER
     .connect(signer)
-    .getYearlyProportionalTerm();
-  return new Decimal(pResponse.toString())
-    .div(10 ** 27)
-    .sub(1)
-    .toPrecision(5)
-    .toString();
+    .getYearlyProportionalTerms();
+
+  console.log("Strating getProportionalTerm ...");
+  const res = pResponse.map((e) =>
+    new Decimal(e.toString())
+      .div(10 ** 27)
+      .sub(1)
+      .toDP(5)
+      .toString()
+  );
+
+  console.log("Finished getProportionalTerm");
+  return res;
 };
 
 const getIntegralTerm = async (signer) => {
   const iResponse = await contractRATESETTER
     .connect(signer)
-    .getYearlyIntegralTerm();
-  return new Decimal(iResponse.toString())
-    .div(10 ** 27)
-    .sub(1)
-    .toPrecision(5)
-    .toString();
+    .getYearlyIntegralTerms();
+
+  console.log("Strating getIntegralTerm ...");
+  const res = iResponse.map((e) =>
+    new Decimal(e.toString())
+      .div(10 ** 27)
+      .sub(1)
+      .toDP(5)
+      .toString()
+  );
+  console.log("Finished getIntegralTerm");
+  return res;
 };
 
 const getCdpCount = async (signer) => {
@@ -110,16 +118,12 @@ const getTreasuryNoi = async (signer) => {
 };
 
 const getGlobalCR = async (signer) => {
-  const globalCR = await contractSHUTDOWN
-    .connect(signer)
-    .calculateGlobalCR();
+  const globalCR = await contractSHUTDOWN.connect(signer).calculateGlobalCR();
   return globalCR;
 };
 
 const getCRLimit = async (signer) => {
-  const crLimit = await contractPARAMETERS
-    .connect(signer)
-    .getGlobalCRLimit();
+  const crLimit = await contractPARAMETERS.connect(signer).getGlobalCRLimit();
   return crLimit;
 };
 
@@ -138,5 +142,5 @@ export default {
   getNoiSurplus,
   getTreasuryNoi,
   getGlobalCR,
-  getCRLimit
+  getCRLimit,
 };

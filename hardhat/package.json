@@ -29,6 +29,7 @@
     "@types/mocha": "^9.1.0",
     "big-number": "^2.0.0",
     "chai-bn": "^0.3.1",
+    "ethers-utils": "^2.1.11",
     "sinon": "^14.0.0",
     "sinon-chai": "^3.7.0",
     "ts-node": ">=8.0.0",

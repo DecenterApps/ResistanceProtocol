@@ -48,12 +48,12 @@ const ABI= [
   },
   {
     "inputs": [],
-    "name": "MarketTwapFeed__NotAuthorized",
+    "name": "MarketTwapFeed__NotOwner",
     "type": "error"
   },
   {
     "inputs": [],
-    "name": "MarketTwapFeed__NotOwner",
+    "name": "MarketTwapFeed__NotShutdownModule",
     "type": "error"
   },
   {
@@ -91,38 +91,6 @@ const ABI= [
     ],
     "name": "UpdateValues",
     "type": "event"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "account",
-        "type": "address"
-      }
-    ],
-    "name": "addAuthorization",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "name": "authorizedAccounts",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
   },
   {
     "inputs": [],
@@ -206,11 +174,11 @@ const ABI= [
     "inputs": [
       {
         "internalType": "address",
-        "name": "account",
+        "name": "_addr",
         "type": "address"
       }
     ],
-    "name": "removeAuthorization",
+    "name": "setShutdownModuleContractAddress",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -256,5 +224,5 @@ const ABI= [
     "type": "function"
   }
 ]
-export const address= "0x4000F8820522AC96C4221b299876e3e53bCc8525"
+export const address= "0x7Cf4be31f546c04787886358b9486ca3d62B9acf"
  export const contract=new ethers.Contract(address, ABI)

@@ -129,6 +129,11 @@ const ABI= [
         "internalType": "uint256",
         "name": "_redemptionPrice",
         "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_alpha",
+        "type": "uint256"
       }
     ],
     "name": "computeRate",
@@ -140,6 +145,19 @@ const ABI= [
       }
     ],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "currentRedemptionRate",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {

@@ -23,6 +23,11 @@ const ABI= [
   },
   {
     "inputs": [],
+    "name": "Liquidator__NotOwner",
+    "type": "error"
+  },
+  {
+    "inputs": [],
     "name": "Liquidator__NotShutdownModule",
     "type": "error"
   },
@@ -34,11 +39,6 @@ const ABI= [
   {
     "inputs": [],
     "name": "Liquidator__SendToUserFailed",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "Parameters_NotAuthorized",
     "type": "error"
   },
   {
@@ -207,5 +207,5 @@ const ABI= [
     "type": "receive"
   }
 ]
-export const address= "0x3fdc08D815cc4ED3B7F69Ee246716f2C8bCD6b07"
+export const address= "0x70E5370b8981Abc6e14C91F4AcE823954EFC8eA3"
  export const contract=new ethers.Contract(address, ABI)

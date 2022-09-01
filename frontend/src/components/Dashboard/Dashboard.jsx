@@ -6,7 +6,7 @@ import {
   VStack,
   Image,
   Tooltip,
-  Progress
+  Progress,
 } from "@chakra-ui/react";
 import {
   Chart as ChartJS,
@@ -28,7 +28,7 @@ import { ethers } from "ethers";
 import Decimal from "decimal.js";
 import FirebaseService from "../../services/FirebaseService";
 import InfoService from "../../services/InfoService";
-import config from '../../config/config.json'
+import config from "../../config/config.json";
 
 ChartJS.register(
   CategoryScale,
@@ -62,12 +62,8 @@ export const options = {
   },
 };
 
-export default function Dashboard({
-  bAnimation,
-  setBAnimation,
-}) {
-  const { library} =
-    useWeb3React();
+export default function Dashboard({ bAnimation, setBAnimation }) {
+  const { library } = useWeb3React();
   const [ethPrice, setEthPrice] = useState(0);
   const [totalEth, setTotalEth] = useState(0);
   const [sf, setSF] = useState(0);
@@ -89,6 +85,8 @@ export default function Dashboard({
   const [limitCR, setLimitCR] = useState(0);
   const [loading, setLoading] = useState(true);
 
+  const SECONDS_IN_A_YEAR=31556926;
+
   useEffect(() => {
     FirebaseService.setUpNOITracking(setNOISupplyHistory);
     FirebaseService.setUpMPTracking(setMarketPriceHistory);
@@ -105,9 +103,7 @@ export default function Dashboard({
     if (library) {
       signer = library.getSigner();
     } else {
-      const provider = new ethers.providers.JsonRpcProvider(
-        config.localURL
-      );
+      const provider = new ethers.providers.JsonRpcProvider(config.localURL);
       signer = provider.getSigner();
     }
     setEthPrice(await InfoService.getEthPrice(signer));
@@ -144,11 +140,12 @@ export default function Dashboard({
   }, [library]);
 
   if (loading) {
-    return(
-    <>
-      <h1 className="load-h1">Loading...</h1>
-      <Progress size="xs" isIndeterminate className="progress" />
-    </>)
+    return (
+      <>
+        <h1 className="load-h1">Loading...</h1>
+        <Progress size="xs" isIndeterminate className="progress" />
+      </>
+    );
   } else {
     return (
       <div className="dashboard animated bounceIn">
@@ -243,7 +240,7 @@ export default function Dashboard({
                 <h2 className="h-test">System rates</h2>
                 <VStack spacing="2vh">
                   <HStack spacing="2vw">
-                    <Box className="div-indiv-line2 ">
+                    <Box className="div-indiv2-line2 ">
                       <div className="div-info ">
                         <Tooltip label="TO DO: WRITE INFO" placement="right">
                           <div>
@@ -256,41 +253,7 @@ export default function Dashboard({
                         <div className="bold-text">{sf}%</div>
                       </VStack>
                     </Box>
-                    <Box className="div-indiv-line2 ">
-                      <div className="div-info ">
-                        <Tooltip label="TO DO: WRITE INFO" placement="right">
-                          <div>
-                            <FcInfo></FcInfo>
-                          </div>
-                        </Tooltip>
-                      </div>
-                      <VStack>
-                        <div>Redemption rate</div>
-                        <Tooltip
-                          placement="auto"
-                          label={new Decimal(rr.toString())
-                            .div(10 ** 27)
-                            .sub(1)
-                            .toString()}
-                        >
-                          <div className="bold-text">
-                            {new Decimal(rr.toString())
-                              .div(10 ** 27)
-                              .sub(1)
-                              .toDP(5)
-                              .toString()}
-                            %
-                          </div>
-                        </Tooltip>
-                        <div>
-                          <b>pRate</b>:{pTerm}%
-                        </div>
-                        <div>
-                          <b>iRate</b>: {iTerm}%
-                        </div>
-                      </VStack>
-                    </Box>
-                    <Box className="div-indiv-line2 ">
+                    <Box className="div-indiv2-line2 ">
                       <div className="div-info ">
                         <Tooltip label="TO DO: WRITE INFO" placement="right">
                           <div>
@@ -430,6 +393,123 @@ export default function Dashboard({
                     </Box>
                   </HStack>
                 </VStack>
+              </Box>
+            </HStack>
+            <HStack>
+              <Box className="div-line3">
+                <h2 className="h-test">Rates</h2>
+                <HStack spacing="2vw">
+                  <Box className="div-indiv-line2 ">
+                    <div className="div-info ">
+                      <Tooltip label="TO DO: WRITE INFO" placement="right">
+                        <div>
+                          <FcInfo></FcInfo>
+                        </div>
+                      </Tooltip>
+                    </div>
+                    <VStack>
+                      <div>Redemption rate</div>
+                      <Tooltip
+                        placement="auto"
+                        label={new Decimal(rr[2].toString())
+                          .div(10 ** 27)
+                          .pow(SECONDS_IN_A_YEAR)
+                          .sub(1)
+                          .mul(10)
+                          .toString()}
+                      >
+                        <div className="bold-text">
+                          {new Decimal(rr[2].toString())
+                            .div(10 ** 27)
+                            .pow(SECONDS_IN_A_YEAR)
+                            .sub(1)
+                            .mul(10)
+                            .toDP(5)
+                            .toString()}
+                          %
+                        </div>
+                      </Tooltip>
+                      <div>
+                        <b>pTerm</b>:{new Decimal(pTerm[0]).add(new Decimal(pTerm[1])).toString()}
+                      </div>
+                      <div>
+                        <b>iTerm</b>: {new Decimal(iTerm[0]).add(new Decimal(iTerm[1])).toString()}
+                      </div>
+                    </VStack>
+                  </Box>
+                  <Box className="div-indiv-line2 ">
+                    <div className="div-info ">
+                      <Tooltip label="TO DO: WRITE INFO" placement="right">
+                        <div>
+                          <FcInfo></FcInfo>
+                        </div>
+                      </Tooltip>
+                    </div>
+                    <VStack>
+                      <div>Market rate</div>
+                      <Tooltip
+                        placement="auto"
+                        label={new Decimal(rr[0].toString())
+                          .div(10 ** 27)
+                          .pow(SECONDS_IN_A_YEAR)
+                          .sub(1)
+                          .mul(10)
+                          .toString()}
+                      >
+                        <div className="bold-text">
+                          {new Decimal(rr[0].toString())
+                            .div(10 ** 27)
+                            .pow(SECONDS_IN_A_YEAR)
+                            .sub(1)
+                            .mul(10)
+                            .toDP(5)
+                            .toString()}
+                          %
+                        </div>
+                      </Tooltip>
+                      <div>
+                        <b>pTerm</b>:{pTerm[0]}
+                      </div>
+                      <div>
+                        <b>iTerm</b>: {iTerm[0]}
+                      </div>
+                    </VStack>
+                  </Box>
+                  <Box className="div-indiv-line2 ">
+                    <div className="div-info ">
+                      <Tooltip label="TO DO: WRITE INFO" placement="right">
+                        <div>
+                          <FcInfo></FcInfo>
+                        </div>
+                      </Tooltip>
+                    </div>
+                    <VStack>
+                      <div>CPI rate</div>
+                      <Tooltip
+                        placement="auto"
+                        label={new Decimal(rr[1].toString())
+                          .div(10 ** 27)
+                          .sub(1)
+                          .toString()}
+                      >
+                        <div className="bold-text">
+                          {new Decimal(rr[1].toString())
+                            .div(10 ** 27)
+                            .sub(1)
+                            .toDP(5)
+                            .toString()}
+                          %
+                        </div>
+                      </Tooltip>
+                      <div>
+                        <b>pTerm</b>:{pTerm[1]}
+                      </div>
+                      <div>
+                        <b>iTerm</b>: {iTerm[1]}
+                      </div>
+                    </VStack>
+                  </Box>
+                </HStack>
               </Box>
             </HStack>
             <HStack>

@@ -160,6 +160,7 @@ abstract contract RedemptionRateController {
 
     function getLastProportionalTerm() public view returns (int256) {
         if (oll() == 0) return 0;
+        
         return deviationObservations[oll() - 1].proportional;
     }
 

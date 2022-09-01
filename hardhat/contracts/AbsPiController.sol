@@ -71,6 +71,7 @@ contract AbsPiController is RedemptionRateController{
             proportionalTerm,
             prevIntegralTerms
         );
+
         if (piOutput != 0) {
             uint256 newRedemptionRate = getBoundedRedemptionRate(piOutput);
             currentRedemptionRate = newRedemptionRate;

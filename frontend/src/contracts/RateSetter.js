@@ -19,6 +19,11 @@ const ABI= [
       },
       {
         "internalType": "address",
+        "name": "_CPIController",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
         "name": "_cpiDataFeed",
         "type": "address"
       }
@@ -33,12 +38,17 @@ const ABI= [
   },
   {
     "inputs": [],
-    "name": "RateSetter__NotAuthorized",
+    "name": "RateSetter__NotMarketTwapFeed",
     "type": "error"
   },
   {
     "inputs": [],
     "name": "RateSetter__NotOwner",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "RateSetter__NotShutdownModule",
     "type": "error"
   },
   {
@@ -50,6 +60,25 @@ const ABI= [
     "inputs": [],
     "name": "RateSetter__UnknownParameter",
     "type": "error"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "_parameter",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "_value",
+        "type": "address"
+      }
+    ],
+    "name": "ModifyAddressParameter",
+    "type": "event"
   },
   {
     "anonymous": false,
@@ -148,48 +177,16 @@ const ABI= [
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "account",
-        "type": "address"
-      }
-    ],
-    "name": "addAuthorization",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "name": "authorizedAccounts",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [],
     "name": "getCpiData",
     "outputs": [
       {
         "internalType": "uint256",
-        "name": "",
+        "name": "cpi",
         "type": "uint256"
       }
     ],
-    "stateMutability": "view",
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -220,12 +217,12 @@ const ABI= [
   },
   {
     "inputs": [],
-    "name": "getYearlyIntegralTerm",
+    "name": "getYearlyIntegralTerms",
     "outputs": [
       {
-        "internalType": "uint256",
+        "internalType": "int256[]",
         "name": "",
-        "type": "uint256"
+        "type": "int256[]"
       }
     ],
     "stateMutability": "view",
@@ -233,12 +230,12 @@ const ABI= [
   },
   {
     "inputs": [],
-    "name": "getYearlyProportionalTerm",
+    "name": "getYearlyProportionalTerms",
     "outputs": [
       {
-        "internalType": "uint256",
+        "internalType": "int256[]",
         "name": "",
-        "type": "uint256"
+        "type": "int256[]"
       }
     ],
     "stateMutability": "view",
@@ -246,15 +243,46 @@ const ABI= [
   },
   {
     "inputs": [],
-    "name": "getYearlyRedemptionRate",
+    "name": "getYearlyRedemptionRates",
     "outputs": [
       {
-        "internalType": "uint256",
+        "internalType": "uint256[]",
         "name": "",
-        "type": "uint256"
+        "type": "uint256[]"
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "marketTwapFeedContractAddress",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "_parameter",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "address",
+        "name": "_value",
+        "type": "address"
+      }
+    ],
+    "name": "modifyAddressParameter",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -304,19 +332,6 @@ const ABI= [
       }
     ],
     "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "account",
-        "type": "address"
-      }
-    ],
-    "name": "removeAuthorization",
-    "outputs": [],
-    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -380,6 +395,19 @@ const ABI= [
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "shutdownModuleContractAddress",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "uint256",
@@ -398,5 +426,5 @@ const ABI= [
     "type": "function"
   }
 ]
-export const address= "0x70E5370b8981Abc6e14C91F4AcE823954EFC8eA3"
+export const address= "0x9c65f85425c619A6cB6D29fF8d57ef696323d188"
  export const contract=new ethers.Contract(address, ABI)

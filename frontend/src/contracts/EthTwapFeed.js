@@ -33,12 +33,17 @@ const ABI= [
   },
   {
     "inputs": [],
-    "name": "EthTwapFeed__NotAuthorized",
+    "name": "EthTwapFeed__NotMarketTwapFeed",
     "type": "error"
   },
   {
     "inputs": [],
     "name": "EthTwapFeed__NotOwner",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "EthTwapFeed__NotShutdownModule",
     "type": "error"
   },
   {
@@ -76,38 +81,6 @@ const ABI= [
     ],
     "name": "UpdateValues",
     "type": "event"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "account",
-        "type": "address"
-      }
-    ],
-    "name": "addAuthorization",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "name": "authorizedAccounts",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
   },
   {
     "inputs": [],
@@ -150,6 +123,19 @@ const ABI= [
   },
   {
     "inputs": [],
+    "name": "marketTwapFeedContractAddress",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "owner",
     "outputs": [
       {
@@ -165,11 +151,24 @@ const ABI= [
     "inputs": [
       {
         "internalType": "address",
-        "name": "account",
+        "name": "_address",
         "type": "address"
       }
     ],
-    "name": "removeAuthorization",
+    "name": "setMarketTwapFeedContractAddress",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_address",
+        "type": "address"
+      }
+    ],
+    "name": "setShutdownModuleContractAddress",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -179,6 +178,19 @@ const ABI= [
     "name": "shutdown",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "shutdownModuleContractAddress",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -221,5 +233,5 @@ const ABI= [
     "type": "function"
   }
 ]
-export const address= "0x286B8DecD5ED79c962b2d8F4346CD97FF0E2C352"
+export const address= "0x4000F8820522AC96C4221b299876e3e53bCc8525"
  export const contract=new ethers.Contract(address, ABI)
