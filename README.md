@@ -5,7 +5,7 @@
   <h1>Resistance Protocol</h1>
 
   <h3>
-  Inflation resistant stablecoin called NOI
+  Inflation resistant ERC20 stablecoin called NOI
   </h3>
 
 <br />
@@ -26,7 +26,7 @@
 
 # About
 
-Resistance Protocol is a inflation resistant stablecoin called NOI, that is designed for the ethereum blockchain. The price stability comes from two PID controllers that control its target price through its market price and the Consumer Price Index. Its value is backed by the locked ether collateral in CDP positions.
+Resistance Protocol is a inflation resistant ERC20 stablecoin called NOI, that is designed for the ethereum blockchain. The price stability comes from the floating-peg with two PID controllers that control its target price through its market price and the Consumer Price Index. Its value is backed by the locked ether collateral in CDP positions.
 
 UML Diagram:
 https://app.diagrams.net/#G1ESvZRNm7P7Lv8m95BMcQB4rjX2j_kAPI
